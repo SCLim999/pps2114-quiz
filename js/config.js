@@ -9,7 +9,7 @@ const CONFIG = {
    * to deploy the script, then paste the /exec URL here.
    * Leave as "" to run the quiz without recording (results still shown).
    */
-  SHEETS_WEBAPP_URL: "",
+  SHEETS_WEBAPP_URL: "SHEETS_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbwUHXNPH5__mM2MJA9sefLWafCUriEg1qdzGAppNCuFJ_iv_XZKnrrrbnCXjhja8nlC/exec",",
 
   /** Assessment title written into the spreadsheet (lets you reuse one sheet for several quizzes). */
   ASSESSMENT_NAME: "PPS2114 C++ Assessment - July 2026",
