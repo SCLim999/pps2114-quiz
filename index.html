@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPS2114 — C++ Assessment</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>PPS2114 &mdash; C++ Capability Assessment</h1>
+    <p class="subtitle">C++ Coding Test with Instant Feedback &mdash; Duration: 1 Hour</p>
+  </header>
+
+  <main id="app">
+
+    <!-- ===================== START SCREEN ===================== -->
+    <section id="start-screen" class="card">
+      <h2>Student Information</h2>
+      <p>Please enter your details before starting. Your marks will be recorded automatically when you submit.</p>
+      <form id="student-form">
+        <div class="form-row">
+          <label for="student-name">Full Name</label>
+          <input type="text" id="student-name" required placeholder="e.g. Tan Ah Kow" autocomplete="name">
+        </div>
+        <div class="form-row">
+          <label for="student-id">Student ID</label>
+          <input type="text" id="student-id" required placeholder="e.g. A12345" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="student-class">Class / Group</label>
+          <input type="text" id="student-class" placeholder="e.g. DCS-2A (optional)">
+        </div>
+        <div class="notice">
+          <strong>Instructions:</strong>
+          <ul>
+            <li>Duration: <strong>1 hour</strong>. This quiz is C++ coding only — some questions ask you to WRITE a program, others give you buggy code to DEBUG and fix.</li>
+            <li>Your code is compiled and run against test cases — you get feedback on every attempt, and you may re-attempt before final submission.</li>
+            <li><strong>Print ONLY the required output</strong> — do not print prompts like <code>"Enter a number"</code>. Extra text makes test cases fail even when your logic is correct.</li>
+            <li>Click <em>Submit Assessment</em> at the end to record your marks.</li>
+          </ul>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">Start Assessment</button>
+      </form>
+    </section>
+
+    <!-- ===================== QUIZ SCREEN ===================== -->
+    <section id="quiz-screen" class="hidden">
+      <div class="sticky-bar">
+        <span id="student-badge"></span>
+        <span id="progress-badge"></span>
+      </div>
+
+      <div id="theory-section">
+        <h2 class="section-title">Section A &mdash; Theory</h2>
+        <div id="theory-container"></div>
+      </div>
+
+      <div id="coding-section">
+        <h2 class="section-title" id="coding-title">Section B &mdash; C++ Coding</h2>
+        <div id="coding-container"></div>
+      </div>
+
+      <div class="card submit-card">
+        <h3>Finished?</h3>
+        <p>Check that you have answered every question. Once submitted, your marks are recorded and cannot be changed.</p>
+        <button id="submit-btn" class="btn btn-primary btn-lg">Submit Assessment</button>
+        <p id="submit-status" class="submit-status"></p>
+      </div>
+    </section>
+
+    <!-- ===================== RESULT SCREEN ===================== -->
+    <section id="result-screen" class="hidden">
+      <div class="card">
+        <h2>Your Results</h2>
+        <div id="score-summary"></div>
+        <h3>Feedback Summary</h3>
+        <div id="feedback-summary"></div>
+        <p class="notice" id="record-status"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>PPS2114 Interactive Quiz &middot; Code is compiled via the Wandbox execution engine</p>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
