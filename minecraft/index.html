@@ -263,7 +263,7 @@ zh: {
   joinToast:'🎮 {name} 加入了房间', leaveToast:'👋 {name} 离开了房间',
   joinedWorld:'已加入 {name} 的园区',
   mobileToast:'本体验需要键盘和鼠标，建议使用电脑打开',
-  blocks:{1:'草方块',2:'泥土',3:'石头',4:'白色混凝土',5:'玻璃幕墙',6:'木板',7:'原木',8:'树叶',9:'水',10:'铺地砖',11:'ViTrox 蓝',12:'信息方块',13:'步道',14:'灰色混凝土'},
+  blocks:{1:'草方块',2:'泥土',3:'石头',4:'白色混凝土',5:'玻璃幕墙',6:'木板',7:'原木',8:'树叶',9:'水',10:'铺地砖',11:'ViTrox 蓝',12:'信息方块',13:'步道',14:'灰色混凝土',15:'太阳能板',16:'钢梁'},
 },
 en: {
   docTitle:'ViTrox Campus 2.0 — Block Education World (VitroxCraft)',
@@ -306,7 +306,7 @@ en: {
   joinToast:'🎮 {name} joined the room', leaveToast:'👋 {name} left the room',
   joinedWorld:"Joined {name}'s campus",
   mobileToast:'This experience needs a keyboard and mouse — please open it on a computer',
-  blocks:{1:'Grass',2:'Dirt',3:'Stone',4:'White Concrete',5:'Glass',6:'Planks',7:'Log',8:'Leaves',9:'Water',10:'Tile',11:'ViTrox Blue',12:'Info Block',13:'Path',14:'Grey Concrete'},
+  blocks:{1:'Grass',2:'Dirt',3:'Stone',4:'White Concrete',5:'Glass',6:'Planks',7:'Log',8:'Leaves',9:'Water',10:'Tile',11:'ViTrox Blue',12:'Info Block',13:'Path',14:'Grey Concrete',15:'Solar Panel',16:'Steel'},
 },
 ms: {
   docTitle:'ViTrox Campus 2.0 — Dunia Pendidikan Blok (VitroxCraft)',
@@ -349,7 +349,7 @@ ms: {
   joinToast:'🎮 {name} menyertai bilik', leaveToast:'👋 {name} meninggalkan bilik',
   joinedWorld:'Menyertai kampus {name}',
   mobileToast:'Pengalaman ini memerlukan papan kekunci dan tetikus — sila buka di komputer',
-  blocks:{1:'Rumput',2:'Tanah',3:'Batu',4:'Konkrit Putih',5:'Kaca',6:'Papan',7:'Balak',8:'Daun',9:'Air',10:'Jubin',11:'Biru ViTrox',12:'Blok Maklumat',13:'Laluan',14:'Konkrit Kelabu'},
+  blocks:{1:'Rumput',2:'Tanah',3:'Batu',4:'Konkrit Putih',5:'Kaca',6:'Papan',7:'Balak',8:'Daun',9:'Air',10:'Jubin',11:'Biru ViTrox',12:'Blok Maklumat',13:'Laluan',14:'Konkrit Kelabu',15:'Panel Solar',16:'Keluli'},
 },
 };
 let lang = (()=>{
@@ -370,7 +370,8 @@ function blockName(b){
    方块定义与纹理图集（全部程序化生成，无外部素材）
 ================================================================ */
 const B = { AIR:0, GRASS:1, DIRT:2, STONE:3, WHITE:4, GLASS:5, PLANK:6,
-            LOG:7, LEAF:8, WATER:9, TILE:10, BLUE:11, INFO:12, PATH:13, GRAY:14 };
+            LOG:7, LEAF:8, WATER:9, TILE:10, BLUE:11, INFO:12, PATH:13, GRAY:14,
+            SOLAR:15, STEEL:16 };
 
 const TRANSPARENT = { [B.GLASS]:true, [B.WATER]:true };
 const NONSOLID    = { [B.AIR]:true, [B.WATER]:true };
@@ -378,7 +379,7 @@ const NONSOLID    = { [B.AIR]:true, [B.WATER]:true };
 // 纹理编号
 const T = { GRASS_TOP:0, GRASS_SIDE:1, DIRT:2, STONE:3, WHITE:4, GLASS:5, PLANK:6,
             LOG_SIDE:7, LOG_TOP:8, LEAF:9, WATER:10, TILE:11, BLUE:12, INFO:13,
-            PATH:14, GRAY:15 };
+            PATH:14, GRAY:15, SOLAR:16, STEEL:17 };
 
 const BLOCK_DEF = {
   [B.GRASS]: { name:'草方块',   top:T.GRASS_TOP, side:T.GRASS_SIDE, bottom:T.DIRT },
@@ -395,9 +396,11 @@ const BLOCK_DEF = {
   [B.INFO]:  { name:'信息方块', top:T.INFO,  side:T.INFO,  bottom:T.INFO },
   [B.PATH]:  { name:'步道',     top:T.PATH,  side:T.PATH,  bottom:T.PATH },
   [B.GRAY]:  { name:'灰色混凝土', top:T.GRAY,  side:T.GRAY,  bottom:T.GRAY },
+  [B.SOLAR]: { name:'太阳能板', top:T.SOLAR, side:T.STEEL, bottom:T.STEEL },
+  [B.STEEL]: { name:'钢梁',     top:T.STEEL, side:T.STEEL, bottom:T.STEEL },
 };
 
-const ATLAS_COLS = 8, ATLAS_ROWS = 2, TILE_PX = 16;
+const ATLAS_COLS = 8, ATLAS_ROWS = 3, TILE_PX = 16;
 const atlas = document.createElement('canvas');
 atlas.width = ATLAS_COLS*TILE_PX; atlas.height = ATLAS_ROWS*TILE_PX;
 const actx = atlas.getContext('2d');
@@ -493,6 +496,21 @@ function noisy(ox,oy,r,g,b,v,rand,alpha){
   });
   paintTile(T.PATH, (ox,oy)=>noisy(ox,oy,193,174,134,12,rand));
   paintTile(T.GRAY, (ox,oy)=>noisy(ox,oy,168,170,174,7,rand));
+  paintTile(T.SOLAR,(ox,oy)=>{
+    noisy(ox,oy,30,46,88,8,rand);
+    actx.fillStyle='rgba(120,170,230,.55)';               // 电池片网格
+    for(let i=0;i<16;i+=4){ actx.fillRect(ox+i,oy,1,16); actx.fillRect(ox,oy+i,16,1); }
+    actx.fillStyle='rgba(255,255,255,.30)';               // 反光
+    for(let i=0;i<7;i++) actx.fillRect(ox+8+i,oy+8-i,1,1);
+    actx.fillStyle='rgb(18,24,40)';                       // 边框
+    actx.fillRect(ox,oy,16,1); actx.fillRect(ox,oy+15,16,1);
+    actx.fillRect(ox,oy,1,16); actx.fillRect(ox+15,oy,1,16);
+  });
+  paintTile(T.STEEL,(ox,oy)=>{
+    noisy(ox,oy,62,65,72,6,rand);
+    actx.fillStyle='rgba(30,32,38,.9)';
+    actx.fillRect(ox,oy,16,1); actx.fillRect(ox,oy+15,16,1);
+  });
 }
 
 /* ================================================================
@@ -671,6 +689,28 @@ function generate(){
     for(let y=16;y<=18;y++) set(x,y,z,B.AIR);
   }
 
+  /* ---- 4.5 屋顶环形光伏雨棚（参照实景：弧形太阳能板架空于屋顶花园上方）---- */
+  for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
+    const cx=x+0.5, cz=z+0.5;
+    const r=Math.hypot(cx,cz);
+    if(r<18||r>23) continue;
+    const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
+    if(Math.abs(angDiff(a,90))<14) continue;             // 入口上空留出缺口
+    const seg=Math.floor(a/12);
+    const h=19+(seg%2);                                   // 分段高低交错，模拟倾斜板列
+    set(x,h,z,B.SOLAR);
+    if(Math.abs(angDiff(a,seg*12))<1.1 || r>22.4) set(x,h-1,z,B.STEEL);  // 径向钢梁 + 外圈梁
+  }
+  for(let k=0;k<30;k++){                                  // 白色圆柱支撑
+    const a=k*12+6;
+    if(Math.abs(angDiff(a,90))<16 || Math.abs(angDiff(a,BRIDGE_A))<6) continue;
+    const h=19+(Math.floor(a/12)%2);
+    for(const rr of [18.8,22.2]){
+      const px=Math.floor(rr*cosd(a)), pz=Math.floor(rr*sind(a));
+      for(let y=16;y<h;y++) set(px,y,pz,B.WHITE);
+    }
+  }
+
   /* ---- 5. 矩形体量：生产办公楼（东，5 层）与实验楼（西北，4 层）---- */
   buildBox(20,54,-16,16,5,[
     {x0:20,x1:21,z0:-3,z1:3,y1:9},     // 面向环形楼的两层高中庭开口
@@ -743,9 +783,9 @@ const INFO_POINTS = [
   { x:-19, y:16, z:-7,
     title:{ zh:'④ 绿色屋顶花园', en:'④ The Green Roof Garden', ms:'④ Taman Bumbung Hijau' },
     text:{
-      zh:'恭喜你走上屋顶！ViTrox Campus 2.0 是在「绿色建筑环境」理念下设计的：屋顶绿化可以隔热降温、滞留雨水、减少空调能耗，也为员工提供了眺望整个峇都交湾工业园的休闲空间。从这里俯瞰，你能清楚看到圆形庭院、放射状布局和远处的矩形厂房体量。',
-      en:'Congratulations on reaching the roof! ViTrox Campus 2.0 was designed within a green building environment: a planted roof insulates against heat, retains rainwater and cuts air-conditioning energy, while giving staff a relaxing lookout over Batu Kawan Industrial Park. From up here you can clearly see the circular courtyard, the radial layout and the rectangular factory masses in the distance.',
-      ms:'Tahniah kerana sampai ke bumbung! ViTrox Campus 2.0 direka dalam persekitaran bangunan hijau: bumbung bertanaman menebat haba, menakung air hujan dan menjimatkan tenaga penyaman udara, sambil memberi pekerja ruang santai dengan pemandangan Taman Perindustrian Batu Kawan. Dari sini anda dapat melihat dengan jelas laman bulat, susun atur jejari dan jisim kilang segi empat di kejauhan.' } },
+      zh:'恭喜你走上屋顶！ViTrox Campus 2.0 是在「绿色建筑环境」理念下设计的：屋顶绿化可以隔热降温、滞留雨水、减少空调能耗，也为员工提供了眺望整个峇都交湾工业园的休闲空间。抬头看——头顶这圈弧形的太阳能光伏雨棚一边发电，一边为屋顶花园遮阳，绿色能源与绿化屋顶在这里叠加在一起。',
+      en:'Congratulations on reaching the roof! ViTrox Campus 2.0 was designed within a green building environment: a planted roof insulates against heat, retains rainwater and cuts air-conditioning energy, while giving staff a relaxing lookout over Batu Kawan Industrial Park. Look up — the curved solar-panel canopy overhead generates clean electricity while shading the roof garden, stacking green energy on top of a green roof.',
+      ms:'Tahniah kerana sampai ke bumbung! ViTrox Campus 2.0 direka dalam persekitaran bangunan hijau: bumbung bertanaman menebat haba, menakung air hujan dan menjimatkan tenaga penyaman udara, sambil memberi pekerja ruang santai dengan pemandangan Taman Perindustrian Batu Kawan. Dongak ke atas — kanopi panel solar melengkung itu menjana elektrik bersih sambil meneduhkan taman bumbung; tenaga hijau bertindan di atas bumbung hijau.' } },
   { x:18, y:4, z:19,
     title:{ zh:'⑤ 几何体量的碰撞', en:'⑤ Juxtaposition of Geometric Masses', ms:'⑤ Pertembungan Jisim Geometri' },
     text:{
@@ -1052,7 +1092,7 @@ function blip(freq,dur){
 /* ================================================================
    HUD：物品栏 / 提示 / 任务
 ================================================================ */
-const HOT = [B.GRASS,B.STONE,B.WHITE,B.GLASS,B.PLANK,B.LOG,B.LEAF,B.BLUE,B.TILE];
+const HOT = [B.GRASS,B.STONE,B.WHITE,B.GLASS,B.PLANK,B.LOG,B.LEAF,B.BLUE,B.SOLAR];
 let hotSel = 0;
 const hotbarEl = document.getElementById('hotbar');
 function buildHotbar(){
