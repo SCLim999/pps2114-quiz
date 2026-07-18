@@ -747,9 +747,9 @@ function generate(){
       for(let z=-1;z<=1;z++) for(let y=y0;y<=y1;y++) set(X1,y,z,B.AIR);
     set(X1,6,0,B.BLUE);                                      // 入口上方蓝色标志
     for(const vy of [7,11]) for(let z=-1;z<=1;z++) set(X1,vy,z,B.LEAF);  // 每层边缘垂吊绿植
-    // 南北面：通往环形楼 2F / 3F 的门洞
+    // 南北面：地面门洞 + 通往环形楼 2F / 3F 的门洞
     for(const zf of [Z0,Z1])
-      for(const [y0,y1] of [[8,9],[12,13]])
+      for(const [y0,y1] of [[4,5],[8,9],[12,13]])
         for(let x=-20;x<=-18;x++) for(let y=y0;y<=y1;y++) set(x,y,zf,B.AIR);
     // 南北面：屋顶花园出口（并清出门前的绿植）
     for(const zf of [Z0,Z1]) for(let x=-21;x<=-19;x++){
