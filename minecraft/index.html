@@ -890,6 +890,25 @@ function generate(){
     set(25,4,21,B.STEEL); set(26,4,21,B.STEEL);                            // 分类垃圾桶
   }
 
+  /* ---- 5.7 ViTrox Gallery（入口右手环形走廊 → 食堂：贵宾接待展廊）---- */
+  {
+    for(let x=0;x<=24;x++) for(let z=0;z<=24;z++){
+      const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
+      if(r<17.4||r>23.2) continue;
+      const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
+      if(a<8||a>84) continue;                               // 从 Siti 所在的入口处一路铺到食堂
+      if(Math.abs(r-20.2)<1.6) set(x,3,z,B.BLUE);          // ViTrox 蓝贵宾地毯
+    }
+    for(let x=17;x<=21;x++) for(let z=-1;z<=1;z++) set(x,3,z,B.BLUE);   // 地毯延伸到食堂门
+    for(const a of [15,25,35,45,55,65]){                    // 展台基座（奖杯/展示柜交替）
+      set(Math.round(18.7*cosd(a)), 4, Math.round(18.7*sind(a)), B.WHITE);
+    }
+    set(6,4,20,B.WHITE); set(7,4,20,B.WHITE);               // 贵宾长椅
+    for(const [px,pz] of [[4,21],[9,18]]){                  // 迎宾盆栽
+      set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF);
+    }
+  }
+
   /* ---- 6. 入口广场与步道 ---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
@@ -1313,6 +1332,69 @@ const markers=[];
     s.userData.baseY = p.y+2.3;
     scene.add(s); markers.push(s);
   }
+}
+
+/* ---- ViTrox Gallery 展品（金奖杯、玻璃展示柜、历史相框与年份标签）---- */
+function galleryLabel(text){
+  const c=document.createElement('canvas'); c.width=512; c.height=128;
+  const g=c.getContext('2d');
+  g.fillStyle='rgba(10,25,50,.88)'; g.fillRect(0,0,512,128);
+  g.strokeStyle='#e3b93b'; g.lineWidth=6; g.strokeRect(6,6,500,116);
+  g.fillStyle='#e3b93b'; g.font='bold 46px Georgia,serif';
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(text,256,68);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+{
+  const D=Math.PI/180;
+  const gGold =new THREE.MeshBasicMaterial({color:0xe3b93b});
+  const gGoldD=new THREE.MeshBasicMaterial({color:0xa8811e});
+  const gGlass=new THREE.MeshBasicMaterial({color:0xcfe4f4,transparent:true,opacity:0.38});
+  const gFrame=new THREE.MeshBasicMaterial({color:0xf0f0ee});
+  const gPhoto=new THREE.MeshBasicMaterial({color:0x27435f});
+  const gItem =new THREE.MeshBasicMaterial({color:0x0074ba});
+  const grp=new THREE.Group(); scene.add(grp);
+  for(const a of [15,35,55]){                    // 🏆 金色奖杯
+    const px=Math.round(18.7*Math.cos(a*D))+0.5, pz=Math.round(18.7*Math.sin(a*D))+0.5;
+    const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.12,0.34,10),gGold);
+    cup.position.set(px,5.44,pz);
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.16,8),gGoldD);
+    stem.position.set(px,5.19,pz);
+    const base=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.08,0.3),gGoldD);
+    base.position.set(px,5.07,pz);
+    grp.add(cup,stem,base);
+  }
+  for(const a of [25,45,65]){                    // 玻璃展示柜（内为纪念芯片）
+    const px=Math.round(18.7*Math.cos(a*D))+0.5, pz=Math.round(18.7*Math.sin(a*D))+0.5;
+    const item=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.14,0.32),gItem);
+    item.position.set(px,5.1,pz);
+    const box=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.56,0.62),gGlass);
+    box.position.set(px,5.3,pz);
+    grp.add(item,box);
+  }
+  // 公司历史相框（挂在外墙内侧）+ 年份标签
+  const MILES=[[15,'2000 · Founded'],[28,'2005 · Listed on MESDAQ'],
+               [41,'2009 · Bursa Main Board'],[54,'2018 · Campus 2.0'],[67,'2021 · Campus 3.0']];
+  for(const [a,label] of MILES){
+    const dx=Math.cos(a*D), dz=Math.sin(a*D);
+    const px=22.15*dx, pz=22.15*dz;
+    const ry=Math.atan2(dx,dz);
+    const fr=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.05,0.08),gFrame);
+    fr.position.set(px,5.55,pz); fr.rotation.y=ry;
+    const ph=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.85,0.1),gPhoto);
+    ph.position.set(px-dx*0.02,5.55,pz-dz*0.02); ph.rotation.y=ry;
+    grp.add(fr,ph);
+    const lbl=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel(label)}));
+    lbl.scale.set(2.4,0.6,1);
+    lbl.position.set(px-dx*0.5,6.5,pz-dz*0.5);
+    grp.add(lbl);
+  }
+  // 入口招牌（Siti 旁）
+  const sign=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('★ ViTrox Gallery ★')}));
+  sign.scale.set(2.6,0.65,1);
+  sign.position.set(5.5,6.5,19.5);
+  grp.add(sign);
 }
 
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
@@ -1986,9 +2068,9 @@ const NPCS = [
   { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', range:2, x:0.5, y:4, z:22.5, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
-      zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯，可以一路走上屋顶花园。',
-      en:'Welcome! This is the famous doorless entrance — the architects deliberately left out the gate so the courtyard opens to everyone. Ahead is the big round lawn, and the dark tower on the west has stairs all the way up to the roof garden.',
-      ms:'Selamat datang! Inilah pintu masuk tanpa pintu yang terkenal — arkitek sengaja tidak memasang pintu supaya laman terbuka kepada semua. Di hadapan ialah padang bulat yang besar, dan menara gelap di sebelah barat ada tangga terus ke taman bumbung.' } },
+      zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯可以上屋顶花园。对了，您的右手边就是 ViTrox Gallery——沿着蓝色地毯走，可以看到奖杯、纪念品和公司历史，一直通到食堂。',
+      en:'Welcome! This is the famous doorless entrance — the architects deliberately left out the gate so the courtyard opens to everyone. Ahead is the big round lawn, and the dark tower on the west has stairs up to the roof garden. Oh, and on your right is the ViTrox Gallery — follow the blue carpet past the trophies, memorabilia and company history, all the way to the canteen.',
+      ms:'Selamat datang! Inilah pintu masuk tanpa pintu yang terkenal — arkitek sengaja tidak memasang pintu supaya laman terbuka kepada semua. Di hadapan ialah padang bulat yang besar, dan menara gelap di barat ada tangga ke taman bumbung. Oh ya, di sebelah kanan anda ialah Galeri ViTrox — susuri permaidani biru melepasi trofi, cenderamata dan sejarah syarikat, terus ke kantin.' } },
   { name:'Mei Ling', color:0xd4643c, expr:'smile', style:'f', x:1.5, y:4, z:10.5,
     role:{ zh:'视觉检测工程师', en:'Vision Engineer', ms:'Jurutera Penglihatan' },
     dialog:{
@@ -2019,6 +2101,12 @@ const NPCS = [
       zh:'早上好！我刚停好车。你看每辆车都停在白线里——整齐的停车场也是园区规划的一部分。对了，西边还有一个大得多的停车场，几百个车位呢！',
       en:'Good morning! I just parked my car. See how every car sits inside the white lines — a tidy car park is part of the campus planning too. By the way, there is a much bigger car park on the west side, hundreds of lots!',
       ms:'Selamat pagi! Saya baru letak kereta. Tengok, setiap kereta parkir dalam garisan putih — tempat letak kereta yang kemas juga sebahagian perancangan kampus. Oh ya, ada tempat letak kereta jauh lebih besar di sebelah barat, beratus-ratus petak!' } },
+  { name:'Grace', color:0x3a3f4a, expr:'smile', style:'f', range:3, x:12.5, y:4, z:15.0,
+    role:{ zh:'贵宾接待 · ViTrox Gallery', en:'Guest Relations · ViTrox Gallery', ms:'Perhubungan Tetamu · Galeri ViTrox' },
+    dialog:{
+      zh:'欢迎来到 ViTrox Gallery！这条从入口延伸到食堂的环形走廊，是我们接待贵宾的地方。展台上是历年的奖杯和纪念品，墙上的相框讲述公司的历史——2000 年几位工程师创业，2005 年在 MESDAQ 上市，2009 年转主板，2018 年搬进 Campus 2.0，2021 年又购地扩建 Campus 3.0。参观完，沿着蓝地毯走到底就是食堂，请贵宾喝杯咖啡再走！',
+      en:'Welcome to the ViTrox Gallery! This curved corridor running from the entrance to the canteen is where we receive our honoured guests. The pedestals hold trophies and memorabilia from over the years, and the framed wall tells our history — engineers founding the company in 2000, listing on MESDAQ in 2005, moving to the Main Board in 2009, settling into Campus 2.0 in 2018, and acquiring land for Campus 3.0 in 2021. After the tour, follow the blue carpet to the canteen for a coffee!',
+      ms:'Selamat datang ke Galeri ViTrox! Koridor melengkung dari pintu masuk ke kantin ini ialah tempat kami menerima tetamu kehormat. Di atas pedestal terdapat trofi dan cenderamata sepanjang tahun, dan bingkai di dinding menceritakan sejarah kami — jurutera mengasaskan syarikat pada 2000, disenaraikan di MESDAQ pada 2005, berpindah ke Papan Utama pada 2009, mendiami Campus 2.0 pada 2018, dan memperoleh tanah Campus 3.0 pada 2021. Selepas lawatan, susuri permaidani biru ke kantin untuk secawan kopi!' } },
   { name:'Jason', color:0x0074ba, expr:'smile', x:-22.5, y:4, z:-38.5,
     role:{ zh:'设备工程师（实验楼 1F）', en:'Equipment Engineer (Lab 1F)', ms:'Jurutera Peralatan (Makmal 1F)' },
     dialog:{
