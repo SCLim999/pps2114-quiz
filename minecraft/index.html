@@ -1764,7 +1764,8 @@ function nameTagTexture(name){
   const c=document.createElement('canvas'); c.width=256; c.height=64;
   const g=c.getContext('2d');
   g.fillStyle='rgba(0,0,0,.55)'; g.fillRect(0,0,256,64);
-  g.fillStyle='#fff'; g.font='bold 30px "Microsoft YaHei",sans-serif';
+  g.fillStyle='#fff';
+  g.font=`bold ${name.length>12?22:30}px "Microsoft YaHei",sans-serif`;
   g.textAlign='center'; g.textBaseline='middle';
   g.fillText(name,128,34);
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
@@ -1818,7 +1819,7 @@ function faceTexture(expr, style, scarfHex){
   t.colorSpace=THREE.SRGBColorSpace;
   FACE_TEX[key]=t; return t;
 }
-function createAvatar(name, colorHex, expr, style){
+function createAvatar(name, colorHex, expr, style, tieHex){
   style = style||'m';
   const group = new THREE.Group();
   const shirtHex = colorHex!==undefined ? colorHex : colorFromName(name).getHex();
@@ -1846,6 +1847,14 @@ function createAvatar(name, colorHex, expr, style){
   // 躯干
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26), shirt);
   body.position.y = 1.0;
+  if(tieHex!==undefined){                                  // 西装：白衬衫领 + 领带
+    const collar=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.14,0.28),
+      new THREE.MeshBasicMaterial({color:0xf5f5f5}));
+    collar.position.set(0,0.26,0); body.add(collar);
+    const tie=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.42,0.03),
+      new THREE.MeshBasicMaterial({color:tieHex}));
+    tie.position.set(0,0.02,-0.145); body.add(tie);
+  }
   // 手臂：肩部为转轴，衫袖 + 肤色手掌
   const mkArm = sx=>{
     const arm=new THREE.Group(); arm.position.set(sx,1.26,0);
@@ -1948,6 +1957,28 @@ const NPCS = [
       zh:'早上好！我刚停好车。你看每辆车都停在白线里——整齐的停车场也是园区规划的一部分。对了，西边还有一个大得多的停车场，几百个车位呢！',
       en:'Good morning! I just parked my car. See how every car sits inside the white lines — a tidy car park is part of the campus planning too. By the way, there is a much bigger car park on the west side, hundreds of lots!',
       ms:'Selamat pagi! Saya baru letak kereta. Tengok, setiap kereta parkir dalam garisan putih — tempat letak kereta yang kemas juga sebahagian perancangan kampus. Oh ya, ada tempat letak kereta jauh lebih besar di sebelah barat, beratus-ratus petak!' } },
+  /* —— 三位 ViTrox 创办人（参照官方创业故事）：站在园区心脏·庭院中央圆坪 —— */
+  { name:'Chu Jenn Weng', color:0x2b2f36, expr:'smile', tie:0xb02a2a,
+    x:0.0, y:4, z:-2.8, baseYaw:Math.PI,
+    role:{ zh:'创办人 · 总裁兼首席执行官', en:'Co-Founder · President & CEO', ms:'Pengasas Bersama · Presiden & CEO' },
+    dialog:{
+      zh:'你好！我是 Chu Jenn Weng，ViTrox 的创办人之一。2000 年，我们几个马来西亚理科大学（USM）毕业的工程师怀着一个梦想创立了 ViTrox——用机器视觉让电子制造更可靠。从很小的起步走到今天这整个园区，我们的愿景从没变过：成为世界上最值得信赖的科技公司。建这个校园式的园区，就是想让每个人在绿色的环境里快乐地创新。',
+      en:"Hello! I am Chu Jenn Weng, one of the founders of ViTrox. In 2000, a few of us engineers who graduated from Universiti Sains Malaysia started ViTrox with one dream — to make electronics manufacturing more reliable through machine vision. From a very small beginning to this whole campus, our vision has never changed: to become the world's most trusted technology company. We built this campus-like workplace so everyone can innovate happily in a green environment.",
+      ms:'Helo! Saya Chu Jenn Weng, salah seorang pengasas ViTrox. Pada tahun 2000, beberapa orang jurutera lulusan Universiti Sains Malaysia memulakan ViTrox dengan satu impian — menjadikan pembuatan elektronik lebih boleh dipercayai melalui penglihatan mesin. Daripada permulaan yang sangat kecil hingga ke seluruh kampus ini, visi kami tidak pernah berubah: menjadi syarikat teknologi yang paling dipercayai di dunia. Kampus ini dibina supaya semua orang dapat berinovasi dengan gembira dalam persekitaran hijau.' } },
+  { name:'Steven Siaw', color:0x1f3a5f, expr:'smile', tie:0x1b9aaa,
+    x:-2.6, y:4, z:0.8, baseYaw:Math.PI,
+    role:{ zh:'创办人 · 高级执行副总裁', en:'Co-Founder · Senior Executive VP', ms:'Pengasas Bersama · Naib Presiden Eksekutif Kanan' },
+    dialog:{
+      zh:'我是 Steven Siaw Kok Tong。当年我以计算机科学一等荣誉学位从 USM 毕业，和伙伴们一起创立了 ViTrox，现在负责业务发展和技术创新。送你一句话：保持好奇心，敢把新技术用在没人试过的地方——我们的 AI 视觉检测系统，就是这样一步一步做出来的。',
+      en:'I am Steven Siaw Kok Tong. I graduated from USM with First-Class Honours in Computer Science and co-founded ViTrox with my partners; today I lead business development and technological innovation. Here is a thought for you: stay curious, and dare to apply new technology where no one has tried before — that is exactly how our AI vision inspection systems were built, step by step.',
+      ms:'Saya Steven Siaw Kok Tong. Saya lulus dari USM dengan Ijazah Kepujian Kelas Pertama dalam Sains Komputer dan mengasaskan ViTrox bersama rakan-rakan; kini saya menerajui pembangunan perniagaan dan inovasi teknologi. Satu pesanan untuk anda: kekalkan sifat ingin tahu dan beranilah menggunakan teknologi baharu di tempat yang belum pernah dicuba — begitulah sistem pemeriksaan penglihatan AI kami dibina, langkah demi langkah.' } },
+  { name:'Yeoh Shih Hoong', color:0x4a5058, expr:'happy', tie:0x2f5fb8,
+    x:2.6, y:4, z:0.8, baseYaw:Math.PI,
+    role:{ zh:'创办人 · 高级执行副总裁', en:'Co-Founder · Senior Executive VP', ms:'Pengasas Bersama · Naib Presiden Eksekutif Kanan' },
+    dialog:{
+      zh:'我是 Yeoh Shih Hoong。我的故事有点特别——我原本只是 USM 派来的实习生，实习结束后就跟着大家一起创业，成了 ViTrox 创始团队的一员，从创立那天起一直负责产品和软件开发。所以，千万别小看任何一次实习机会！把眼前的事做到最好，它可能会改变你的一生。',
+      en:"I am Yeoh Shih Hoong. My story is a little special — I was just an intern from USM, and when the internship ended I joined the team at ViTrox's inception, becoming part of the founding trio and driving product and software development ever since. So never underestimate an internship! Do your very best at whatever is in front of you — it might change your whole life.",
+      ms:'Saya Yeoh Shih Hoong. Kisah saya agak istimewa — saya hanyalah pelajar latihan industri dari USM, dan selepas tamat latihan saya terus menyertai pasukan ini sejak penubuhan ViTrox, menjadi sebahagian trio pengasas dan menerajui pembangunan produk dan perisian sejak itu. Jadi, jangan sesekali pandang rendah peluang latihan industri! Buat yang terbaik dalam apa jua di hadapan anda — ia mungkin mengubah seluruh hidup anda.' } },
   { name:'Ar. Chan', color:0x222222, expr:'smile', x:117.5, y:4, z:-12.5,
     role:{ zh:'建筑师', en:'Architect', ms:'Arkitek' },
     dialog:{
@@ -1957,7 +1988,7 @@ const NPCS = [
 ];
 const npcObjs = [];
 for(const n of NPCS){
-  const av = createAvatar(n.name, n.color, n.expr, n.style);
+  const av = createAvatar(n.name, n.color, n.expr, n.style, n.tie);
   av.group.position.set(n.x, n.y, n.z);
   av.group.rotation.y = n.baseYaw||0;
   scene.add(av.group);
