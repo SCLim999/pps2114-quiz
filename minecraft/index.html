@@ -731,6 +731,45 @@ function generate(){
     }
   }
 
+  /* ---- 4.7 庭院楼梯塔（深灰色，参照实景：连接地面→2F→3F→屋顶花园）---- */
+  {
+    const X0=-22, X1=-14, Z0=-2, Z1=2;
+    // 清空塔体范围（含穿过的环楼墙体、楼板、雨棚支柱与光伏板）
+    for(let x=X0;x<=X1;x++) for(let z=Z0;z<=Z1;z++) for(let y=4;y<=20;y++) set(x,y,z,B.AIR);
+    for(let x=X0;x<=X1;x++) for(let z=Z0;z<=Z1;z++){
+      set(x,3,z,B.TILE);
+      const edge = x===X0||x===X1||z===Z0||z===Z1;
+      if(edge) for(let y=4;y<=17;y++) set(x,y,z,B.STEEL);   // 深灰色塔身
+      set(x,18,z,B.STEEL);                                   // 塔顶
+    }
+    // 东面（庭院侧）：地面入口 + 每层观景口
+    for(const [y0,y1] of [[4,5],[8,9],[12,13]])
+      for(let z=-1;z<=1;z++) for(let y=y0;y<=y1;y++) set(X1,y,z,B.AIR);
+    set(X1,6,0,B.BLUE);                                      // 入口上方蓝色标志
+    for(const vy of [7,11]) for(let z=-1;z<=1;z++) set(X1,vy,z,B.LEAF);  // 每层边缘垂吊绿植
+    // 南北面：通往环形楼 2F / 3F 的门洞
+    for(const zf of [Z0,Z1])
+      for(const [y0,y1] of [[8,9],[12,13]])
+        for(let x=-20;x<=-18;x++) for(let y=y0;y<=y1;y++) set(x,y,zf,B.AIR);
+    // 南北面：屋顶花园出口（并清出门前的绿植）
+    for(const zf of [Z0,Z1]) for(let x=-21;x<=-19;x++){
+      for(let y=16;y<=17;y++) set(x,y,zf,B.AIR);
+      set(x,16, zf>0?3:-3, B.AIR);
+    }
+    // 三段折返楼梯（浅灰踏步）+ 层间平台
+    const steps=[
+      [[-15,4,-1],[-16,5,-1],[-17,6,-1],[-18,7,-1]],         // 地面 → 2F
+      [[-18,8,1],[-17,9,1],[-16,10,1],[-15,11,1]],           // 2F → 3F
+      [[-16,12,-1],[-17,13,-1],[-18,14,-1],[-19,15,-1]],     // 3F → 屋顶
+    ];
+    for(const run of steps) for(const [sx,sy,sz] of run) set(sx,sy,sz,B.GRAY);
+    for(let z=-1;z<=1;z++){
+      for(let x=-21;x<=-19;x++) set(x,7,z,B.GRAY);           // 2F 平台
+      set(-15,11,z,B.GRAY);                                  // 3F 平台
+      for(let x=-21;x<=-20;x++) set(x,15,z,B.GRAY);          // 屋顶平台
+    }
+  }
+
   /* ---- 5. 矩形体量：生产办公楼（东，5 层）与实验楼（西北，4 层）---- */
   buildBox(20,54,-16,16,5,[
     {x0:20,x1:21,z0:-3,z1:3,y1:9},     // 面向环形楼的两层高中庭开口
