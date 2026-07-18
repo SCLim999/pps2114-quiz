@@ -108,6 +108,23 @@
   .btn:hover { background:#46b846; }
   .btn.gray { background:#556; box-shadow:0 3px 0 #334; font-size:14px; padding:9px 22px; }
   .btn.gray:hover { background:#667; }
+  .btn.blue { background:#2b6fb3; box-shadow:0 3px 0 #1c4a78; }
+  .btn.blue:hover { background:#3583d1; }
+  .mp-box {
+    margin-top:16px; padding:14px 16px; border:1px solid #2e5f9e; border-radius:10px;
+    background:rgba(20,45,85,.35);
+  }
+  .mp-box h3 { font-size:15px; color:#7fc3ff; margin-bottom:8px; }
+  .mp-line { display:flex; align-items:center; gap:8px; margin:8px 0; flex-wrap:wrap; }
+  .mp-box input {
+    padding:8px 10px; font-size:15px; border-radius:6px; border:1px solid #4a7ab5;
+    background:#0d1b30; color:#fff; width:130px; text-transform:none;
+  }
+  .mp-box input#room-code { text-transform:uppercase; width:110px; letter-spacing:2px; }
+  .mp-box .btn { margin-top:0; }
+  #mp-status { font-size:13px; margin-top:8px; color:#9fd0ff; line-height:1.5; }
+  #mp-status.err { color:#ff9b9b; }
+  #mp-status b { color:#ffd75e; font-size:16px; letter-spacing:2px; }
   .credit { font-size:11px; color:#8aa; margin-top:14px; }
   .credit a { color:#7fc3ff; }
   .hidden { display:none !important; }
@@ -123,7 +140,7 @@
 
 <div id="crosshair"></div>
 <div id="pos"></div>
-<div id="chip">🏗 探索进度 <b id="chip-n">0</b>/<b id="chip-t">6</b> — 按 <b>Q</b> 查看任务</div>
+<div id="chip">🏗 探索进度 <b id="chip-n">0</b>/<b id="chip-t">6</b> — 按 <b>Q</b> 查看任务<span id="chip-mp"></span></div>
 <div id="prompt"><kbd>E</kbd><span id="prompt-text"></span></div>
 <div id="toast"></div>
 <div id="quests"><h3>📋 建筑探索任务</h3><ul id="quest-list"></ul></div>
@@ -147,8 +164,20 @@
       <tr><td>飞行模式</td><td><kbd>F</kbd> 切换（空格上升，<kbd>Shift</kbd> 下降）</td></tr>
       <tr><td>互动 / 任务列表</td><td><kbd>E</kbd> 阅读信息点 · <kbd>Q</kbd> 任务列表</td></tr>
     </table>
+    <div class="mp-line">你的名字：<input id="player-name" maxlength="12" placeholder="Steve"></div>
     <button class="btn" id="btn-start">▶ 进入园区</button>
     <button class="btn gray" id="btn-reset">🔄 重置世界（清除我的改动）</button>
+
+    <div class="mp-box">
+      <h3>🌐 多人连线（同学一起逛园区）</h3>
+      <div class="mp-line">
+        <button class="btn blue" id="btn-host">创建多人房间</button>
+        <span style="color:#8aa">— 或 —</span>
+        <input id="room-code" maxlength="5" placeholder="房间代码">
+        <button class="btn blue" id="btn-join">加入房间</button>
+      </div>
+      <div id="mp-status">创建房间后会得到一个 5 位代码，发给同学即可加入；房主请保持页面打开。连线后点上方「进入园区」开始。</div>
+    </div>
     <p class="credit">
       建筑原型：<a href="https://www.cycarch.com/vitrox-campus-20" target="_blank" rel="noopener">ViTrox Campus 2.0 — CYC Architect</a>
       · 一期总面积约 450,000 平方英尺 · 教育用途的方块化演绎，非精确比例模型
@@ -166,6 +195,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
 </script>
@@ -579,6 +609,7 @@ try{
 let saveTimer = null;
 function recordEdit(x,y,z,t){
   edits.set(`${x},${y},${z}`, t);
+  if(net.mode==='guest') return;   // 访客的世界属于房主，不写本地存档
   clearTimeout(saveTimer);
   saveTimer = setTimeout(()=>{
     try{ localStorage.setItem(SAVE_KEY, JSON.stringify(Object.fromEntries(edits))); }catch(e){}
@@ -944,6 +975,239 @@ function checkInfoProximity(){
 }
 
 /* ================================================================
+   多人连线（PeerJS / WebRTC 点对点，房主即服务器）
+================================================================ */
+let net = { mode:'solo', peer:null, conns:new Map(), hostConn:null, myId:null, code:null };
+let netNames = new Map();          // peerId -> 玩家名
+const remotes = new Map();         // peerId -> 远程玩家形象
+let posTimer = null, hostRetries = 0;
+
+const PEER_OPTS = (()=>{           // 默认用 PeerJS 官方免费云；?peerhost= 可指向自建服务器
+  const q = new URLSearchParams(location.search);
+  if(q.get('peerhost')) return {
+    host:q.get('peerhost'), port:+(q.get('peerport')||9000),
+    path:q.get('peerpath')||'/', secure:q.get('peersecure')==='1'
+  };
+  return {};
+})();
+
+const mpStatus = document.getElementById('mp-status');
+function setMpStatus(html, err){
+  mpStatus.innerHTML = html;
+  mpStatus.classList.toggle('err', !!err);
+}
+const nameInput = document.getElementById('player-name');
+try{ nameInput.value = localStorage.getItem('vitroxcraft_name')||''; }catch(e){}
+function myName(){
+  const n = nameInput.value.trim().slice(0,12) || ('玩家'+Math.floor(Math.random()*90+10));
+  try{ localStorage.setItem('vitroxcraft_name', n); }catch(e){}
+  return n;
+}
+
+function roomCode(){
+  const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s='';
+  for(let i=0;i<5;i++) s+=cs[Math.floor(Math.random()*cs.length)];
+  return s;
+}
+const peerIdFor = code => 'vitroxcraft-c20-'+code;
+
+function leaveNet(){
+  clearInterval(posTimer); posTimer=null;
+  if(net.peer){ try{ net.peer.destroy(); }catch(e){} }
+  for(const id of [...remotes.keys()]) dropRemote(id);
+  netNames = new Map();
+  net = { mode:'solo', peer:null, conns:new Map(), hostConn:null, myId:null, code:null };
+}
+
+function broadcast(msg, exceptId){
+  for(const [id,conn] of net.conns) if(id!==exceptId && conn.open) conn.send(msg);
+}
+function netSendSet(x,y,z,b){
+  if(net.mode==='host') broadcast({t:'set',x,y,z,b});
+  else if(net.mode==='guest' && net.hostConn && net.hostConn.open) net.hostConn.send({t:'set',x,y,z,b});
+}
+function applyNetSet(d){
+  if(INFO_POINTS.some(p=>p.x===d.x&&p.y===d.y&&p.z===d.z)) return;
+  set(d.x,d.y,d.z,d.b);
+  recordEdit(d.x,d.y,d.z,d.b);
+  markDirty(d.x,d.z); flushDirty();
+}
+function startPosLoop(){
+  clearInterval(posTimer);
+  posTimer = setInterval(()=>{
+    const msg = {t:'pos', x:player.pos.x, y:player.pos.y, z:player.pos.z,
+                 yaw:player.yaw, pitch:player.pitch};
+    if(net.mode==='host'){ msg.id=net.myId; broadcast(msg); }
+    else if(net.mode==='guest' && net.hostConn && net.hostConn.open) net.hostConn.send(msg);
+  }, 120);
+}
+
+function hostRoom(){
+  if(!window.Peer){ setMpStatus('❌ 多人组件未能加载（检查网络后刷新页面）', true); return; }
+  leaveNet();
+  const code = roomCode();
+  setMpStatus('正在创建房间…');
+  const peer = new Peer(peerIdFor(code), PEER_OPTS);
+  net = { mode:'host', peer, conns:new Map(), hostConn:null, myId:peerIdFor(code), code };
+  netNames.set(net.myId, myName());
+  peer.on('open', ()=>{
+    hostRetries = 0;
+    setMpStatus(`✅ 房间已创建！房间代码：<b>${code}</b><br>把代码发给同学；房主请保持本页打开。现在点上方「进入园区」。`);
+    startPosLoop();
+  });
+  peer.on('connection', conn=>{
+    conn.on('open', ()=>{
+      net.conns.set(conn.peer, conn);
+      conn.send({t:'init', edits:[...edits], names:[...netNames], hostId:net.myId});
+    });
+    conn.on('data', d=>onHostData(conn,d));
+    const bye = ()=>{
+      if(!net.conns.has(conn.peer)) return;
+      net.conns.delete(conn.peer);
+      const n = netNames.get(conn.peer)||'玩家';
+      dropRemote(conn.peer); netNames.delete(conn.peer);
+      broadcast({t:'leave', id:conn.peer});
+      toast(`👋 ${n} 离开了房间`);
+    };
+    conn.on('close', bye); conn.on('error', bye);
+  });
+  peer.on('error', e=>{
+    if(e.type==='unavailable-id' && hostRetries<3){ hostRetries++; hostRoom(); return; }
+    setMpStatus('❌ 创建房间失败：'+e.type, true);
+    leaveNet();
+  });
+}
+
+function onHostData(conn, d){
+  if(d.t==='hi'){
+    netNames.set(conn.peer, d.name);
+    broadcast({t:'join', id:conn.peer, name:d.name}, conn.peer);
+    toast(`🎮 ${d.name} 加入了房间（在线 ${net.conns.size+1} 人）`);
+  }else if(d.t==='pos'){
+    updateRemote(conn.peer, d);
+    d.id = conn.peer;
+    broadcast(d, conn.peer);
+  }else if(d.t==='set'){
+    applyNetSet(d);
+    broadcast(d, conn.peer);
+  }
+}
+
+function joinRoom(code){
+  if(!window.Peer){ setMpStatus('❌ 多人组件未能加载（检查网络后刷新页面）', true); return; }
+  code = code.trim().toUpperCase();
+  if(code.length!==5){ setMpStatus('请输入 5 位房间代码', true); return; }
+  leaveNet();
+  setMpStatus('正在加入房间 '+code+' …');
+  const peer = new Peer(PEER_OPTS);
+  net = { mode:'guest', peer, conns:new Map(), hostConn:null, myId:null, code };
+  peer.on('open', id=>{
+    net.myId = id;
+    const conn = peer.connect(peerIdFor(code), { reliable:true });
+    net.hostConn = conn;
+    conn.on('open', ()=>conn.send({t:'hi', name:myName()}));
+    conn.on('data', d=>onGuestData(d));
+    const bye = ()=>{
+      if(net.mode!=='guest') return;
+      setMpStatus('❌ 与房主的连接已断开', true);
+      toast('与房主的连接已断开');
+      leaveNet();
+    };
+    conn.on('close', bye); conn.on('error', bye);
+  });
+  peer.on('error', e=>{
+    setMpStatus(e.type==='peer-unavailable' ? '❌ 找不到这个房间（代码错误或房主已离线）' : '❌ 连接出错：'+e.type, true);
+    leaveNet();
+  });
+}
+
+function onGuestData(d){
+  if(d.t==='init'){
+    edits = new Map(d.edits);
+    netNames = new Map(d.names);
+    generate(); markAllDirty(); flushDirty();
+    setMpStatus(`✅ 已加入房间 <b>${net.code}</b>！点上方「进入园区」开始。<br>注意：这个世界属于房主，你的改动不会存到自己的浏览器里。`);
+    startPosLoop();
+    toast('已加入 '+(netNames.get(d.hostId)||'房主')+' 的园区');
+  }else if(d.t==='pos'){
+    if(d.id!==net.myId) updateRemote(d.id, d);
+  }else if(d.t==='set'){
+    applyNetSet(d);
+  }else if(d.t==='join'){
+    netNames.set(d.id, d.name);
+    toast(`🎮 ${d.name} 加入了房间`);
+  }else if(d.t==='leave'){
+    const n = netNames.get(d.id)||'玩家';
+    dropRemote(d.id); netNames.delete(d.id);
+    toast(`👋 ${n} 离开了房间`);
+  }
+}
+
+/* ---- 远程玩家形象（方块小人 + 名牌）---- */
+function nameTagTexture(name){
+  const c=document.createElement('canvas'); c.width=256; c.height=64;
+  const g=c.getContext('2d');
+  g.fillStyle='rgba(0,0,0,.55)'; g.fillRect(0,0,256,64);
+  g.fillStyle='#fff'; g.font='bold 30px "Microsoft YaHei",sans-serif';
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(name,128,34);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+function colorFromName(n){
+  let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0;
+  return new THREE.Color().setHSL((h%360)/360, 0.62, 0.5);
+}
+function createAvatar(name){
+  const group = new THREE.Group();
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),
+    new THREE.MeshBasicMaterial({color:0xf0c8a0}));
+  head.position.y = 1.55;
+  const face = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.1,0.04),
+    new THREE.MeshBasicMaterial({color:0x35281e}));
+  face.position.set(0,0.05,-0.26);
+  head.add(face);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.72,0.3),
+    new THREE.MeshBasicMaterial({color:colorFromName(name)}));
+  body.position.y = 0.95;
+  const legs = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26),
+    new THREE.MeshBasicMaterial({color:0x3a4a6a}));
+  legs.position.y = 0.3;
+  const tag = new THREE.Sprite(new THREE.SpriteMaterial({map:nameTagTexture(name), depthTest:false}));
+  tag.scale.set(1.7,0.42,1); tag.position.y = 2.2;
+  group.add(head, body, legs, tag);
+  return { group, head, target:null };
+}
+function updateRemote(id, d){
+  let r = remotes.get(id);
+  if(!r){
+    r = createAvatar(netNames.get(id)||'玩家');
+    r.group.position.set(d.x, d.y, d.z);
+    remotes.set(id, r); scene.add(r.group);
+  }
+  r.target = d;
+}
+function dropRemote(id){
+  const r = remotes.get(id);
+  if(r){ scene.remove(r.group); remotes.delete(id); }
+}
+function animateRemotes(dt){
+  const k = Math.min(1, dt*10);
+  for(const r of remotes.values()){
+    if(!r.target) continue;
+    r.group.position.lerp(new THREE.Vector3(r.target.x, r.target.y, r.target.z), k);
+    const dy = ((r.target.yaw - r.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
+    r.group.rotation.y += dy*k;
+    r.head.rotation.x = -(r.target.pitch||0)*0.8;
+  }
+}
+
+document.getElementById('btn-host').addEventListener('click', hostRoom);
+document.getElementById('btn-join').addEventListener('click', ()=>{
+  joinRoom(document.getElementById('room-code').value);
+});
+
+/* ================================================================
    输入
 ================================================================ */
 const overlayEl=document.getElementById('overlay');
@@ -951,10 +1215,12 @@ document.getElementById('btn-start').addEventListener('click',()=>{
   canvas.requestPointerLock();
 });
 document.getElementById('btn-reset').addEventListener('click',()=>{
+  if(net.mode==='guest'){ toast('只有房主可以重置世界'); return; }
   if(!confirm('确定要清除你放置/破坏的所有方块，恢复原始园区吗？')) return;
   edits.clear();
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   generate(); markAllDirty(); flushDirty();
+  if(net.mode==='host') broadcast({t:'init', edits:[], names:[...netNames], hostId:net.myId});
   toast('世界已重置');
 });
 
@@ -1012,6 +1278,7 @@ canvas.addEventListener('mousedown',e=>{
     set(hit.x,hit.y,hit.z,B.AIR);
     recordEdit(hit.x,hit.y,hit.z,B.AIR);
     markDirty(hit.x,hit.z); flushDirty();
+    netSendSet(hit.x,hit.y,hit.z,B.AIR);
     blip(140,0.08);
   }else if(e.button===2){
     const tx=hit.x+hit.face[0], ty=hit.y+hit.face[1], tz=hit.z+hit.face[2];
@@ -1027,6 +1294,7 @@ canvas.addEventListener('mousedown',e=>{
     set(tx,ty,tz,HOT[hotSel]);
     recordEdit(tx,ty,tz,HOT[hotSel]);
     markDirty(tx,tz); flushDirty();
+    netSendSet(tx,ty,tz,HOT[hotSel]);
     blip(300,0.07);
   }
 });
@@ -1054,10 +1322,13 @@ function animate(){
   elapsed+=dt;
   if(locked && !modalOpen) physics(dt);
   checkInfoProximity();
+  animateRemotes(dt);
   for(const c of clouds){
     c.position.x += dt*1.4;
     if(c.position.x>140) c.position.x=-140;
   }
+  const chipMp=document.getElementById('chip-mp');
+  chipMp.textContent = net.mode==='solo' ? '' : ` · 🌐 ${remotes.size+1} 人在线（${net.code}）`;
   markers.forEach((m,i)=>{
     m.position.y = m.userData.baseY + Math.sin(elapsed*2+i)*0.18;
   });
@@ -1073,6 +1344,14 @@ if('ontouchstart' in window && !matchMedia('(pointer:fine)').matches){
 // 调试/自动化测试钩子
 window.__test = {
   player, camera, overlay: overlayEl,
+  hostRoom, joinRoom, get,
+  net: ()=>({ mode:net.mode, code:net.code, conns:net.conns.size }),
+  remoteCount: ()=>remotes.size,
+  remotePos(){ const r=[...remotes.values()][0]; return r? r.group.position.toArray() : null; },
+  place(x,y,z,b){
+    set(x,y,z,b); recordEdit(x,y,z,b);
+    markDirty(x,z); flushDirty(); netSendSet(x,y,z,b);
+  },
   stats(){
     let solid=0; for(let i=0;i<vox.length;i++) if(vox[i]) solid++;
     return { solidBlocks:solid, chunkMeshes:chunks.size, infoPoints:INFO_POINTS.length };

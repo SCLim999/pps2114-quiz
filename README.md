@@ -75,7 +75,11 @@ punching through the circular form.
   Three.js from a CDN; everything else is generated procedurally — no assets).
 - Walk (WASD), fly (F), break/place blocks (mouse), and visit the **6 golden info
   blocks** to read bilingual architecture lessons about the building's design.
+- **Multiplayer**: host a room from the start menu, share the 5-letter code, and
+  classmates join over WebRTC (PeerJS) — positions and block edits sync live, no
+  server needed.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
+- Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
 ## How feedback works
 
