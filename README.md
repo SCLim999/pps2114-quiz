@@ -74,7 +74,9 @@ punching through the circular form.
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).
 - Walk (WASD), fly (F), break/place blocks (mouse), and visit the **6 golden info
-  blocks** to read bilingual architecture lessons about the building's design.
+  blocks** to read architecture lessons about the building's design.
+- **Trilingual**: the whole UI and all lessons switch between 中文 / English /
+  Bahasa Melayu (top-right of the start menu; auto-detected on first load).
 - **Multiplayer**: host a room from the start menu, share the 5-letter code, and
   classmates join over WebRTC (PeerJS) — positions and block edits sync live, no
   server needed.
