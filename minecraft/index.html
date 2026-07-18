@@ -1634,7 +1634,8 @@ function checkInfoProximity(){
   if(nearInfo<0){
     let bestN=4.0;
     NPCS.forEach((n,i)=>{
-      const d=Math.hypot(n.x-player.pos.x, n.y-player.pos.y, n.z-player.pos.z);
+      const g=npcObjs[i].group.position;   // 用实时位置（NPC 会走动）
+      const d=Math.hypot(g.x-player.pos.x, n.y-player.pos.y, g.z-player.pos.z);
       if(d<bestN){ bestN=d; nearNpc=i; }
     });
   }
@@ -1982,7 +1983,7 @@ const NPCS = [
       zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 7 个金色信息方块，按 E 就能学到建筑知识！',
       en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 7 golden info blocks around the campus and press E to learn!',
       ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 7 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
-  { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', x:0.5, y:4, z:22.5, baseYaw:Math.PI,
+  { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', range:2, x:0.5, y:4, z:22.5, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
       zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯，可以一路走上屋顶花园。',
@@ -2000,13 +2001,13 @@ const NPCS = [
       zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是走坡道上来的，还是爬了那座深灰色的楼梯塔？',
       en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you come up the landscape ramp, or climb the dark stair tower?',
       ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik ikut tanjakan landskap atau panjat menara tangga gelap itu?' } },
-  { name:'Chef Tan', color:0xf0f0f0, expr:'happy', x:36.5, y:4, z:-13.5,
+  { name:'Chef Tan', color:0xf0f0f0, expr:'happy', range:1.5, x:36.5, y:4, z:-13.5,
     role:{ zh:'食堂厨师', en:'Canteen Chef', ms:'Cef Kantin' },
     dialog:{
       zh:'今天有椰浆饭和炒粿条！在 ViTrox，工程师们像大学生一样在食堂一起吃饭聊天。吃完记得把餐盘拿到外面的洗碗棚哦——就在南边檐下。',
       en:'Today we have nasi lemak and char kway teow! At ViTrox, engineers eat and chat together in the canteen like university students. After your meal, please bring the tray to the washing shed outside — just under the canopy on the south side.',
       ms:'Hari ini ada nasi lemak dan char kuey teow! Di ViTrox, para jurutera makan dan berbual bersama di kantin macam pelajar universiti. Selepas makan, tolong bawa dulang ke bangsal basuh di luar — di bawah kanopi sebelah selatan.' } },
-  { name:'Aina', color:0xc94f7c, expr:'happy', style:'f', x:-45.5, y:4, z:20.5,
+  { name:'Aina', color:0xc94f7c, expr:'happy', style:'f', range:5, x:-45.5, y:4, z:20.5,
     role:{ zh:'ViTrox 学院学生', en:'ViTrox College Student', ms:'Pelajar Kolej ViTrox' },
     dialog:{
       zh:'嗨！我是 ViTrox 学院的学生，下课就来球场投几个球。听说这个园区把工厂和校园混在一起——所以我们在工业园里也有篮球场！要不要来一场三对三？',
@@ -2031,28 +2032,28 @@ const NPCS = [
       en:'Hi, you made it to the 3rd floor! I am tuning the vision algorithms on these machines. The round disc on the side of each machine is a tape reel — chips that pass inspection are sealed into tape and shipped to electronics factories worldwide. Our cameras inspect dozens of chips every second, far faster and more accurate than human eyes — the magic of machine vision!',
       ms:'Hai, anda sampai ke tingkat 3! Saya sedang menala algoritma penglihatan mesin-mesin ini. Cakera bulat di sisi setiap mesin ialah gulungan pita — cip yang lulus pemeriksaan dimeterai ke dalam pita dan dihantar ke kilang elektronik seluruh dunia. Kamera kami memeriksa berpuluh cip setiap saat, jauh lebih pantas dan tepat daripada mata manusia — itulah keajaiban penglihatan mesin!' } },
   /* —— 三位 ViTrox 创办人（参照官方创业故事）：站在园区心脏·庭院中央圆坪 —— */
-  { name:'Chu Jenn Weng', color:0x2b2f36, expr:'smile', tie:0xb02a2a,
+  { name:'Chu Jenn Weng', color:0x2b2f36, expr:'smile', tie:0xb02a2a, range:2.5,
     x:0.0, y:4, z:-2.8, baseYaw:Math.PI,
     role:{ zh:'创办人 · 总裁兼首席执行官', en:'Co-Founder · President & CEO', ms:'Pengasas Bersama · Presiden & CEO' },
     dialog:{
       zh:'你好！我是 Chu Jenn Weng，ViTrox 的创办人之一。2000 年，我们几个马来西亚理科大学（USM）毕业的工程师怀着一个梦想创立了 ViTrox——用机器视觉让电子制造更可靠。从很小的起步走到今天这整个园区，我们的愿景从没变过：成为世界上最值得信赖的科技公司。建这个校园式的园区，就是想让每个人在绿色的环境里快乐地创新。',
       en:"Hello! I am Chu Jenn Weng, one of the founders of ViTrox. In 2000, a few of us engineers who graduated from Universiti Sains Malaysia started ViTrox with one dream — to make electronics manufacturing more reliable through machine vision. From a very small beginning to this whole campus, our vision has never changed: to become the world's most trusted technology company. We built this campus-like workplace so everyone can innovate happily in a green environment.",
       ms:'Helo! Saya Chu Jenn Weng, salah seorang pengasas ViTrox. Pada tahun 2000, beberapa orang jurutera lulusan Universiti Sains Malaysia memulakan ViTrox dengan satu impian — menjadikan pembuatan elektronik lebih boleh dipercayai melalui penglihatan mesin. Daripada permulaan yang sangat kecil hingga ke seluruh kampus ini, visi kami tidak pernah berubah: menjadi syarikat teknologi yang paling dipercayai di dunia. Kampus ini dibina supaya semua orang dapat berinovasi dengan gembira dalam persekitaran hijau.' } },
-  { name:'Steven Siaw', color:0x1f3a5f, expr:'smile', tie:0x1b9aaa,
+  { name:'Steven Siaw', color:0x1f3a5f, expr:'smile', tie:0x1b9aaa, range:2.5,
     x:-2.6, y:4, z:0.8, baseYaw:Math.PI,
     role:{ zh:'创办人 · 高级执行副总裁', en:'Co-Founder · Senior Executive VP', ms:'Pengasas Bersama · Naib Presiden Eksekutif Kanan' },
     dialog:{
       zh:'我是 Steven Siaw Kok Tong。当年我以计算机科学一等荣誉学位从 USM 毕业，和伙伴们一起创立了 ViTrox，现在负责业务发展和技术创新。送你一句话：保持好奇心，敢把新技术用在没人试过的地方——我们的 AI 视觉检测系统，就是这样一步一步做出来的。',
       en:'I am Steven Siaw Kok Tong. I graduated from USM with First-Class Honours in Computer Science and co-founded ViTrox with my partners; today I lead business development and technological innovation. Here is a thought for you: stay curious, and dare to apply new technology where no one has tried before — that is exactly how our AI vision inspection systems were built, step by step.',
       ms:'Saya Steven Siaw Kok Tong. Saya lulus dari USM dengan Ijazah Kepujian Kelas Pertama dalam Sains Komputer dan mengasaskan ViTrox bersama rakan-rakan; kini saya menerajui pembangunan perniagaan dan inovasi teknologi. Satu pesanan untuk anda: kekalkan sifat ingin tahu dan beranilah menggunakan teknologi baharu di tempat yang belum pernah dicuba — begitulah sistem pemeriksaan penglihatan AI kami dibina, langkah demi langkah.' } },
-  { name:'Yeoh Shih Hoong', color:0x4a5058, expr:'happy', tie:0x2f5fb8,
+  { name:'Yeoh Shih Hoong', color:0x4a5058, expr:'happy', tie:0x2f5fb8, range:2.5,
     x:2.6, y:4, z:0.8, baseYaw:Math.PI,
     role:{ zh:'创办人 · 高级执行副总裁', en:'Co-Founder · Senior Executive VP', ms:'Pengasas Bersama · Naib Presiden Eksekutif Kanan' },
     dialog:{
       zh:'我是 Yeoh Shih Hoong。我的故事有点特别——我原本只是 USM 派来的实习生，实习结束后就跟着大家一起创业，成了 ViTrox 创始团队的一员，从创立那天起一直负责产品和软件开发。所以，千万别小看任何一次实习机会！把眼前的事做到最好，它可能会改变你的一生。',
       en:"I am Yeoh Shih Hoong. My story is a little special — I was just an intern from USM, and when the internship ended I joined the team at ViTrox's inception, becoming part of the founding trio and driving product and software development ever since. So never underestimate an internship! Do your very best at whatever is in front of you — it might change your whole life.",
       ms:'Saya Yeoh Shih Hoong. Kisah saya agak istimewa — saya hanyalah pelajar latihan industri dari USM, dan selepas tamat latihan saya terus menyertai pasukan ini sejak penubuhan ViTrox, menjadi sebahagian trio pengasas dan menerajui pembangunan produk dan perisian sejak itu. Jadi, jangan sesekali pandang rendah peluang latihan industri! Buat yang terbaik dalam apa jua di hadapan anda — ia mungkin mengubah seluruh hidup anda.' } },
-  { name:'Ar. Chan', color:0x222222, expr:'smile', x:117.5, y:4, z:-12.5,
+  { name:'Ar. Chan', color:0x222222, expr:'smile', range:1.6, x:117.5, y:4, z:-12.5,
     role:{ zh:'建筑师', en:'Architect', ms:'Arkitek' },
     dialog:{
       zh:'我是设计团队的建筑师。Campus 3.0 延续了 2.0 的语言：白色板楼、细长的竖窗、铺满光伏板的屋顶。这方鱼池不只是好看——水面能给庭院降温，鱼和睡莲让工程师们放松眼睛和心情。',
@@ -2065,18 +2066,70 @@ for(const n of NPCS){
   av.group.position.set(n.x, n.y, n.z);
   av.group.rotation.y = n.baseYaw||0;
   scene.add(av.group);
-  npcObjs.push(Object.assign(av, { def:n }));
+  npcObjs.push(Object.assign(av, { def:n, wait: 1+Math.random()*3, tx:undefined, tz:undefined }));
+}
+// NPC 在家附近的小范围内散步（默认半径 3.5 格，可用 def.range 覆盖）
+function npcWalkable(cx, fy, cz){
+  return !isSolid(cx,fy,cz) && !isSolid(cx,fy+1,cz) && isSolid(cx,fy-1,cz);
+}
+function npcPickTarget(o){
+  const R = o.def.range ?? 3.5;
+  for(let tries=0; tries<6; tries++){
+    const a = Math.random()*Math.PI*2;
+    const r = 0.8 + Math.random()*(R-0.8);
+    const tx = o.def.x + Math.cos(a)*r, tz = o.def.z + Math.sin(a)*r;
+    if(npcWalkable(Math.floor(tx), o.def.y, Math.floor(tz))){ o.tx=tx; o.tz=tz; return; }
+  }
+  o.wait = 1.5;   // 周围都被挡住，原地再等等
+}
+function npcTurn(o, ty, k){
+  const dy = ((ty - o.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
+  o.group.rotation.y += dy*Math.min(1,k);
 }
 function animateNpcs(dt){
   npcObjs.forEach((o,i)=>{
-    const dx = player.pos.x - o.def.x, dz = player.pos.z - o.def.z;
-    const d = Math.hypot(dx,dz);
-    const ty = d<7 ? Math.atan2(-dx,-dz)
-                   : (o.def.baseYaw||0) + Math.sin(elapsed*0.6+i*2)*0.5;
-    const dy = ((ty - o.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
-    o.group.rotation.y += dy*Math.min(1,dt*5);
-    const s = Math.sin(elapsed*1.4+i*1.7)*0.08;   // 待机时手臂轻摆
-    o.armL.rotation.x= s; o.armR.rotation.x=-s;
+    const g = o.group.position;
+    const dxp = player.pos.x - g.x, dzp = player.pos.z - g.z;
+    const dp = Math.hypot(dxp, dzp);
+    let moving = false;
+    if(dp < 6 && Math.abs(player.pos.y - o.def.y) < 3){
+      // 玩家靠近：停下脚步并面向玩家
+      o.tx = undefined;
+      o.wait = Math.max(o.wait, 1);
+      npcTurn(o, Math.atan2(-dxp,-dzp), dt*5);
+    }else if(o.wait > 0){
+      o.wait -= dt;
+      npcTurn(o, (o.def.baseYaw||0) + Math.sin(elapsed*0.6+i*2)*0.5, dt*2);
+    }else{
+      if(o.tx===undefined) npcPickTarget(o);
+      if(o.tx!==undefined){
+        const dx = o.tx-g.x, dz = o.tz-g.z;
+        const dist = Math.hypot(dx,dz);
+        if(dist < 0.15){
+          o.tx = undefined;
+          o.wait = 2 + Math.random()*4;      // 到达后休息一会儿
+        }else{
+          const step = 1.5*dt;
+          const nx = g.x + dx/dist*step, nz = g.z + dz/dist*step;
+          if(npcWalkable(Math.floor(nx), o.def.y, Math.floor(nz))){
+            g.x = nx; g.z = nz; moving = true;
+            npcTurn(o, Math.atan2(-dx,-dz), dt*7);
+          }else{
+            o.tx = undefined; o.wait = 0.8;  // 被挡住就换个方向
+          }
+        }
+      }
+    }
+    if(moving){                              // 行走：手脚交替摆动
+      o.phase += dt*7;
+      const sw = Math.sin(o.phase)*0.55;
+      o.armL.rotation.x =  sw; o.armR.rotation.x = -sw;
+      o.legL.rotation.x = -sw; o.legR.rotation.x =  sw;
+    }else{                                   // 待机：手臂轻摆
+      const s = Math.sin(elapsed*1.4+i*1.7)*0.08;
+      o.armL.rotation.x =  s; o.armR.rotation.x = -s;
+      o.legL.rotation.x =  0; o.legR.rotation.x =  0;
+    }
   });
 }
 function openNpc(i){
@@ -2366,6 +2419,8 @@ window.__test = {
   net: ()=>({ mode:net.mode, code:net.code, conns:net.conns.size }),
   remoteCount: ()=>remotes.size,
   remotePos(){ const r=[...remotes.values()][0]; return r? r.group.position.toArray() : null; },
+  npcs(){ return npcObjs.map(o=>({ name:o.def.name, x:o.group.position.x, z:o.group.position.z,
+    hx:o.def.x, hz:o.def.z, range:o.def.range??3.5 })); },
   place(x,y,z,b){
     set(x,y,z,b); recordEdit(x,y,z,b);
     markDirty(x,z); flushDirty(); netSendSet(x,y,z,b);
