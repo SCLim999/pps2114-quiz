@@ -595,8 +595,14 @@ function inBounds(x,y,z){
 function idx(x,y,z){ return ((y*SZ)+(z-WORLD.minZ))*SX + (x-WORLD.minX); }
 function get(x,y,z){ return inBounds(x,y,z) ? vox[idx(x,y,z)] : B.AIR; }
 function set(x,y,z,t){ if(inBounds(x,y,z)) vox[idx(x,y,z)] = t; }
+/* 车辆（Mod 风格网格模型，不占体素；碰撞用虚拟格子） */
+const CARS = [];
+const carCells = new Set();
+const CAR_PAINTS = [0xb83232, 0xe8e8e6, 0x2f5fb8, 0x9aa0a8, 0x24262b, 0xd9a520];
+
 function isSolid(x,y,z){
   if(y<0) return true;                       // 世界底部当作基岩
+  if((y===4||y===5) && carCells.has(x+','+z)) return true;   // 车身碰撞
   return !NONSOLID[get(x,y,z)];
 }
 
@@ -673,6 +679,8 @@ function writeSign(text,x0,y0,z){
 
 function generate(){
   vox.fill(B.AIR);
+  CARS.length = 0;
+  carCells.clear();
   const rand = mulberry32(4500001);
 
   /* ---- 1. 地形 ---- */
@@ -913,16 +921,17 @@ function generate(){
 
   /* ---- 6.6 停车场（入口东侧）与车辆 ---- */
   function placeCar(x0,z0,col,alongX){
-    // 2×5 方块小车：低车头/车尾 + 玻璃座舱 + 四个黑轮；40% 概率生成方背 SUV
-    // alongX=true 时车身沿 x 方向摆放（用于西侧大停车场）
+    // Mod 风格 3D 车模：这里只登记位置/朝向/涂装，网格由 buildCarMeshes() 统一生成
     const suv = rand()<0.4;
-    const tops = suv ? [null,B.GLASS,col,col,B.GLASS] : [null,B.GLASS,col,B.GLASS,null];
-    for(let w=0;w<2;w++) for(let l=0;l<5;l++){
-      const X = alongX ? x0+l : x0+w;
-      const Z = alongX ? z0+w : z0+l;
-      set(X,4,Z, (l===1||l===3) ? B.BLACK : col);   // 底层：车身 + 前后轮
-      if(tops[l]) set(X,5,Z,tops[l]);
-    }
+    for(let w=0;w<2;w++) for(let l=0;l<5;l++)
+      carCells.add((alongX?x0+l:x0+w)+','+(alongX?z0+w:z0+l));   // 碰撞脚印
+    CARS.push({
+      x: alongX ? x0+2.5 : x0+1,
+      z: alongX ? z0+1   : z0+2.5,
+      rot: alongX ? (rand()<0.5 ? Math.PI/2 : -Math.PI/2)
+                  : (rand()<0.5 ? 0 : Math.PI),
+      col, suv,
+    });
   }
   {
     for(let x=8;x<=34;x++) for(let z=34;z<=56;z++) set(x,3,z,B.ASPHALT);
@@ -931,7 +940,7 @@ function generate(){
       for(let z=52;z<=56;z++) set(x,3,z,B.WHITE);
     }
     for(let x=3;x<=7;x++) for(let z=43;z<=47;z++) set(x,3,z,B.ASPHALT);   // 连接主路的车道
-    const CAR_COLORS=[B.RED,B.WHITE,B.BLUE,B.GRAY,B.BLACK,B.YELLOW];
+    const CAR_COLORS=CAR_PAINTS;
     for(let k=0;k<9;k++){
       const sx=9+k*3;
       if(rand()<0.75) placeCar(sx,34, CAR_COLORS[Math.floor(rand()*CAR_COLORS.length)]);
@@ -1027,7 +1036,7 @@ function generate(){
     for(const bx of banks)
       for(let z=LZ0;z<=LZ1;z+=3)
         for(let x=bx;x<=bx+4;x++) set(x,3,z,B.WHITE);        // 车位分隔线
-    const COLS=[B.RED,B.WHITE,B.BLUE,B.GRAY,B.BLACK,B.YELLOW];
+    const COLS=CAR_PAINTS;
     for(const bx of banks)
       for(let zs=LZ0+1; zs+1<LZ1; zs+=3)
         if(rand()<0.6) placeCar(bx, zs, COLS[Math.floor(rand()*COLS.length)], true);
@@ -1286,6 +1295,76 @@ const markers=[];
     s.position.set(p.x+0.5, p.y+2.3, p.z+0.5);
     s.userData.baseY = p.y+2.3;
     scene.add(s); markers.push(s);
+  }
+}
+
+/* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
+const carGroup = new THREE.Group(); scene.add(carGroup);
+const CAR_GEO = {
+  body:    new THREE.BoxGeometry(1.9,0.5,4.4),
+  cabin:   new THREE.BoxGeometry(1.68,0.6,2.05),
+  cabinSuv:new THREE.BoxGeometry(1.72,0.72,2.9),
+  roof:    new THREE.BoxGeometry(1.55,0.09,1.85),
+  roofSuv: new THREE.BoxGeometry(1.6,0.09,2.7),
+  wheel:   new THREE.CylinderGeometry(0.42,0.42,0.26,12),
+  hub:     new THREE.CylinderGeometry(0.17,0.17,0.28,8),
+  light:   new THREE.BoxGeometry(0.34,0.16,0.08),
+  grille:  new THREE.BoxGeometry(1.15,0.22,0.08),
+  bumper:  new THREE.BoxGeometry(1.95,0.16,0.18),
+};
+const CAR_MAT = {
+  tire: new THREE.MeshBasicMaterial({color:0x1a1a1d}),
+  hub:  new THREE.MeshBasicMaterial({color:0xb9bec4}),
+  glass:new THREE.MeshBasicMaterial({color:0x9fc4dd, transparent:true, opacity:0.75}),
+  head: new THREE.MeshBasicMaterial({color:0xfff3c4}),
+  tail: new THREE.MeshBasicMaterial({color:0xc22222}),
+  dark: new THREE.MeshBasicMaterial({color:0x2e3136}),
+  paints:{},
+};
+function carPaint(hex){
+  return CAR_MAT.paints[hex] || (CAR_MAT.paints[hex]=new THREE.MeshBasicMaterial({color:hex}));
+}
+function buildCarMeshes(){
+  carGroup.clear();
+  const buckets = new Map();   // 按 几何体+材质 分桶 → InstancedMesh，全场仅 ~25 次绘制
+  const put=(key,geo,mat,p,ry,rz)=>{
+    let b=buckets.get(key);
+    if(!b){ b={geo,mat,list:[]}; buckets.set(key,b); }
+    b.list.push({p,ry,rz:rz||0});
+  };
+  for(const c of CARS){
+    const ca=Math.cos(c.rot), sa=Math.sin(c.rot);
+    const T=off=>[ c.x + off[0]*ca + off[2]*sa, 4+off[1], c.z - off[0]*sa + off[2]*ca ];
+    const pk='p'+c.col, vk=c.suv?'s':'d';
+    put('body|'+pk, CAR_GEO.body, carPaint(c.col), T([0,0.82,0]), c.rot);
+    put('cab|'+vk, c.suv?CAR_GEO.cabinSuv:CAR_GEO.cabin, CAR_MAT.glass,
+        T([0,1.34,c.suv?0.45:0.35]), c.rot);
+    put('roof|'+vk+pk, c.suv?CAR_GEO.roofSuv:CAR_GEO.roof, carPaint(c.col),
+        T([0,1.7,c.suv?0.45:0.35]), c.rot);
+    for(const [wx,wz] of [[-0.86,-1.4],[0.86,-1.4],[-0.86,1.4],[0.86,1.4]]){
+      put('wheel', CAR_GEO.wheel, CAR_MAT.tire, T([wx,0.42,wz]), c.rot, Math.PI/2);
+      put('hub',   CAR_GEO.hub,   CAR_MAT.hub,  T([wx,0.42,wz]), c.rot, Math.PI/2);
+    }
+    for(const sx of [-0.6,0.6]){
+      put('head', CAR_GEO.light, CAR_MAT.head, T([sx,0.95,-2.18]), c.rot);
+      put('tail', CAR_GEO.light, CAR_MAT.tail, T([sx,0.95, 2.18]), c.rot);
+    }
+    put('grille', CAR_GEO.grille, CAR_MAT.dark, T([0,0.7,-2.2]),  c.rot);
+    put('bumpF',  CAR_GEO.bumper, CAR_MAT.dark, T([0,0.56,-2.24]), c.rot);
+    put('bumpB',  CAR_GEO.bumper, CAR_MAT.dark, T([0,0.56, 2.24]), c.rot);
+  }
+  const dummy=new THREE.Object3D();
+  for(const b of buckets.values()){
+    const im=new THREE.InstancedMesh(b.geo, b.mat, b.list.length);
+    b.list.forEach((it,i)=>{
+      dummy.position.set(it.p[0], it.p[1], it.p[2]);
+      dummy.rotation.set(0, it.ry, it.rz, 'YZX');
+      dummy.updateMatrix();
+      im.setMatrixAt(i, dummy.matrix);
+    });
+    im.instanceMatrix.needsUpdate = true;
+    im.frustumCulled = false;
+    carGroup.add(im);
   }
 }
 
@@ -1662,7 +1741,7 @@ function onGuestData(d){
   if(d.t==='init'){
     edits = new Map(d.edits);
     netNames = new Map(d.names);
-    generate(); markAllDirty(); flushDirty();
+    generate(); markAllDirty(); flushDirty(); buildCarMeshes();
     setMpStatus(t('mpJoined', { code:net.code }));
     startPosLoop();
     toast(t('joinedWorld', { name:netNames.get(d.hostId)||t('playerDefault') }));
@@ -1695,20 +1774,37 @@ function colorFromName(n){
   let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0;
   return new THREE.Color().setHSL((h%360)/360, 0.62, 0.5);
 }
-/* Minecraft 风格小人：像素表情脸 + 独立双手双脚（可摆动） */
+/* Minecraft 风格小人：像素表情脸 + 独立双手双脚（可摆动）
+   style: 'm' 男生（默认） | 'f' 女生（长发+睫毛） | 'hijab' 头巾马来女生（tudung+长裙） */
 const FACE_TEX = {};
-function faceTexture(expr){
-  if(FACE_TEX[expr]) return FACE_TEX[expr];
+function faceTexture(expr, style, scarfHex){
+  const key = expr+'|'+(style||'m')+'|'+(scarfHex||0);
+  if(FACE_TEX[key]) return FACE_TEX[key];
   const c=document.createElement('canvas'); c.width=c.height=32;
   const g=c.getContext('2d');
   g.fillStyle='#f0c8a0'; g.fillRect(0,0,32,32);          // 皮肤
-  g.fillStyle='#4a3220'; g.fillRect(0,0,32,7);           // 刘海
-  g.fillRect(0,7,3,4); g.fillRect(29,7,3,4);             // 鬓角
-  g.fillStyle='#4a3220'; g.fillRect(6,10,7,2); g.fillRect(19,10,7,2);   // 眉毛
+  if(style==='hijab'){
+    // 头巾包住整个头，只露出脸
+    g.fillStyle='#'+(scarfHex||0x1b9aaa).toString(16).padStart(6,'0');
+    g.fillRect(0,0,32,32);
+    g.fillStyle='#f0c8a0'; g.fillRect(5,7,22,23);
+  }else if(style==='f'){
+    g.fillStyle='#4a3220';
+    g.fillRect(0,0,32,7);                                // 刘海
+    g.fillRect(0,7,4,25); g.fillRect(28,7,4,25);         // 长发框脸
+  }else{
+    g.fillStyle='#4a3220';
+    g.fillRect(0,0,32,7);                                // 刘海
+    g.fillRect(0,7,3,4); g.fillRect(29,7,3,4);           // 鬓角
+  }
+  g.fillStyle='#4a3220'; g.fillRect(7,10,6,2); g.fillRect(19,10,6,2);   // 眉毛
+  if(style==='f'||style==='hijab'){                                      // 睫毛
+    g.fillRect(6,12,7,1); g.fillRect(19,12,7,1);
+  }
   g.fillStyle='#fff'; g.fillRect(6,13,7,5); g.fillRect(19,13,7,5);      // 眼白
   g.fillStyle='#3a52a0'; g.fillRect(8,14,3,4); g.fillRect(21,14,3,4);   // 瞳孔
   g.fillStyle='#c98b6b'; g.fillRect(14,19,4,3);                          // 鼻子
-  g.fillStyle='#8a4a3a';                                                 // 嘴（表情）
+  g.fillStyle = (style==='f'||style==='hijab') ? '#c9607a' : '#8a4a3a';  // 嘴（女生粉色）
   if(expr==='happy'){       // 开口笑
     g.fillRect(11,24,10,4);
     g.fillStyle='#fff'; g.fillRect(12,24,8,2);
@@ -1720,19 +1816,33 @@ function faceTexture(expr){
   const t=new THREE.CanvasTexture(c);
   t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter;
   t.colorSpace=THREE.SRGBColorSpace;
-  FACE_TEX[expr]=t; return t;
+  FACE_TEX[key]=t; return t;
 }
-function createAvatar(name, colorHex, expr){
+function createAvatar(name, colorHex, expr, style){
+  style = style||'m';
   const group = new THREE.Group();
+  const shirtHex = colorHex!==undefined ? colorHex : colorFromName(name).getHex();
   const skin  = new THREE.MeshBasicMaterial({color:0xf0c8a0});
   const hair  = new THREE.MeshBasicMaterial({color:0x4a3220});
-  const shirt = new THREE.MeshBasicMaterial({color: colorHex!==undefined ? new THREE.Color(colorHex) : colorFromName(name)});
+  const shirt = new THREE.MeshBasicMaterial({color:new THREE.Color(shirtHex)});
   const pants = new THREE.MeshBasicMaterial({color:0x3a4a6a});
-  const face  = new THREE.MeshBasicMaterial({map:faceTexture(expr||'smile')});
-  // 头：正面表情贴图，头顶与后脑勺是头发（朝向 -z）
+  const face  = new THREE.MeshBasicMaterial({map:faceTexture(expr||'smile', style, style==='hijab'?shirtHex:0)});
+  // 头：正面表情贴图；男女=头发，头巾=衫色包头（朝向 -z）
+  const capMat = style==='hijab' ? shirt : hair;
+  const sideMat = style==='hijab' ? shirt : (style==='f' ? hair : skin);
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),
-    [skin,skin,hair,skin,hair,face]);
+    [sideMat,sideMat,capMat,style==='hijab'?shirt:skin,capMat,face]);
   head.position.y = 1.55;
+  if(style==='f'){                                        // 披肩长发
+    const backHair=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.58,0.12), hair);
+    backHair.position.set(0,-0.12,0.24);
+    head.add(backHair);
+  }
+  if(style==='hijab'){                                    // 头巾垂布
+    const drape=new THREE.Mesh(new THREE.BoxGeometry(0.54,0.34,0.14), shirt);
+    drape.position.set(0,-0.22,0.23);
+    head.add(drape);
+  }
   // 躯干
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26), shirt);
   body.position.y = 1.0;
@@ -1751,6 +1861,11 @@ function createAvatar(name, colorHex, expr){
     leg.add(m); return leg;
   };
   const legL=mkLeg(-0.13), legR=mkLeg(0.13);
+  if(style==='hijab'){                                    // 长裙
+    const skirt=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.38,0.32), shirt);
+    skirt.position.y = 0.62;
+    group.add(skirt);
+  }
   const tag = new THREE.Sprite(new THREE.SpriteMaterial({map:nameTagTexture(name), depthTest:false}));
   tag.scale.set(1.7,0.42,1); tag.position.y = 2.2;
   group.add(head, body, armL, armR, legL, legR, tag);
@@ -1797,13 +1912,13 @@ const NPCS = [
       zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 7 个金色信息方块，按 E 就能学到建筑知识！',
       en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 7 golden info blocks around the campus and press E to learn!',
       ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 7 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
-  { name:'Siti', color:0x1b9aaa, expr:'smile', x:0.5, y:4, z:22.5, baseYaw:Math.PI,
+  { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', x:0.5, y:4, z:22.5, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
       zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯，可以一路走上屋顶花园。',
       en:'Welcome! This is the famous doorless entrance — the architects deliberately left out the gate so the courtyard opens to everyone. Ahead is the big round lawn, and the dark tower on the west has stairs all the way up to the roof garden.',
       ms:'Selamat datang! Inilah pintu masuk tanpa pintu yang terkenal — arkitek sengaja tidak memasang pintu supaya laman terbuka kepada semua. Di hadapan ialah padang bulat yang besar, dan menara gelap di sebelah barat ada tangga terus ke taman bumbung.' } },
-  { name:'Mei Ling', color:0xd4643c, expr:'smile', x:1.5, y:4, z:10.5,
+  { name:'Mei Ling', color:0xd4643c, expr:'smile', style:'f', x:1.5, y:4, z:10.5,
     role:{ zh:'视觉检测工程师', en:'Vision Engineer', ms:'Jurutera Penglihatan' },
     dialog:{
       zh:'我是这里的视觉检测工程师。最喜欢午休时来庭院走走——不管从哪栋楼出来，放射状的走道都会把你带到这片草坪。待会儿我要去主楼的食堂吃饭，你也来吗？',
@@ -1821,7 +1936,7 @@ const NPCS = [
       zh:'今天有椰浆饭和炒粿条！在 ViTrox，工程师们像大学生一样在食堂一起吃饭聊天。吃完记得把餐盘拿到外面的洗碗棚哦——就在南边檐下。',
       en:'Today we have nasi lemak and char kway teow! At ViTrox, engineers eat and chat together in the canteen like university students. After your meal, please bring the tray to the washing shed outside — just under the canopy on the south side.',
       ms:'Hari ini ada nasi lemak dan char kuey teow! Di ViTrox, para jurutera makan dan berbual bersama di kantin macam pelajar universiti. Selepas makan, tolong bawa dulang ke bangsal basuh di luar — di bawah kanopi sebelah selatan.' } },
-  { name:'Aina', color:0xc94f7c, expr:'happy', x:-45.5, y:4, z:20.5,
+  { name:'Aina', color:0xc94f7c, expr:'happy', style:'f', x:-45.5, y:4, z:20.5,
     role:{ zh:'ViTrox 学院学生', en:'ViTrox College Student', ms:'Pelajar Kolej ViTrox' },
     dialog:{
       zh:'嗨！我是 ViTrox 学院的学生，下课就来球场投几个球。听说这个园区把工厂和校园混在一起——所以我们在工业园里也有篮球场！要不要来一场三对三？',
@@ -1842,7 +1957,7 @@ const NPCS = [
 ];
 const npcObjs = [];
 for(const n of NPCS){
-  const av = createAvatar(n.name, n.color, n.expr);
+  const av = createAvatar(n.name, n.color, n.expr, n.style);
   av.group.position.set(n.x, n.y, n.z);
   av.group.rotation.y = n.baseYaw||0;
   scene.add(av.group);
@@ -1893,7 +2008,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   if(!confirm(t('confirmReset'))) return;
   edits.clear();
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  generate(); markAllDirty(); flushDirty();
+  generate(); markAllDirty(); flushDirty(); buildCarMeshes();
   if(net.mode==='host') broadcast({t:'init', edits:[], names:[...netNames], hostId:net.myId});
   toast(t('resetDone'));
 });
@@ -2025,6 +2140,7 @@ applyLang();
 generate();
 markAllDirty();
 flushDirty();
+buildCarMeshes();
 respawn();
 
 const posEl=document.getElementById('pos');
