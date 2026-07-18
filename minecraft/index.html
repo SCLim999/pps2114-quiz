@@ -1695,25 +1695,66 @@ function colorFromName(n){
   let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0;
   return new THREE.Color().setHSL((h%360)/360, 0.62, 0.5);
 }
-function createAvatar(name, colorHex){
+/* Minecraft 风格小人：像素表情脸 + 独立双手双脚（可摆动） */
+const FACE_TEX = {};
+function faceTexture(expr){
+  if(FACE_TEX[expr]) return FACE_TEX[expr];
+  const c=document.createElement('canvas'); c.width=c.height=32;
+  const g=c.getContext('2d');
+  g.fillStyle='#f0c8a0'; g.fillRect(0,0,32,32);          // 皮肤
+  g.fillStyle='#4a3220'; g.fillRect(0,0,32,7);           // 刘海
+  g.fillRect(0,7,3,4); g.fillRect(29,7,3,4);             // 鬓角
+  g.fillStyle='#4a3220'; g.fillRect(6,10,7,2); g.fillRect(19,10,7,2);   // 眉毛
+  g.fillStyle='#fff'; g.fillRect(6,13,7,5); g.fillRect(19,13,7,5);      // 眼白
+  g.fillStyle='#3a52a0'; g.fillRect(8,14,3,4); g.fillRect(21,14,3,4);   // 瞳孔
+  g.fillStyle='#c98b6b'; g.fillRect(14,19,4,3);                          // 鼻子
+  g.fillStyle='#8a4a3a';                                                 // 嘴（表情）
+  if(expr==='happy'){       // 开口笑
+    g.fillRect(11,24,10,4);
+    g.fillStyle='#fff'; g.fillRect(12,24,8,2);
+  }else if(expr==='smile'){ // 微笑
+    g.fillRect(10,24,2,2); g.fillRect(20,24,2,2); g.fillRect(11,25,10,2);
+  }else{                    // 平静
+    g.fillRect(12,25,8,2);
+  }
+  const t=new THREE.CanvasTexture(c);
+  t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter;
+  t.colorSpace=THREE.SRGBColorSpace;
+  FACE_TEX[expr]=t; return t;
+}
+function createAvatar(name, colorHex, expr){
   const group = new THREE.Group();
+  const skin  = new THREE.MeshBasicMaterial({color:0xf0c8a0});
+  const hair  = new THREE.MeshBasicMaterial({color:0x4a3220});
+  const shirt = new THREE.MeshBasicMaterial({color: colorHex!==undefined ? new THREE.Color(colorHex) : colorFromName(name)});
+  const pants = new THREE.MeshBasicMaterial({color:0x3a4a6a});
+  const face  = new THREE.MeshBasicMaterial({map:faceTexture(expr||'smile')});
+  // 头：正面表情贴图，头顶与后脑勺是头发（朝向 -z）
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),
-    new THREE.MeshBasicMaterial({color:0xf0c8a0}));
+    [skin,skin,hair,skin,hair,face]);
   head.position.y = 1.55;
-  const face = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.1,0.04),
-    new THREE.MeshBasicMaterial({color:0x35281e}));
-  face.position.set(0,0.05,-0.26);
-  head.add(face);
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.72,0.3),
-    new THREE.MeshBasicMaterial({color: colorHex!==undefined ? new THREE.Color(colorHex) : colorFromName(name)}));
-  body.position.y = 0.95;
-  const legs = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26),
-    new THREE.MeshBasicMaterial({color:0x3a4a6a}));
-  legs.position.y = 0.3;
+  // 躯干
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26), shirt);
+  body.position.y = 1.0;
+  // 手臂：肩部为转轴，衫袖 + 肤色手掌
+  const mkArm = sx=>{
+    const arm=new THREE.Group(); arm.position.set(sx,1.26,0);
+    const up=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.42,0.24), shirt); up.position.y=-0.21;
+    const hand=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.24), skin); hand.position.y=-0.52;
+    arm.add(up,hand); return arm;
+  };
+  const armL=mkArm(-0.36), armR=mkArm(0.36);
+  // 双腿：髋部为转轴
+  const mkLeg = sx=>{
+    const leg=new THREE.Group(); leg.position.set(sx,0.7,0);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.24), pants); m.position.y=-0.35;
+    leg.add(m); return leg;
+  };
+  const legL=mkLeg(-0.13), legR=mkLeg(0.13);
   const tag = new THREE.Sprite(new THREE.SpriteMaterial({map:nameTagTexture(name), depthTest:false}));
   tag.scale.set(1.7,0.42,1); tag.position.y = 2.2;
-  group.add(head, body, legs, tag);
-  return { group, head, target:null };
+  group.add(head, body, armL, armR, legL, legR, tag);
+  return { group, head, armL, armR, legL, legR, target:null, phase:0 };
 }
 function updateRemote(id, d){
   let r = remotes.get(id);
@@ -1732,10 +1773,17 @@ function animateRemotes(dt){
   const k = Math.min(1, dt*10);
   for(const r of remotes.values()){
     if(!r.target) continue;
+    const ox=r.group.position.x, oz=r.group.position.z;
     r.group.position.lerp(new THREE.Vector3(r.target.x, r.target.y, r.target.z), k);
     const dy = ((r.target.yaw - r.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
     r.group.rotation.y += dy*k;
     r.head.rotation.x = -(r.target.pitch||0)*0.8;
+    // 行走时手脚交替摆动
+    const sp = Math.hypot(r.group.position.x-ox, r.group.position.z-oz)/Math.max(dt,1e-4);
+    r.phase += Math.min(sp,6)*dt*4;
+    const sw = Math.sin(r.phase)*Math.min(sp/3,1)*0.6;
+    r.armL.rotation.x= sw; r.armR.rotation.x=-sw;
+    r.legL.rotation.x=-sw; r.legR.rotation.x= sw;
   }
 }
 
@@ -1743,49 +1791,49 @@ function animateRemotes(dt){
    NPC 人物（参照 Minecraft Education 的 Characters：可交谈的园区角色）
 ================================================================ */
 const NPCS = [
-  { name:'Ahmad', color:0x2c4a86, x:3.5, y:4, z:55.5, baseYaw:Math.PI,
+  { name:'Ahmad', color:0x2c4a86, expr:'neutral', x:3.5, y:4, z:55.5, baseYaw:Math.PI,
     role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
     dialog:{
       zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 7 个金色信息方块，按 E 就能学到建筑知识！',
       en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 7 golden info blocks around the campus and press E to learn!',
       ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 7 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
-  { name:'Siti', color:0x1b9aaa, x:0.5, y:4, z:22.5, baseYaw:Math.PI,
+  { name:'Siti', color:0x1b9aaa, expr:'smile', x:0.5, y:4, z:22.5, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
       zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯，可以一路走上屋顶花园。',
       en:'Welcome! This is the famous doorless entrance — the architects deliberately left out the gate so the courtyard opens to everyone. Ahead is the big round lawn, and the dark tower on the west has stairs all the way up to the roof garden.',
       ms:'Selamat datang! Inilah pintu masuk tanpa pintu yang terkenal — arkitek sengaja tidak memasang pintu supaya laman terbuka kepada semua. Di hadapan ialah padang bulat yang besar, dan menara gelap di sebelah barat ada tangga terus ke taman bumbung.' } },
-  { name:'Mei Ling', color:0xd4643c, x:1.5, y:4, z:10.5,
+  { name:'Mei Ling', color:0xd4643c, expr:'smile', x:1.5, y:4, z:10.5,
     role:{ zh:'视觉检测工程师', en:'Vision Engineer', ms:'Jurutera Penglihatan' },
     dialog:{
       zh:'我是这里的视觉检测工程师。最喜欢午休时来庭院走走——不管从哪栋楼出来，放射状的走道都会把你带到这片草坪。待会儿我要去主楼的食堂吃饭，你也来吗？',
       en:'I am a machine-vision engineer here. I love walking in the courtyard at lunch — whichever building you leave, the radial walkways bring you to this lawn. I am heading to the canteen in the main building later, want to come along?',
       ms:'Saya jurutera penglihatan mesin di sini. Saya suka berjalan di laman pada waktu rehat — dari bangunan mana pun anda keluar, laluan jejari akan membawa anda ke padang ini. Nanti saya ke kantin di bangunan utama, nak ikut?' } },
-  { name:'Kumar', color:0x3e7d3a, x:13.5, y:12, z:-12.5,
+  { name:'Kumar', color:0x3e7d3a, expr:'happy', x:13.5, y:12, z:-12.5,
     role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
     dialog:{
       zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是走坡道上来的，还是爬了那座深灰色的楼梯塔？',
       en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you come up the landscape ramp, or climb the dark stair tower?',
       ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik ikut tanjakan landskap atau panjat menara tangga gelap itu?' } },
-  { name:'Chef Tan', color:0xf0f0f0, x:36.5, y:4, z:-13.5,
+  { name:'Chef Tan', color:0xf0f0f0, expr:'happy', x:36.5, y:4, z:-13.5,
     role:{ zh:'食堂厨师', en:'Canteen Chef', ms:'Cef Kantin' },
     dialog:{
       zh:'今天有椰浆饭和炒粿条！在 ViTrox，工程师们像大学生一样在食堂一起吃饭聊天。吃完记得把餐盘拿到外面的洗碗棚哦——就在南边檐下。',
       en:'Today we have nasi lemak and char kway teow! At ViTrox, engineers eat and chat together in the canteen like university students. After your meal, please bring the tray to the washing shed outside — just under the canopy on the south side.',
       ms:'Hari ini ada nasi lemak dan char kuey teow! Di ViTrox, para jurutera makan dan berbual bersama di kantin macam pelajar universiti. Selepas makan, tolong bawa dulang ke bangsal basuh di luar — di bawah kanopi sebelah selatan.' } },
-  { name:'Aina', color:0xc94f7c, x:-45.5, y:4, z:20.5,
+  { name:'Aina', color:0xc94f7c, expr:'happy', x:-45.5, y:4, z:20.5,
     role:{ zh:'ViTrox 学院学生', en:'ViTrox College Student', ms:'Pelajar Kolej ViTrox' },
     dialog:{
       zh:'嗨！我是 ViTrox 学院的学生，下课就来球场投几个球。听说这个园区把工厂和校园混在一起——所以我们在工业园里也有篮球场！要不要来一场三对三？',
       en:'Hi! I am a ViTrox College student — I shoot some hoops here after class. They say this campus mixes factory with school, so we even get a basketball court inside an industrial park! Up for a three-on-three?',
       ms:'Hai! Saya pelajar Kolej ViTrox — selepas kelas saya main bola keranjang di sini. Kata orang, kampus ini campurkan kilang dengan sekolah, jadi ada gelanggang bola keranjang dalam taman perindustrian! Nak main tiga lawan tiga?' } },
-  { name:'Encik Lim', color:0x777788, x:21.5, y:4, z:45.5,
+  { name:'Encik Lim', color:0x777788, expr:'neutral', x:21.5, y:4, z:45.5,
     role:{ zh:'职员', en:'Staff', ms:'Kakitangan' },
     dialog:{
       zh:'早上好！我刚停好车。你看每辆车都停在白线里——整齐的停车场也是园区规划的一部分。对了，西边还有一个大得多的停车场，几百个车位呢！',
       en:'Good morning! I just parked my car. See how every car sits inside the white lines — a tidy car park is part of the campus planning too. By the way, there is a much bigger car park on the west side, hundreds of lots!',
       ms:'Selamat pagi! Saya baru letak kereta. Tengok, setiap kereta parkir dalam garisan putih — tempat letak kereta yang kemas juga sebahagian perancangan kampus. Oh ya, ada tempat letak kereta jauh lebih besar di sebelah barat, beratus-ratus petak!' } },
-  { name:'Ar. Chan', color:0x222222, x:117.5, y:4, z:-12.5,
+  { name:'Ar. Chan', color:0x222222, expr:'smile', x:117.5, y:4, z:-12.5,
     role:{ zh:'建筑师', en:'Architect', ms:'Arkitek' },
     dialog:{
       zh:'我是设计团队的建筑师。Campus 3.0 延续了 2.0 的语言：白色板楼、细长的竖窗、铺满光伏板的屋顶。这方鱼池不只是好看——水面能给庭院降温，鱼和睡莲让工程师们放松眼睛和心情。',
@@ -1794,11 +1842,11 @@ const NPCS = [
 ];
 const npcObjs = [];
 for(const n of NPCS){
-  const av = createAvatar(n.name, n.color);
+  const av = createAvatar(n.name, n.color, n.expr);
   av.group.position.set(n.x, n.y, n.z);
   av.group.rotation.y = n.baseYaw||0;
   scene.add(av.group);
-  npcObjs.push({ group:av.group, head:av.head, def:n });
+  npcObjs.push(Object.assign(av, { def:n }));
 }
 function animateNpcs(dt){
   npcObjs.forEach((o,i)=>{
@@ -1808,6 +1856,8 @@ function animateNpcs(dt){
                    : (o.def.baseYaw||0) + Math.sin(elapsed*0.6+i*2)*0.5;
     const dy = ((ty - o.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
     o.group.rotation.y += dy*Math.min(1,dt*5);
+    const s = Math.sin(elapsed*1.4+i*1.7)*0.08;   // 待机时手臂轻摆
+    o.armL.rotation.x= s; o.armR.rotation.x=-s;
   });
 }
 function openNpc(i){
