@@ -788,12 +788,19 @@ function generate(){
   }
 
   /* ---- 6.6 停车场（入口东侧）与车辆 ---- */
-  function placeCar(x0,z0,col){                 // 2×4 方块小车：黑轮 + 车身 + 玻璃座舱
-    for(let dx=0;dx<2;dx++) for(let dz=0;dz<4;dz++){
-      const wheel=(dz===0||dz===3);
-      set(x0+dx,4,z0+dz, wheel?B.BLACK:col);
+  function placeCar(x0,z0,col){
+    // 2×5 方块小车：低车头/车尾 + 玻璃座舱 + 四个黑轮；40% 概率生成方背 SUV
+    const suv = rand()<0.4;
+    for(let dx=0;dx<2;dx++){
+      for(let dz=0;dz<5;dz++){
+        const wheel=(dz===1||dz===3);
+        set(x0+dx,4,z0+dz, wheel?B.BLACK:col);   // 底层：车身 + 前后轮
+      }
+      set(x0+dx,5,z0+1,B.GLASS);                 // 挡风玻璃
+      set(x0+dx,5,z0+2,col);                     // 车顶
+      if(suv){ set(x0+dx,5,z0+3,col); set(x0+dx,5,z0+4,B.GLASS); }  // SUV：长车顶+尾窗
+      else set(x0+dx,5,z0+3,B.GLASS);            // 轿车：后窗，车尾低一格
     }
-    for(let dx=0;dx<2;dx++) for(let dz=1;dz<3;dz++) set(x0+dx,5,z0+dz,B.GLASS);
   }
   {
     for(let x=8;x<=34;x++) for(let z=34;z<=56;z++) set(x,3,z,B.ASPHALT);
