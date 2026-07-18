@@ -635,13 +635,17 @@ function generate(){
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const r = Math.hypot(x+0.5,z+0.5);
     if(r<=15.5){
-      if(r<=2.8){ set(x,2,z,B.TILE); set(x,3,z,B.WATER); }
-      else if(r<=6.5){ /* 中心花园保留草地 */ }
-      else set(x,3,z, (Math.floor(r)%4===0)?B.WHITE:B.TILE);
+      if(r<=1.3) set(x,3,z,B.STONE);            // 中心深色圆点
+      else if(r<=4.5) set(x,3,z,B.WHITE);       // 中央白色圆坪
+      else if(r<=13){ /* 大草坪 */ }
+      else set(x,3,z,B.TILE);                   // 周边环形步道
     }
   }
-  placeTree( 3, 3,rand); placeTree( 3,-4,rand);
-  placeTree(-4, 3,rand); placeTree(-4,-4,rand);
+  for(let k=0;k<12;k++){                        // 草坪边缘的低矮灌木
+    const ba=k*30+15;
+    if(Math.abs(angDiff(ba,90))<20) continue;
+    set(Math.round(11.5*cosd(ba)),4,Math.round(11.5*sind(ba)),B.LEAF);
+  }
 
   /* ---- 3. 环形楼（3 层，内侧玻璃幕墙面向庭院）---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
@@ -651,29 +655,29 @@ function generate(){
     const a = (Math.atan2(cz,cx)*180/Math.PI+360)%360;
     const entrance = Math.abs(angDiff(a,90))<12;      // 南面无门入口
     set(x,3,z,B.TILE);
-    // 楼板
-    for(const fy of [7,11,15]){
-      if(entrance && fy<=10) continue;
+    // 楼板（两层：中间楼板 y7，屋面板 y11）
+    for(const fy of [7,11]){
+      if(entrance && fy<=7) continue;       // 入口全高开洞，屋面板保留为门洞顶
       set(x,fy,z,B.WHITE);
     }
     const inner = r<18, outer = r>22.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
-      for(let y=4;y<15;y++){
-        if(entrance && y<=10) continue;
+      for(let y=4;y<11;y++){
+        if(entrance) continue;
         const k=(y-4)%4;
         set(x,y,z, (fin||k===0||k===3) ? B.WHITE : B.GLASS);
       }
-      if(Math.abs(angDiff(a,BRIDGE_A))>7) set(x,16,z,B.WHITE);     // 女儿墙（连桥处断开）
+      if(Math.abs(angDiff(a,BRIDGE_A))>7) set(x,12,z,B.WHITE);     // 女儿墙（连桥处断开）
     }else if(inner){
-      for(let y=4;y<15;y++){
-        if(entrance && y<=10) continue;
+      for(let y=4;y<11;y++){
+        if(entrance) continue;
         set(x,y,z, y===4 ? B.WHITE : B.GLASS);                     // 面向庭院的玻璃幕墙
       }
-      set(x,16,z,B.WHITE);
+      set(x,12,z,B.WHITE);
     }else{
-      // 屋顶花园（绿色屋顶）
-      if(r>=19&&r<=21.5 && !entrance) set(x,16,z, rand()<0.12?B.LEAF:B.GRASS);
+      // 屋顶花园（绿色屋顶露台）
+      if(r>=19&&r<=21.5 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.GRASS);
     }
   }
   // 环形楼内部结构柱（放射状排布）
@@ -681,7 +685,7 @@ function generate(){
     const a=k*20;
     if(Math.abs(angDiff(a,90))<15) continue;
     const px=Math.round(20.25*cosd(a)), pz=Math.round(20.25*sind(a));
-    for(let y=4;y<15;y++) set(px,y,pz,B.WHITE);
+    for(let y=4;y<11;y++) set(px,y,pz,B.WHITE);
   }
 
   /* ---- 4. 环形景观坡道（沿圆周盘旋而上，直达屋顶花园）---- */
@@ -693,7 +697,7 @@ function generate(){
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
     const rel=(a-RAMP_A0+360)%360;
     if(rel>span) continue;
-    const h = 3 + Math.round((rel/span)*12);
+    const h = 3 + Math.round((rel/span)*8);   // 升至两层楼屋面（y11）
     for(let y=4;y<h;y++) set(x,y,z,B.DIRT);
     if(h>=4) set(x,h,z, (r>=25&&r<=26.5)?B.PATH:B.GRASS);
     else set(x,3,z,B.PATH);
@@ -705,8 +709,8 @@ function generate(){
     if(r<22.4||r>25.6) continue;
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
     if(Math.abs(angDiff(a,BRIDGE_A))>4) continue;
-    set(x,15,z,B.TILE);
-    for(let y=16;y<=18;y++) set(x,y,z,B.AIR);
+    set(x,11,z,B.TILE);
+    for(let y=12;y<=14;y++) set(x,y,z,B.AIR);
   }
 
   /* ---- 4.5 屋顶环形光伏雨棚（参照实景：弧形太阳能板架空于屋顶花园上方）---- */
@@ -717,57 +721,53 @@ function generate(){
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
     if(Math.abs(angDiff(a,90))<14) continue;             // 入口上空留出缺口
     const seg=Math.floor(a/12);
-    const h=19+(seg%2);                                   // 分段高低交错，模拟倾斜板列
+    const h=15+(seg%2);                                   // 分段高低交错，模拟倾斜板列
     set(x,h,z,B.SOLAR);
     if(Math.abs(angDiff(a,seg*12))<1.1 || r>22.4) set(x,h-1,z,B.STEEL);  // 径向钢梁 + 外圈梁
   }
   for(let k=0;k<30;k++){                                  // 白色圆柱支撑
     const a=k*12+6;
     if(Math.abs(angDiff(a,90))<16 || Math.abs(angDiff(a,BRIDGE_A))<6) continue;
-    const h=19+(Math.floor(a/12)%2);
+    const h=15+(Math.floor(a/12)%2);
     for(const rr of [18.8,22.2]){
       const px=Math.floor(rr*cosd(a)), pz=Math.floor(rr*sind(a));
-      for(let y=16;y<h;y++) set(px,y,pz,B.WHITE);
+      for(let y=12;y<h;y++) set(px,y,pz,B.WHITE);
     }
   }
 
-  /* ---- 4.7 庭院楼梯塔（深灰色，参照实景：连接地面→2F→3F→屋顶花园）---- */
+  /* ---- 4.7 庭院楼梯塔（深灰色，参照实景：连接地面→2F→屋顶花园，塔身高出屋面）---- */
   {
     const X0=-22, X1=-14, Z0=-2, Z1=2;
     // 清空塔体范围（含穿过的环楼墙体、楼板、雨棚支柱与光伏板）
-    for(let x=X0;x<=X1;x++) for(let z=Z0;z<=Z1;z++) for(let y=4;y<=20;y++) set(x,y,z,B.AIR);
+    for(let x=X0;x<=X1;x++) for(let z=Z0;z<=Z1;z++) for(let y=4;y<=17;y++) set(x,y,z,B.AIR);
     for(let x=X0;x<=X1;x++) for(let z=Z0;z<=Z1;z++){
       set(x,3,z,B.TILE);
       const edge = x===X0||x===X1||z===Z0||z===Z1;
-      if(edge) for(let y=4;y<=17;y++) set(x,y,z,B.STEEL);   // 深灰色塔身
-      set(x,18,z,B.STEEL);                                   // 塔顶
+      if(edge) for(let y=4;y<=15;y++) set(x,y,z,B.STEEL);   // 深灰色塔身（高出屋面）
+      set(x,16,z,B.STEEL);                                   // 塔顶
     }
-    // 东面（庭院侧）：地面入口 + 每层观景口
+    // 东面（庭院侧）：地面入口 + 每层观景口（顶部为屋面层观景阳台）
     for(const [y0,y1] of [[4,5],[8,9],[12,13]])
       for(let z=-1;z<=1;z++) for(let y=y0;y<=y1;y++) set(X1,y,z,B.AIR);
     set(X1,6,0,B.BLUE);                                      // 入口上方蓝色标志
     for(const vy of [7,11]) for(let z=-1;z<=1;z++) set(X1,vy,z,B.LEAF);  // 每层边缘垂吊绿植
-    // 南北面：地面门洞 + 通往环形楼 2F / 3F 的门洞
+    // 南北面：地面门洞 + 通往环形楼 2F 的门洞
     for(const zf of [Z0,Z1])
-      for(const [y0,y1] of [[4,5],[8,9],[12,13]])
+      for(const [y0,y1] of [[4,5],[8,9]])
         for(let x=-20;x<=-18;x++) for(let y=y0;y<=y1;y++) set(x,y,zf,B.AIR);
     // 南北面：屋顶花园出口（并清出门前的绿植）
     for(const zf of [Z0,Z1]) for(let x=-21;x<=-19;x++){
-      for(let y=16;y<=17;y++) set(x,y,zf,B.AIR);
-      set(x,16, zf>0?3:-3, B.AIR);
+      for(let y=12;y<=13;y++) set(x,y,zf,B.AIR);
+      set(x,12, zf>0?3:-3, B.AIR);
     }
-    // 三段折返楼梯（浅灰踏步）+ 层间平台
+    // 两段折返楼梯（浅灰踏步）+ 层间平台
     const steps=[
       [[-15,4,-1],[-16,5,-1],[-17,6,-1],[-18,7,-1]],         // 地面 → 2F
-      [[-18,8,1],[-17,9,1],[-16,10,1],[-15,11,1]],           // 2F → 3F
-      [[-16,12,-1],[-17,13,-1],[-18,14,-1],[-19,15,-1]],     // 3F → 屋顶
+      [[-18,8,1],[-17,9,1],[-16,10,1],[-15,11,1]],           // 2F → 屋顶
     ];
     for(const run of steps) for(const [sx,sy,sz] of run) set(sx,sy,sz,B.GRAY);
-    for(let z=-1;z<=1;z++){
-      for(let x=-21;x<=-19;x++) set(x,7,z,B.GRAY);           // 2F 平台
-      set(-15,11,z,B.GRAY);                                  // 3F 平台
-      for(let x=-21;x<=-20;x++) set(x,15,z,B.GRAY);          // 屋顶平台
-    }
+    for(let z=-1;z<=1;z++) for(let x=-21;x<=-19;x++) set(x,7,z,B.GRAY);    // 2F 平台
+    for(const pz of [-1,0]) for(let x=-21;x<=-15;x++) set(x,11,pz,B.GRAY); // 屋面层通道
   }
 
   /* ---- 5. 矩形体量：生产办公楼（东，5 层）与实验楼（西北，4 层）---- */
@@ -943,7 +943,7 @@ const INFO_POINTS = [
       zh:'这条绿色的坡道沿着建筑的圆周缓缓盘旋而上。当环形坡道与笔直的矩形生产办公楼相交时，会产生一种明显的「旋转动感」，让静止的建筑仿佛在转动，也把人的视线和脚步引向屋顶。沿着步道一直往上走，你可以直接登上环形楼的屋顶花园！',
       en:'This green ramp spirals gently upward along the circumference of the building. Where the circular ramp meets the straight rectangular production-office block, an apparent rotary motion is created — the still building seems to turn, drawing your eyes and your footsteps toward the roof. Follow the path all the way up and you will reach the roof garden of the ring building!',
       ms:'Tanjakan hijau ini melingkar naik perlahan-lahan di sepanjang lilitan bangunan. Apabila tanjakan membulat bertemu blok pejabat-kilang segi empat yang lurus, terhasil kesan gerakan berputar — bangunan yang pegun seakan-akan berpusing, menarik pandangan dan langkah anda ke arah bumbung. Ikuti laluan ini sehingga ke atas dan anda akan tiba di taman bumbung bangunan cincin!' } },
-  { x:-19, y:16, z:-7,
+  { x:-19, y:12, z:-7,
     title:{ zh:'④ 绿色屋顶花园', en:'④ The Green Roof Garden', ms:'④ Taman Bumbung Hijau' },
     text:{
       zh:'恭喜你走上屋顶！ViTrox Campus 2.0 是在「绿色建筑环境」理念下设计的：屋顶绿化可以隔热降温、滞留雨水、减少空调能耗，也为员工提供了眺望整个峇都交湾工业园的休闲空间。抬头看——头顶这圈弧形的太阳能光伏雨棚一边发电，一边为屋顶花园遮阳，绿色能源与绿化屋顶在这里叠加在一起。',
