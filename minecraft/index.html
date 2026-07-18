@@ -762,6 +762,21 @@ function generate(){
     }
   }
 
+  /* ---- 5.6 食堂外的超大洗碗棚（南侧檐下，参照实景：长洗碗台 + 垂吊水管 + 木百叶柜）---- */
+  {
+    for(let x=21;x<=37;x++) for(let z=17;z<=22;z++) set(x,3,z,B.GRAY);    // 混凝土地坪
+    for(let x=21;x<=37;x++) for(let z=16;z<=22;z++) set(x,8,z,B.WHITE);   // 出挑的白色雨棚
+    for(const px of [23,29,35]) for(let y=4;y<=7;y++) set(px,y,22,B.WHITE); // 白色圆柱
+    for(let x=23;x<=35;x++) set(x,5,19,B.WHITE);                           // 超长洗碗台台面
+    for(let x=23;x<=35;x+=3) set(x,4,19,B.WHITE);                          // 台座（带方形开口）
+    for(let x=23;x<=35;x++){                                               // 垂吊不锈钢水管，长短交错
+      set(x,7,19,B.STEEL);
+      if(x%2===1) set(x,6,19,B.STEEL);
+    }
+    for(let z=17;z<=20;z++) for(let y=4;y<=7;y++) set(21,y,z,B.PLANK);     // 木百叶储物柜墙
+    set(25,4,21,B.STEEL); set(26,4,21,B.STEEL);                            // 分类垃圾桶
+  }
+
   /* ---- 6. 入口广场与步道 ---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
