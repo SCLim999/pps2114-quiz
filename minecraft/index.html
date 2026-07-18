@@ -741,6 +741,27 @@ function generate(){
   ]);
   writeSign('VITROX', 21, 17, 16);     // 主楼南立面品牌标识（宽 33 格，正好占满立面）
 
+  /* ---- 5.5 底层员工食堂（主楼西半层，参照实景：长桌 + 自助餐台 + 绿植）---- */
+  {
+    for(let x=20;x<=38;x++) for(let z=-15;z<=15;z++) set(x,3,z,B.GRAY);   // 灰色混凝土地坪
+    for(let x=20;x<=22;x++) for(let z=-2;z<=2;z++) set(x,3,z,B.STEEL);    // 入口地垫
+    for(let z=-15;z<=15;z++) for(let y=4;y<=6;y++){                       // 与生产区的分隔墙（留两个门洞）
+      if((z>=-7&&z<=-4)||(z>=4&&z<=7)) continue;
+      set(38,y,z,B.WHITE);
+    }
+    for(const tz of [-8,0,8]){                                            // 三排长桌
+      for(let x=23;x<=33;x++) set(x,5,tz,B.WHITE);                        // 白色桌面
+      for(const lx of [23,28,33]) set(lx,4,tz,B.BLACK);                   // 黑色桌脚
+      for(let x=24;x<=32;x+=2){ set(x,4,tz-1,B.PLANK); set(x,4,tz+1,B.PLANK); } // 米色餐椅
+    }
+    for(let x=23;x<=35;x++){ set(x,4,-13,B.PLANK); set(x,5,-13,B.WHITE); } // 自助餐台：木柜身+白台面
+    for(let x=25;x<=34;x+=3) set(x,6,-13,B.GRAY);                          // 不锈钢餐盖
+    for(let x=24;x<=34;x+=2) for(let y=4;y<=6;y++) set(x,y,-15,B.PLANK);   // 后场木架
+    for(const [px,pz] of [[22,-5],[22,5],[35,-8],[35,8]]){                 // 白色花盆绿植
+      set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF); set(px,6,pz,B.LEAF);
+    }
+  }
+
   /* ---- 6. 入口广场与步道 ---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
@@ -883,9 +904,9 @@ const INFO_POINTS = [
   { x:36, y:4, z:0,
     title:{ zh:'⑥ 工业 × 人文校园', en:'⑥ Industry × Campus Culture', ms:'⑥ Industri × Budaya Kampus' },
     text:{
-      zh:'你现在在生产办公楼内部。ViTrox Campus 2.0 位于马来西亚槟城峇都交湾（Batu Kawan）工业园，一期总面积约 450,000 平方英尺。它的目标不只是一座工厂，而是把「工业制造空间」与「学院式校园文化」融合在一起，在绿色环境中培养企业的人文文化——所以人们叫它 Campus（校园），而不是 Factory（工厂）。',
-      en:'You are now inside the production-office building. ViTrox Campus 2.0 sits in Batu Kawan Industrial Park, Penang, Malaysia, with Phase 1 covering about 450,000 sq ft. The goal is not just a factory, but a place that blends industrial manufacturing space with an institutional campus culture, nurturing the company\'s humanistic culture in a green environment — which is why people call it a Campus, not a Factory.',
-      ms:'Anda kini berada di dalam bangunan pejabat-kilang. ViTrox Campus 2.0 terletak di Taman Perindustrian Batu Kawan, Pulau Pinang, Malaysia, dengan Fasa 1 seluas kira-kira 450,000 kaki persegi. Matlamatnya bukan sekadar sebuah kilang, tetapi tempat yang menggabungkan ruang pembuatan industri dengan budaya kampus institusi, memupuk budaya kemanusiaan syarikat dalam persekitaran hijau — sebab itulah ia dipanggil Kampus, bukan Kilang.' } },
+      zh:'你现在在生产办公楼内部。ViTrox Campus 2.0 位于马来西亚槟城峇都交湾（Batu Kawan）工业园，一期总面积约 450,000 平方英尺。它的目标不只是一座工厂，而是把「工业制造空间」与「学院式校园文化」融合在一起，在绿色环境中培养企业的人文文化——所以人们叫它 Campus（校园），而不是 Factory（工厂）。看看四周——这半层就是员工食堂：白色长桌、自助餐台和花盆绿植，工程师们在这里像大学生一样用餐交流。',
+      en:'You are now inside the production-office building. ViTrox Campus 2.0 sits in Batu Kawan Industrial Park, Penang, Malaysia, with Phase 1 covering about 450,000 sq ft. The goal is not just a factory, but a place that blends industrial manufacturing space with an institutional campus culture, nurturing the company\'s humanistic culture in a green environment — which is why people call it a Campus, not a Factory. Look around — this half of the ground floor is the staff canteen: long white tables, a buffet counter and potted plants, where engineers eat and mingle like students in a university cafeteria.',
+      ms:'Anda kini berada di dalam bangunan pejabat-kilang. ViTrox Campus 2.0 terletak di Taman Perindustrian Batu Kawan, Pulau Pinang, Malaysia, dengan Fasa 1 seluas kira-kira 450,000 kaki persegi. Matlamatnya bukan sekadar sebuah kilang, tetapi tempat yang menggabungkan ruang pembuatan industri dengan budaya kampus institusi, memupuk budaya kemanusiaan syarikat dalam persekitaran hijau — sebab itulah ia dipanggil Kampus, bukan Kilang. Lihat sekeliling — separuh tingkat bawah ini ialah kantin pekerja: meja panjang putih, kaunter bufet dan pasu tanaman, tempat para jurutera makan dan berbual seperti pelajar di kafeteria universiti.' } },
 ];
 
 /* ================================================================
