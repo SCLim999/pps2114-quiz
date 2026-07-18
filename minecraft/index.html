@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ViTrox Campus 2.0 — 方块教育世界 (VitroxCraft)</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -134,6 +134,41 @@
   }
   .lang-btn.active { background:#2b6fb3; color:#fff; border-color:#7fc3ff; }
   .lang-btn:hover { border-color:#7fc3ff; }
+
+  /* ---------- 触屏操作 UI ---------- */
+  #touch-ui { position:fixed; inset:0; z-index:6; pointer-events:none; }
+  #vjoy {
+    position:absolute; left:18px; bottom:96px; width:122px; height:122px; border-radius:50%;
+    background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.35);
+    pointer-events:auto; touch-action:none;
+  }
+  #vjoy-knob {
+    position:absolute; left:36px; top:36px; width:50px; height:50px; border-radius:50%;
+    background:rgba(255,255,255,.55);
+  }
+  #tbtns {
+    position:absolute; right:14px; bottom:92px; display:grid;
+    grid-template-columns:58px 58px; gap:10px; pointer-events:auto;
+  }
+  .tbtn {
+    width:58px; height:58px; border-radius:50%; border:2px solid rgba(255,255,255,.4);
+    background:rgba(0,0,0,.38); color:#fff; font-size:24px; touch-action:none;
+    display:flex; align-items:center; justify-content:center; user-select:none;
+  }
+  .tbtn:active { background:rgba(255,255,255,.3); }
+  #tb-menu {
+    position:absolute; right:12px; top:10px; pointer-events:auto; width:46px; height:38px;
+    border-radius:8px; border:1px solid rgba(255,255,255,.4);
+    background:rgba(0,0,0,.45); color:#fff; font-size:18px;
+  }
+  @media (max-width:760px){
+    .slot { width:38px; height:38px; }
+    .slot .lbl { display:none; }
+    #hotbar { gap:3px; padding:4px; bottom:8px; }
+    #chip { font-size:11px; padding:4px 10px; max-width:92vw; white-space:nowrap; overflow:hidden; }
+    #pos { font-size:10px; }
+    .panel { padding:18px 16px; }
+  }
   .hidden { display:none !important; }
 
   #modal .panel { border-color:#c9a227; }
@@ -152,6 +187,20 @@
 <div id="toast"></div>
 <div id="quests"><h3 id="quests-title"></h3><ul id="quest-list"></ul></div>
 <div id="hotbar"></div>
+
+<!-- 触屏操作层（仅触屏设备显示） -->
+<div id="touch-ui" class="hidden">
+  <div id="vjoy"><div id="vjoy-knob"></div></div>
+  <div id="tbtns">
+    <button class="tbtn" id="tb-fly">✈</button>
+    <button class="tbtn" id="tb-jump">⬆</button>
+    <button class="tbtn" id="tb-mine">⛏</button>
+    <button class="tbtn" id="tb-down">⬇</button>
+    <button class="tbtn" id="tb-place">🧱</button>
+    <button class="tbtn" id="tb-act">💬</button>
+  </div>
+  <button id="tb-menu">☰</button>
+</div>
 
 <!-- 开始 / 暂停 界面 -->
 <div class="overlay" id="overlay">
@@ -262,7 +311,7 @@ zh: {
   joinToastHost:'🎮 {name} 加入了房间（在线 {c} 人）',
   joinToast:'🎮 {name} 加入了房间', leaveToast:'👋 {name} 离开了房间',
   joinedWorld:'已加入 {name} 的园区',
-  mobileToast:'本体验需要键盘和鼠标，建议使用电脑打开',
+  mobileToast:'📱 触屏模式：左摇杆移动 · 右侧滑动转视角 · ⛏挖 🧱放 💬对话',
   blocks:{1:'草方块',2:'泥土',3:'石头',4:'白色混凝土',5:'玻璃幕墙',6:'木板',7:'原木',8:'树叶',9:'水',10:'铺地砖',11:'ViTrox 蓝',12:'信息方块',13:'步道',14:'灰色混凝土',15:'太阳能板',16:'钢梁',17:'沥青',18:'球场绿',19:'球场红',20:'红色',21:'黑色',22:'黄色'},
 },
 en: {
@@ -305,7 +354,7 @@ en: {
   joinToastHost:'🎮 {name} joined the room ({c} online)',
   joinToast:'🎮 {name} joined the room', leaveToast:'👋 {name} left the room',
   joinedWorld:"Joined {name}'s campus",
-  mobileToast:'This experience needs a keyboard and mouse — please open it on a computer',
+  mobileToast:'📱 Touch mode: left stick to move · swipe right side to look · ⛏ mine 🧱 place 💬 talk',
   blocks:{1:'Grass',2:'Dirt',3:'Stone',4:'White Concrete',5:'Glass',6:'Planks',7:'Log',8:'Leaves',9:'Water',10:'Tile',11:'ViTrox Blue',12:'Info Block',13:'Path',14:'Grey Concrete',15:'Solar Panel',16:'Steel',17:'Asphalt',18:'Court Green',19:'Court Red',20:'Red',21:'Black',22:'Yellow'},
 },
 ms: {
@@ -348,7 +397,7 @@ ms: {
   joinToastHost:'🎮 {name} menyertai bilik ({c} dalam talian)',
   joinToast:'🎮 {name} menyertai bilik', leaveToast:'👋 {name} meninggalkan bilik',
   joinedWorld:'Menyertai kampus {name}',
-  mobileToast:'Pengalaman ini memerlukan papan kekunci dan tetikus — sila buka di komputer',
+  mobileToast:'📱 Mod sentuh: kayu bedik kiri untuk gerak · leret kanan untuk pandang · ⛏ gali 🧱 letak 💬 sembang',
   blocks:{1:'Rumput',2:'Tanah',3:'Batu',4:'Konkrit Putih',5:'Kaca',6:'Papan',7:'Balak',8:'Daun',9:'Air',10:'Jubin',11:'Biru ViTrox',12:'Blok Maklumat',13:'Laluan',14:'Konkrit Kelabu',15:'Panel Solar',16:'Keluli',17:'Asfalt',18:'Gelanggang Hijau',19:'Gelanggang Merah',20:'Merah',21:'Hitam',22:'Kuning'},
 },
 };
@@ -1252,6 +1301,10 @@ const player = {
 };
 const keys = new Set();
 let locked=false, modalOpen=false;
+const IS_TOUCH = ('ontouchstart' in window);
+let touchPlay=false;
+const touchVec={x:0,y:0};
+function playing(){ return locked || touchPlay; }
 
 function respawn(){
   player.pos.set(0.5, 5, 50.5); player.vel.set(0,0,0);
@@ -1276,6 +1329,10 @@ function physics(dt){
   if(keys.has('KeyS')){ fx-=fwd[0]; fz-=fwd[1]; }
   if(keys.has('KeyD')){ fx+=rgt[0]; fz+=rgt[1]; }
   if(keys.has('KeyA')){ fx-=rgt[0]; fz-=rgt[1]; }
+  if(touchPlay && (touchVec.x||touchVec.y)){       // 虚拟摇杆
+    fx += fwd[0]*(-touchVec.y) + rgt[0]*touchVec.x;
+    fz += fwd[1]*(-touchVec.y) + rgt[1]*touchVec.x;
+  }
   const len=Math.hypot(fx,fz)||1;
   player.vel.x = fx/len*sp; player.vel.z = fz/len*sp;
 
@@ -1419,7 +1476,7 @@ function openInfo(i){
 function closeInfo(){
   modalEl.classList.add('hidden');
   modalOpen=false;
-  if(!locked) overlayEl.classList.remove('hidden');
+  if(!locked && !touchPlay) overlayEl.classList.remove('hidden');
 }
 document.getElementById('btn-close').addEventListener('click',closeInfo);
 
@@ -1773,7 +1830,13 @@ document.getElementById('btn-join').addEventListener('click', ()=>{
 ================================================================ */
 const overlayEl=document.getElementById('overlay');
 document.getElementById('btn-start').addEventListener('click',()=>{
-  canvas.requestPointerLock();
+  if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
+    touchPlay = true;
+    overlayEl.classList.add('hidden');
+    document.getElementById('touch-ui').classList.remove('hidden');
+  }else{
+    canvas.requestPointerLock();
+  }
 });
 document.getElementById('btn-reset').addEventListener('click',()=>{
   if(net.mode==='guest'){ toast(t('hostOnlyReset')); return; }
@@ -1788,7 +1851,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
 document.addEventListener('pointerlockchange',()=>{
   locked = (document.pointerLockElement===canvas);
   if(locked) overlayEl.classList.add('hidden');
-  else if(!modalOpen) overlayEl.classList.remove('hidden');
+  else if(!modalOpen && !touchPlay) overlayEl.classList.remove('hidden');
 });
 document.addEventListener('mousemove',e=>{
   if(!locked||modalOpen) return;
@@ -1799,8 +1862,8 @@ document.addEventListener('mousemove',e=>{
 document.addEventListener('keydown',e=>{
   if(e.code==='KeyE'){
     if(modalOpen){ closeInfo(); return; }
-    if(locked && nearInfo>=0){ openInfo(nearInfo); return; }
-    if(locked && nearNpc>=0){ openNpc(nearNpc); return; }
+    if(playing() && nearInfo>=0){ openInfo(nearInfo); return; }
+    if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){ closeInfo(); return; }
   if(!locked) return;
@@ -1828,37 +1891,44 @@ addEventListener('wheel',e=>{
 });
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 
-canvas.addEventListener('mousedown',e=>{
-  if(!locked||modalOpen) return;
+function doBreak(){
+  if(modalOpen) return;
   const hit = raycast(7);
   if(!hit) return;
-  if(e.button===0){
-    // 点击信息方块 → 打开说明
-    const infoIdx = INFO_POINTS.findIndex(p=>p.x===hit.x&&p.y===hit.y&&p.z===hit.z);
-    if(infoIdx>=0){ openInfo(infoIdx); return; }
-    if(hit.block===B.INFO){ toast(t('infoNoBreak')); return; }
-    set(hit.x,hit.y,hit.z,B.AIR);
-    recordEdit(hit.x,hit.y,hit.z,B.AIR);
-    markDirty(hit.x,hit.z); flushDirty();
-    netSendSet(hit.x,hit.y,hit.z,B.AIR);
-    blip(140,0.08);
-  }else if(e.button===2){
-    const tx=hit.x+hit.face[0], ty=hit.y+hit.face[1], tz=hit.z+hit.face[2];
-    if(!inBounds(tx,ty,tz)) return;
-    const cur=get(tx,ty,tz);
-    if(cur!==B.AIR && cur!==B.WATER) return;
-    // 不允许把方块放进自己身体里
-    const p=player.pos;
-    const overlap = tx+1>p.x-player.W && tx<p.x+player.W &&
-                    tz+1>p.z-player.W && tz<p.z+player.W &&
-                    ty+1>p.y && ty<p.y+player.H;
-    if(overlap) return;
-    set(tx,ty,tz,HOT[hotSel]);
-    recordEdit(tx,ty,tz,HOT[hotSel]);
-    markDirty(tx,tz); flushDirty();
-    netSendSet(tx,ty,tz,HOT[hotSel]);
-    blip(300,0.07);
-  }
+  // 点击信息方块 → 打开说明
+  const infoIdx = INFO_POINTS.findIndex(p=>p.x===hit.x&&p.y===hit.y&&p.z===hit.z);
+  if(infoIdx>=0){ openInfo(infoIdx); return; }
+  if(hit.block===B.INFO){ toast(t('infoNoBreak')); return; }
+  set(hit.x,hit.y,hit.z,B.AIR);
+  recordEdit(hit.x,hit.y,hit.z,B.AIR);
+  markDirty(hit.x,hit.z); flushDirty();
+  netSendSet(hit.x,hit.y,hit.z,B.AIR);
+  blip(140,0.08);
+}
+function doPlace(){
+  if(modalOpen) return;
+  const hit = raycast(7);
+  if(!hit) return;
+  const tx=hit.x+hit.face[0], ty=hit.y+hit.face[1], tz=hit.z+hit.face[2];
+  if(!inBounds(tx,ty,tz)) return;
+  const cur=get(tx,ty,tz);
+  if(cur!==B.AIR && cur!==B.WATER) return;
+  // 不允许把方块放进自己身体里
+  const p=player.pos;
+  const overlap = tx+1>p.x-player.W && tx<p.x+player.W &&
+                  tz+1>p.z-player.W && tz<p.z+player.W &&
+                  ty+1>p.y && ty<p.y+player.H;
+  if(overlap) return;
+  set(tx,ty,tz,HOT[hotSel]);
+  recordEdit(tx,ty,tz,HOT[hotSel]);
+  markDirty(tx,tz); flushDirty();
+  netSendSet(tx,ty,tz,HOT[hotSel]);
+  blip(300,0.07);
+}
+canvas.addEventListener('mousedown',e=>{
+  if(!locked||modalOpen) return;
+  if(e.button===0) doBreak();
+  else if(e.button===2) doPlace();
 });
 
 addEventListener('resize',()=>{
@@ -1914,7 +1984,7 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
   elapsed+=dt;
-  if(locked && !modalOpen) physics(dt);
+  if(playing() && !modalOpen) physics(dt);
   checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
@@ -1932,8 +2002,91 @@ function animate(){
 }
 animate();
 
-if('ontouchstart' in window && !matchMedia('(pointer:fine)').matches){
-  toast(t('mobileToast'));
+/* ================================================================
+   触屏操作（手机 / 平板）
+================================================================ */
+if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
+  setTimeout(()=>toast(t('mobileToast')), 800);
+}
+{
+  const joy=document.getElementById('vjoy'), knob=document.getElementById('vjoy-knob');
+  let joyId=null;
+  function joyUpdate(tc){
+    const r=joy.getBoundingClientRect();
+    let dx=(tc.clientX-(r.left+r.width/2))/(r.width/2);
+    let dy=(tc.clientY-(r.top+r.height/2))/(r.height/2);
+    const m=Math.hypot(dx,dy); if(m>1){ dx/=m; dy/=m; }
+    touchVec.x=dx; touchVec.y=dy;
+    knob.style.transform=`translate(${dx*34}px,${dy*34}px)`;
+  }
+  joy.addEventListener('touchstart',e=>{
+    e.preventDefault(); const tc=e.changedTouches[0]; joyId=tc.identifier; joyUpdate(tc);
+  },{passive:false});
+  joy.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    for(const tc of e.changedTouches) if(tc.identifier===joyId) joyUpdate(tc);
+  },{passive:false});
+  const joyEnd=e=>{
+    for(const tc of e.changedTouches) if(tc.identifier===joyId){
+      joyId=null; touchVec.x=0; touchVec.y=0; knob.style.transform='translate(0,0)';
+    }
+  };
+  joy.addEventListener('touchend',joyEnd); joy.addEventListener('touchcancel',joyEnd);
+
+  // 右侧滑动转视角（避开摇杆与按钮）
+  let lookId=null, lastTX=0, lastTY=0;
+  document.addEventListener('touchstart',e=>{
+    if(!touchPlay||modalOpen) return;
+    for(const tc of e.changedTouches){
+      const el=tc.target;
+      if(el && el.closest && el.closest('#vjoy,#tbtns,#tb-menu,#hotbar,.overlay,#quests,.panel')) continue;
+      if(lookId===null){ lookId=tc.identifier; lastTX=tc.clientX; lastTY=tc.clientY; }
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!touchPlay) return;
+    let handled=false;
+    for(const tc of e.changedTouches){
+      if(tc.identifier===lookId){
+        player.yaw   -= (tc.clientX-lastTX)*0.006;
+        player.pitch -= (tc.clientY-lastTY)*0.006;
+        player.pitch = clamp(player.pitch,-Math.PI/2+0.01,Math.PI/2-0.01);
+        lastTX=tc.clientX; lastTY=tc.clientY;
+        handled=true;
+      }
+    }
+    if(handled) e.preventDefault();
+  },{passive:false});
+  const lookEnd=e=>{ for(const tc of e.changedTouches) if(tc.identifier===lookId) lookId=null; };
+  document.addEventListener('touchend',lookEnd); document.addEventListener('touchcancel',lookEnd);
+
+  // 按钮
+  const bind=(id,down,up)=>{
+    const el=document.getElementById(id);
+    el.addEventListener('touchstart',e=>{ e.preventDefault(); down(); },{passive:false});
+    if(up){
+      el.addEventListener('touchend',e=>{ e.preventDefault(); up(); },{passive:false});
+      el.addEventListener('touchcancel',()=>up());
+    }
+  };
+  bind('tb-jump', ()=>keys.add('Space'), ()=>keys.delete('Space'));
+  bind('tb-down', ()=>keys.add('ShiftLeft'), ()=>keys.delete('ShiftLeft'));
+  bind('tb-fly',  ()=>{ player.fly=!player.fly; player.vel.y=0;
+                        toast(player.fly ? t('flyOn') : t('flyOff')); });
+  let mineTimer=null;
+  bind('tb-mine', ()=>{ doBreak(); mineTimer=setInterval(doBreak,300); },
+                  ()=>clearInterval(mineTimer));
+  bind('tb-place',()=>doPlace());
+  bind('tb-act',  ()=>{
+    if(modalOpen) closeInfo();
+    else if(nearInfo>=0) openInfo(nearInfo);
+    else if(nearNpc>=0) openNpc(nearNpc);
+  });
+  document.getElementById('tb-menu').addEventListener('click',()=>{
+    touchPlay=false;
+    document.getElementById('touch-ui').classList.add('hidden');
+    overlayEl.classList.remove('hidden');
+  });
 }
 
 // 调试/自动化测试钩子
