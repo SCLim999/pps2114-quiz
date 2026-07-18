@@ -241,7 +241,7 @@ zh: {
   chipMain:'🏗 探索进度 <b>{n}</b>/<b>{total}</b> — 按 <b>Q</b> 查看任务',
   online:' · 🌐 {c} 人在线（{code}）',
   questsTitle:'📋 建筑探索任务',
-  promptLearn:' — 了解这里的设计', promptRead:'（已读）',
+  promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
   btnClose:'继续探索（E）',
   flyOn:'✈ 飞行模式：开（空格上升 / Shift 下降）', flyOff:'🚶 飞行模式：关',
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
@@ -284,7 +284,7 @@ en: {
   chipMain:'🏗 Explored <b>{n}</b>/<b>{total}</b> — press <b>Q</b> for quests',
   online:' · 🌐 {c} online ({code})',
   questsTitle:'📋 Architecture Quests',
-  promptLearn:' — learn about this design', promptRead:' (read)',
+  promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
   btnClose:'Continue exploring (E)',
   flyOn:'✈ Fly mode ON (Space up / Shift down)', flyOff:'🚶 Fly mode OFF',
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
@@ -327,7 +327,7 @@ ms: {
   chipMain:'🏗 Diteroka <b>{n}</b>/<b>{total}</b> — tekan <b>Q</b> utk tugasan',
   online:' · 🌐 {c} dlm talian ({code})',
   questsTitle:'📋 Tugasan Seni Bina',
-  promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)',
+  promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
   btnClose:'Terus meneroka (E)',
   flyOn:'✈ Mod terbang: HIDUP (Space naik / Shift turun)', flyOff:'🚶 Mod terbang: MATI',
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
@@ -1426,17 +1426,28 @@ document.getElementById('btn-close').addEventListener('click',closeInfo);
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
 const promptText=document.getElementById('prompt-text');
-let nearInfo=-1;
+let nearInfo=-1, nearNpc=-1;
 function checkInfoProximity(){
-  nearInfo=-1;
+  nearInfo=-1; nearNpc=-1;
   let best=3.8;
   INFO_POINTS.forEach((p,i)=>{
     const d=Math.hypot(p.x+0.5-player.pos.x, p.y-player.pos.y, p.z+0.5-player.pos.z);
     if(d<best){ best=d; nearInfo=i; }
   });
-  if(nearInfo>=0 && !modalOpen){
+  if(nearInfo<0){
+    let bestN=4.0;
+    NPCS.forEach((n,i)=>{
+      const d=Math.hypot(n.x-player.pos.x, n.y-player.pos.y, n.z-player.pos.z);
+      if(d<bestN){ bestN=d; nearNpc=i; }
+    });
+  }
+  if(modalOpen){ promptEl.style.display='none'; return; }
+  if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
       (visited.has(nearInfo) ? t('promptRead') : t('promptLearn'));
+    promptEl.style.display='block';
+  }else if(nearNpc>=0){
+    promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + t('promptTalk');
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -1627,7 +1638,7 @@ function colorFromName(n){
   let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0;
   return new THREE.Color().setHSL((h%360)/360, 0.62, 0.5);
 }
-function createAvatar(name){
+function createAvatar(name, colorHex){
   const group = new THREE.Group();
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),
     new THREE.MeshBasicMaterial({color:0xf0c8a0}));
@@ -1637,7 +1648,7 @@ function createAvatar(name){
   face.position.set(0,0.05,-0.26);
   head.add(face);
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.72,0.3),
-    new THREE.MeshBasicMaterial({color:colorFromName(name)}));
+    new THREE.MeshBasicMaterial({color: colorHex!==undefined ? new THREE.Color(colorHex) : colorFromName(name)}));
   body.position.y = 0.95;
   const legs = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.26),
     new THREE.MeshBasicMaterial({color:0x3a4a6a}));
@@ -1669,6 +1680,87 @@ function animateRemotes(dt){
     r.group.rotation.y += dy*k;
     r.head.rotation.x = -(r.target.pitch||0)*0.8;
   }
+}
+
+/* ================================================================
+   NPC 人物（参照 Minecraft Education 的 Characters：可交谈的园区角色）
+================================================================ */
+const NPCS = [
+  { name:'Ahmad', color:0x2c4a86, x:3.5, y:4, z:55.5, baseYaw:Math.PI,
+    role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
+    dialog:{
+      zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 7 个金色信息方块，按 E 就能学到建筑知识！',
+      en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 7 golden info blocks around the campus and press E to learn!',
+      ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 7 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
+  { name:'Siti', color:0x1b9aaa, x:0.5, y:4, z:22.5, baseYaw:Math.PI,
+    role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
+    dialog:{
+      zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯，可以一路走上屋顶花园。',
+      en:'Welcome! This is the famous doorless entrance — the architects deliberately left out the gate so the courtyard opens to everyone. Ahead is the big round lawn, and the dark tower on the west has stairs all the way up to the roof garden.',
+      ms:'Selamat datang! Inilah pintu masuk tanpa pintu yang terkenal — arkitek sengaja tidak memasang pintu supaya laman terbuka kepada semua. Di hadapan ialah padang bulat yang besar, dan menara gelap di sebelah barat ada tangga terus ke taman bumbung.' } },
+  { name:'Mei Ling', color:0xd4643c, x:1.5, y:4, z:10.5,
+    role:{ zh:'视觉检测工程师', en:'Vision Engineer', ms:'Jurutera Penglihatan' },
+    dialog:{
+      zh:'我是这里的视觉检测工程师。最喜欢午休时来庭院走走——不管从哪栋楼出来，放射状的走道都会把你带到这片草坪。待会儿我要去主楼的食堂吃饭，你也来吗？',
+      en:'I am a machine-vision engineer here. I love walking in the courtyard at lunch — whichever building you leave, the radial walkways bring you to this lawn. I am heading to the canteen in the main building later, want to come along?',
+      ms:'Saya jurutera penglihatan mesin di sini. Saya suka berjalan di laman pada waktu rehat — dari bangunan mana pun anda keluar, laluan jejari akan membawa anda ke padang ini. Nanti saya ke kantin di bangunan utama, nak ikut?' } },
+  { name:'Kumar', color:0x3e7d3a, x:13.5, y:12, z:-12.5,
+    role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
+    dialog:{
+      zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是走坡道上来的，还是爬了那座深灰色的楼梯塔？',
+      en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you come up the landscape ramp, or climb the dark stair tower?',
+      ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik ikut tanjakan landskap atau panjat menara tangga gelap itu?' } },
+  { name:'Chef Tan', color:0xf0f0f0, x:36.5, y:4, z:-13.5,
+    role:{ zh:'食堂厨师', en:'Canteen Chef', ms:'Cef Kantin' },
+    dialog:{
+      zh:'今天有椰浆饭和炒粿条！在 ViTrox，工程师们像大学生一样在食堂一起吃饭聊天。吃完记得把餐盘拿到外面的洗碗棚哦——就在南边檐下。',
+      en:'Today we have nasi lemak and char kway teow! At ViTrox, engineers eat and chat together in the canteen like university students. After your meal, please bring the tray to the washing shed outside — just under the canopy on the south side.',
+      ms:'Hari ini ada nasi lemak dan char kuey teow! Di ViTrox, para jurutera makan dan berbual bersama di kantin macam pelajar universiti. Selepas makan, tolong bawa dulang ke bangsal basuh di luar — di bawah kanopi sebelah selatan.' } },
+  { name:'Aina', color:0xc94f7c, x:-45.5, y:4, z:20.5,
+    role:{ zh:'ViTrox 学院学生', en:'ViTrox College Student', ms:'Pelajar Kolej ViTrox' },
+    dialog:{
+      zh:'嗨！我是 ViTrox 学院的学生，下课就来球场投几个球。听说这个园区把工厂和校园混在一起——所以我们在工业园里也有篮球场！要不要来一场三对三？',
+      en:'Hi! I am a ViTrox College student — I shoot some hoops here after class. They say this campus mixes factory with school, so we even get a basketball court inside an industrial park! Up for a three-on-three?',
+      ms:'Hai! Saya pelajar Kolej ViTrox — selepas kelas saya main bola keranjang di sini. Kata orang, kampus ini campurkan kilang dengan sekolah, jadi ada gelanggang bola keranjang dalam taman perindustrian! Nak main tiga lawan tiga?' } },
+  { name:'Encik Lim', color:0x777788, x:21.5, y:4, z:45.5,
+    role:{ zh:'职员', en:'Staff', ms:'Kakitangan' },
+    dialog:{
+      zh:'早上好！我刚停好车。你看每辆车都停在白线里——整齐的停车场也是园区规划的一部分。对了，西边还有一个大得多的停车场，几百个车位呢！',
+      en:'Good morning! I just parked my car. See how every car sits inside the white lines — a tidy car park is part of the campus planning too. By the way, there is a much bigger car park on the west side, hundreds of lots!',
+      ms:'Selamat pagi! Saya baru letak kereta. Tengok, setiap kereta parkir dalam garisan putih — tempat letak kereta yang kemas juga sebahagian perancangan kampus. Oh ya, ada tempat letak kereta jauh lebih besar di sebelah barat, beratus-ratus petak!' } },
+  { name:'Ar. Chan', color:0x222222, x:117.5, y:4, z:-12.5,
+    role:{ zh:'建筑师', en:'Architect', ms:'Arkitek' },
+    dialog:{
+      zh:'我是设计团队的建筑师。Campus 3.0 延续了 2.0 的语言：白色板楼、细长的竖窗、铺满光伏板的屋顶。这方鱼池不只是好看——水面能给庭院降温，鱼和睡莲让工程师们放松眼睛和心情。',
+      en:'I am an architect from the design team. Campus 3.0 continues the language of 2.0: white slabs, slender vertical windows, rooftops full of solar panels. This pond is not just pretty — the water cools the court, and the fish and lilies help engineers rest their eyes and minds.',
+      ms:'Saya arkitek daripada pasukan reka bentuk. Campus 3.0 meneruskan bahasa 2.0: blok putih, tingkap menegak yang ramping, bumbung penuh panel solar. Kolam ini bukan sekadar cantik — airnya menyejukkan laman, dan ikan serta teratai membantu jurutera merehatkan mata dan minda.' } },
+];
+const npcObjs = [];
+for(const n of NPCS){
+  const av = createAvatar(n.name, n.color);
+  av.group.position.set(n.x, n.y, n.z);
+  av.group.rotation.y = n.baseYaw||0;
+  scene.add(av.group);
+  npcObjs.push({ group:av.group, head:av.head, def:n });
+}
+function animateNpcs(dt){
+  npcObjs.forEach((o,i)=>{
+    const dx = player.pos.x - o.def.x, dz = player.pos.z - o.def.z;
+    const d = Math.hypot(dx,dz);
+    const ty = d<7 ? Math.atan2(-dx,-dz)
+                   : (o.def.baseYaw||0) + Math.sin(elapsed*0.6+i*2)*0.5;
+    const dy = ((ty - o.group.rotation.y + Math.PI*3)%(Math.PI*2)) - Math.PI;
+    o.group.rotation.y += dy*Math.min(1,dt*5);
+  });
+}
+function openNpc(i){
+  const n = NPCS[i];
+  document.getElementById('modal-title').textContent = '💬 ' + n.name;
+  document.getElementById('modal-en').textContent = n.role[lang];
+  document.getElementById('modal-text').textContent = n.dialog[lang];
+  modalEl.classList.remove('hidden');
+  modalOpen = true;
+  blip(520,0.1);
 }
 
 document.getElementById('btn-host').addEventListener('click', hostRoom);
@@ -1708,6 +1800,7 @@ document.addEventListener('keydown',e=>{
   if(e.code==='KeyE'){
     if(modalOpen){ closeInfo(); return; }
     if(locked && nearInfo>=0){ openInfo(nearInfo); return; }
+    if(locked && nearNpc>=0){ openNpc(nearNpc); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){ closeInfo(); return; }
   if(!locked) return;
@@ -1824,6 +1917,7 @@ function animate(){
   if(locked && !modalOpen) physics(dt);
   checkInfoProximity();
   animateRemotes(dt);
+  animateNpcs(dt);
   for(const c of clouds){
     c.position.x += dt*1.4;
     if(c.position.x>165) c.position.x=-165;
