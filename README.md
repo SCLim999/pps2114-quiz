@@ -63,6 +63,20 @@ Open `js/questions.js`:
   course website — and give students the link. (Running C++ code requires internet
   access to reach the Wandbox API.)
 
+## Bonus: VitroxCraft — ViTrox Campus 2.0 in a web Minecraft (`minecraft/`)
+
+`minecraft/index.html` is a standalone, Minecraft-Education-style voxel world that
+recreates the [ViTrox Campus 2.0 by CYC Architect](https://www.cycarch.com/vitrox-campus-20)
+(Batu Kawan, Penang) — central circular courtyard, radial layout, circular landscape
+ramp, doorless entrance, green roof, and the rectangular production/office blocks
+punching through the circular form.
+
+- Open `minecraft/index.html` in a desktop browser (needs internet once, to load
+  Three.js from a CDN; everything else is generated procedurally — no assets).
+- Walk (WASD), fly (F), break/place blocks (mouse), and visit the **6 golden info
+  blocks** to read bilingual architecture lessons about the building's design.
+- Player edits are saved to `localStorage`; the start menu has a world-reset button.
+
 ## How feedback works
 
 - **Theory:** immediately after checking an answer, the option is marked right/wrong
