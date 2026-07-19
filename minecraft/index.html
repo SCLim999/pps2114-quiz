@@ -918,9 +918,31 @@ function generate(){
   }
   for(let z=24;z<=60;z++) for(let x=-2;x<=2;x++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
   for(let x=-26;x<=-20;x++) for(let z=-25;z<=-22;z++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
-  // 步道两侧行道树（东侧 z=40/50 让位给停车场路灯）
-  for(const z of [30,40,50,58]) placeTree(-6,z,rand);
-  for(const z of [30,58]) placeTree(6,z,rand);
+  // 步道两侧行道树（z=30 让位给正门环岛雨棚；东侧 z=40/50 让位给停车场路灯）
+  for(const z of [40,50,58]) placeTree(-6,z,rand);
+  for(const z of [58]) placeTree(6,z,rand);
+
+  /* ---- 6.1 正门迎宾环岛 + 透明玻璃雨棚（参照实景大门照片）---- */
+  {
+    const RCX=0.5, RCZ=33.5;
+    for(let x=-8;x<=9;x++) for(let z=25;z<=42;z++){
+      const rr=Math.hypot(x+0.5-RCX, z+0.5-RCZ);
+      if(rr<=3) set(x,3,z,B.GRASS);                                  // 中央绿岛
+      else if(rr<=6.5) set(x,3,z,B.ASPHALT);                         // 环形车道
+      else if(rr<=7.3 && get(x,3,z)===B.GRASS) set(x,3,z,B.WHITE);   // 白色路缘
+    }
+    set(0,4,33,B.LEAF); set(0,5,33,B.LEAF); set(1,4,33,B.LEAF); set(0,4,34,B.LEAF);  // 绿岛灌木
+    for(const [fx,fz] of [[-1,32],[2,32],[-1,35],[2,35]]) set(fx,4,fz,B.RED);        // 花丛点缀
+    // 出挑的透明玻璃雨棚（钢边框）
+    for(let x=-9;x<=10;x++) for(let z=25;z<=38;z++){
+      const edge = x===-9||x===10||z===25||z===38;
+      set(x,9,z, edge?B.STEEL:B.GLASS);
+    }
+    for(const [cx2,cz2] of [[-8,26],[9,26],[-8,37],[9,37]])          // 四根细钢柱
+      for(let y=4;y<=8;y++) set(cx2,y,cz2,B.STEEL);
+    for(let x=-7;x<=-4;x++) for(let y=4;y<=5;y++) set(x,y,27,B.LEAF); // ViTrox 绿墙
+    placeCar(4,30,0xe8e8e6,false);                                    // 门廊落客车
+  }
 
   /* ---- 6.5 篮球场（西侧，参照实景 SPORT COURT：围栏 + 灯柱）---- */
   {
@@ -1395,6 +1417,11 @@ function galleryLabel(text){
   sign.scale.set(2.6,0.65,1);
   sign.position.set(5.5,6.5,19.5);
   grp.add(sign);
+  // 正门环岛的 ViTrox 绿墙招牌
+  const vSign=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('ViTrox')}));
+  vSign.scale.set(1.8,0.45,1);
+  vSign.position.set(-5,6.2,27.5);
+  grp.add(vSign);
 }
 
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
