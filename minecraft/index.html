@@ -886,6 +886,25 @@ function generate(){
     }
   }
 
+  /* ---- 5.8 正门门厅：白色接待柜台 + 二楼连桥（玻璃栏板 + 垂吊绿植）---- */
+  {
+    for(let x=-1;x<=2;x++) set(x,4,20,B.WHITE);             // 接待柜台
+    for(const [px,pz] of [[-3,21]]){                        // 门厅盆栽
+      set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF);
+    }
+    for(let x=-7;x<=8;x++) for(let z=16;z<=25;z++){         // 连桥横跨入口门厅
+      const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
+      if(r<19||r>21.8) continue;
+      const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
+      if(Math.abs(angDiff(a,90))>13) continue;
+      set(x,7,z,B.WHITE);                                   // 桥面（与二楼楼板齐平）
+      if(r<19.7||r>21.1){
+        set(x,8,z,B.GLASS);                                 // 玻璃栏板
+        if(x%2===0) set(x,6,z,B.LEAF);                      // 垂吊绿植
+      }
+    }
+  }
+
   /* ---- 6. 入口广场与步道 ---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
@@ -1405,6 +1424,11 @@ function galleryLabel(text){
   vSign.scale.set(1.8,0.45,1);
   vSign.position.set(-5,6.2,27.5);
   grp.add(vSign);
+  // 二楼连桥上的欢迎横幅
+  const bridgeBanner=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('Welcome to ViTrox ★')}));
+  bridgeBanner.scale.set(3.6,0.9,1);
+  bridgeBanner.position.set(0.5,9.0,22.6);
+  grp.add(bridgeBanner);
   // 镇馆之宝：初代智能相机（放在金色信息方块展台上，罩玻璃罩）
   {
     const cam=new THREE.Group();
@@ -2102,7 +2126,7 @@ const NPCS = [
       zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 8 个金色信息方块，按 E 就能学到建筑知识！',
       en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 8 golden info blocks around the campus and press E to learn!',
       ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 8 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
-  { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', range:2, x:0.5, y:4, z:22.5, baseYaw:Math.PI,
+  { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', range:1.5, x:0.5, y:4, z:18.8, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
       zh:'欢迎！这里就是著名的「无门入口」——建筑师故意不装大门，让庭院向所有人敞开。往里走是圆形大草坪，西边深灰色的塔里有楼梯可以上屋顶花园。对了，您的右手边就是 ViTrox Gallery——沿着蓝色地毯走，可以看到奖杯、纪念品和公司历史，一直通到食堂。',
