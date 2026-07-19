@@ -730,7 +730,7 @@ function generate(){
         const k=(y-4)%4;
         set(x,y,z, (fin||k===0||k===3) ? B.WHITE : B.GLASS);
       }
-      if(Math.abs(angDiff(a,BRIDGE_A))>7) set(x,12,z,B.WHITE);     // 女儿墙（连桥处断开）
+      set(x,12,z,B.WHITE);                                          // 女儿墙
     }else if(inner){
       for(let y=4;y<11;y++){
         if(entrance) continue;
@@ -750,30 +750,7 @@ function generate(){
     for(let y=4;y<11;y++) set(px,y,pz,B.WHITE);
   }
 
-  /* ---- 4. 环形景观坡道（沿圆周盘旋而上，直达屋顶花园）---- */
-  const span=(RAMP_A1-RAMP_A0+360)%360;
-  for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
-    const cx=x+0.5, cz=z+0.5;
-    const r=Math.hypot(cx,cz);
-    if(r<24||r>27.5) continue;
-    const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    const rel=(a-RAMP_A0+360)%360;
-    if(rel>span) continue;
-    const h = 3 + Math.round((rel/span)*8);   // 升至两层楼屋面（y11）
-    for(let y=4;y<h;y++) set(x,y,z,B.DIRT);
-    if(h>=4) set(x,h,z, (r>=25&&r<=26.5)?B.PATH:B.GRASS);
-    else set(x,3,z,B.PATH);
-  }
-  // 坡道顶端 → 环形楼屋顶 连桥
-  for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
-    const cx=x+0.5, cz=z+0.5;
-    const r=Math.hypot(cx,cz);
-    if(r<22.4||r>25.6) continue;
-    const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    if(Math.abs(angDiff(a,BRIDGE_A))>4) continue;
-    set(x,11,z,B.TILE);
-    for(let y=12;y<=14;y++) set(x,y,z,B.AIR);
-  }
+  /* ---- 4. 环形楼四周保持平整草坪（原设计概念中的景观坡道不再建模）---- */
 
   /* ---- 4.5 屋顶环形光伏雨棚（参照实景：弧形太阳能板架空于屋顶花园上方）---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
@@ -789,7 +766,7 @@ function generate(){
   }
   for(let k=0;k<30;k++){                                  // 白色圆柱支撑
     const a=k*12+6;
-    if(Math.abs(angDiff(a,90))<16 || Math.abs(angDiff(a,BRIDGE_A))<6) continue;
+    if(Math.abs(angDiff(a,90))<16) continue;
     const h=15+(Math.floor(a/12)%2);
     for(const rr of [18.8,22.2]){
       const px=Math.floor(rr*cosd(a)), pz=Math.floor(rr*sind(a));
@@ -1151,9 +1128,9 @@ const INFO_POINTS = [
   { x:-10, y:4, z:24,
     title:{ zh:'③ 环形景观坡道', en:'③ The Circular Landscape Ramp', ms:'③ Tanjakan Landskap Membulat' },
     text:{
-      zh:'这条绿色的坡道沿着建筑的圆周缓缓盘旋而上。当环形坡道与笔直的矩形生产办公楼相交时，会产生一种明显的「旋转动感」，让静止的建筑仿佛在转动，也把人的视线和脚步引向屋顶。沿着步道一直往上走，你可以直接登上环形楼的屋顶花园！',
-      en:'This green ramp spirals gently upward along the circumference of the building. Where the circular ramp meets the straight rectangular production-office block, an apparent rotary motion is created — the still building seems to turn, drawing your eyes and your footsteps toward the roof. Follow the path all the way up and you will reach the roof garden of the ring building!',
-      ms:'Tanjakan hijau ini melingkar naik perlahan-lahan di sepanjang lilitan bangunan. Apabila tanjakan membulat bertemu blok pejabat-kilang segi empat yang lurus, terhasil kesan gerakan berputar — bangunan yang pegun seakan-akan berpusing, menarik pandangan dan langkah anda ke arah bumbung. Ikuti laluan ini sehingga ke atas dan anda akan tiba di taman bumbung bangunan cincin!' } },
+      zh:'在建筑师的设计概念里，有一条环形景观坡道沿着建筑的圆周缓缓盘旋而上——当弧形动线与笔直的矩形办公楼相交时，会产生明显的「旋转动感」，让静止的建筑仿佛在转动。想登上环形楼的屋顶花园看看？走庭院西侧深灰色楼梯塔里的楼梯就到了！',
+      en:"In the architects' concept, a circular landscape ramp spirals gently up along the building's circumference — where the curved route meets the straight rectangular office block, an apparent rotary motion is created, as if the still building were turning. Want to see the roof garden of the ring building? Take the stairs inside the dark tower on the west side of the courtyard!",
+      ms:'Dalam konsep arkitek, terdapat tanjakan landskap membulat yang melingkar naik di sepanjang lilitan bangunan — apabila laluan melengkung bertemu blok pejabat segi empat yang lurus, terhasil kesan gerakan berputar, seolah-olah bangunan yang pegun sedang berpusing. Mahu melihat taman bumbung bangunan cincin? Naiklah tangga di dalam menara gelap di sebelah barat laman!' } },
   { x:-19, y:12, z:-7,
     title:{ zh:'④ 绿色屋顶花园', en:'④ The Green Roof Garden', ms:'④ Taman Bumbung Hijau' },
     text:{
@@ -2107,9 +2084,9 @@ const NPCS = [
   { name:'Kumar', color:0x3e7d3a, expr:'happy', x:13.5, y:12, z:-12.5,
     role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
     dialog:{
-      zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是走坡道上来的，还是爬了那座深灰色的楼梯塔？',
-      en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you come up the landscape ramp, or climb the dark stair tower?',
-      ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik ikut tanjakan landskap atau panjat menara tangga gelap itu?' } },
+      zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是从庭院那座深灰色楼梯塔爬上来的吧？风景不错吧！',
+      en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you climb up through the dark stair tower from the courtyard? Quite a view, right?',
+      ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik melalui menara tangga gelap dari laman itu, kan? Cantik pemandangannya!' } },
   { name:'Chef Tan', color:0xf0f0f0, expr:'happy', range:1.5, x:36.5, y:4, z:-13.5,
     role:{ zh:'食堂厨师', en:'Canteen Chef', ms:'Cef Kantin' },
     dialog:{
