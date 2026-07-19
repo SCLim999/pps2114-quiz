@@ -275,7 +275,7 @@ zh: {
   docTitle:'ViTrox Campus 2.0 — 方块教育世界 (VitroxCraft)',
   h1:'方块教育世界',
   sub:'VitroxCraft — 网页版 Minecraft 教育体验 · 槟城峇都交湾 (Batu Kawan, Penang)',
-  desc:'本世界以 <b>CYC Architect 设计的 ViTrox Campus 2.0</b> 为蓝本：中央圆形露天庭院、放射状布局、环形景观坡道、与圆形体量相交的矩形生产办公楼，以及无门的开放式入口，东侧还有扩建的 Campus 3.0 与鱼池庭院。走进园区，找到 <b>8 个金色信息方块</b>，按 <kbd>E</kbd> 学习每一处的建筑设计理念！',
+  desc:'本世界以 <b>CYC Architect 设计的 ViTrox Campus 2.0</b> 为蓝本：中央圆形露天庭院、放射状布局、环形景观坡道、与圆形体量相交的矩形生产办公楼，以及无门的开放式入口，东侧还有扩建的 Campus 3.0 与鱼池庭院。走进园区，找到 <b>9 个金色信息方块</b>，按 <kbd>E</kbd> 学习每一处的建筑设计理念！',
   k1:'移动 / 跳跃', v1:'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>空格</kbd>',
   k2:'视角', v2:'移动鼠标（点击开始后锁定指针，<kbd>Esc</kbd> 退出）',
   k3:'破坏 / 放置方块', v3:'鼠标 <b>左键</b> / <b>右键</b>',
@@ -318,7 +318,7 @@ en: {
   docTitle:'ViTrox Campus 2.0 — Block Education World (VitroxCraft)',
   h1:'Block Education World',
   sub:'VitroxCraft — a web Minecraft education experience · Batu Kawan, Penang',
-  desc:'This world is modelled on <b>ViTrox Campus 2.0 by CYC Architect</b>: a central circular open courtyard, a radial layout, a circular landscape ramp, rectangular production/office blocks intersecting the circle, an open doorless entrance — plus the Campus 3.0 expansion with its fish-pond court to the east. Explore the campus, find the <b>8 golden info blocks</b> and press <kbd>E</kbd> to learn the design idea behind each spot!',
+  desc:'This world is modelled on <b>ViTrox Campus 2.0 by CYC Architect</b>: a central circular open courtyard, a radial layout, a circular landscape ramp, rectangular production/office blocks intersecting the circle, an open doorless entrance — plus the Campus 3.0 expansion with its fish-pond court to the east. Explore the campus, find the <b>9 golden info blocks</b> and press <kbd>E</kbd> to learn the design idea behind each spot!',
   k1:'Move / Jump', v1:'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>Space</kbd>',
   k2:'Look around', v2:'Move the mouse (pointer locks after you start; <kbd>Esc</kbd> to release)',
   k3:'Break / Place blocks', v3:'Mouse <b>left</b> / <b>right</b> button',
@@ -361,7 +361,7 @@ ms: {
   docTitle:'ViTrox Campus 2.0 — Dunia Pendidikan Blok (VitroxCraft)',
   h1:'Dunia Pendidikan Blok',
   sub:'VitroxCraft — pengalaman pendidikan Minecraft versi web · Batu Kawan, Pulau Pinang',
-  desc:'Dunia ini berdasarkan <b>ViTrox Campus 2.0 rekaan CYC Architect</b>: laman dalaman bulat di tengah, susun atur jejari, tanjakan landskap membulat, blok pejabat/kilang segi empat yang bersilang dengan bentuk bulat, pintu masuk terbuka tanpa pintu — serta pengembangan Campus 3.0 dengan laman kolam ikannya di timur. Jelajahi kampus, cari <b>8 blok maklumat emas</b> dan tekan <kbd>E</kbd> untuk mempelajari idea reka bentuk setiap lokasi!',
+  desc:'Dunia ini berdasarkan <b>ViTrox Campus 2.0 rekaan CYC Architect</b>: laman dalaman bulat di tengah, susun atur jejari, tanjakan landskap membulat, blok pejabat/kilang segi empat yang bersilang dengan bentuk bulat, pintu masuk terbuka tanpa pintu — serta pengembangan Campus 3.0 dengan laman kolam ikannya di timur. Jelajahi kampus, cari <b>9 blok maklumat emas</b> dan tekan <kbd>E</kbd> untuk mempelajari idea reka bentuk setiap lokasi!',
   k1:'Gerak / Lompat', v1:'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>Space</kbd>',
   k2:'Pandangan', v2:'Gerakkan tetikus (kursor dikunci selepas mula; <kbd>Esc</kbd> untuk keluar)',
   k3:'Pecah / Letak blok', v3:'Butang <b>kiri</b> / <b>kanan</b> tetikus',
@@ -585,7 +585,7 @@ function noisy(ox,oy,r,g,b,v,rand,alpha){
 /* ================================================================
    体素世界数据
 ================================================================ */
-const WORLD = { minX:-108, maxX:148, minZ:-64, maxZ:64, sizeY:40 };
+const WORLD = { minX:-108, maxX:215, minZ:-64, maxZ:64, sizeY:40 };
 const SX = WORLD.maxX-WORLD.minX+1, SZ = WORLD.maxZ-WORLD.minZ+1, SY = WORLD.sizeY;
 const vox = new Uint8Array(SX*SY*SZ);
 
@@ -1082,6 +1082,64 @@ function generate(){
       if((x-84)%7!==6) set(x,4,z,B.LEAF);
   }
 
+  /* ---- 6.75 ViTrox Education（Campus 3.0 隔壁的流线型白色飘带大楼）---- */
+  {
+    const X0=150, X1=204, ZMID=-7, STOREYS=5;   // 5 层：地面架空 + 4 层玻璃飘带
+    const L=X1-X0;
+    const cz  = u => ZMID + 6*Math.sin(u*2.6-1.0);
+    const half= u => 3 + 7*Math.pow(Math.sin(Math.PI*u), 0.6);
+    for(let x=X0;x<=X1;x++){
+      const u=(x-X0)/L, c=cz(u), h=half(u);
+      for(let k=1;k<STOREYS;k++){
+        const y0=4+k*4, y1=y0+3;
+        const hh = h + (k-1)*0.4;                 // 越往上悬挑越远
+        const zN=Math.round(c-hh), zS=Math.round(c+hh);
+        for(let z=zN;z<=zS;z++){
+          set(x,y0-1,z,B.WHITE);                   // 楼板/裙带
+          const edge = (z===zN||z===zS);
+          for(let y=y0;y<=y1;y++){
+            if(edge) set(x,y,z, (y===y0||y===y1)?B.WHITE:B.GLASS);  // 外壳：连续横向玻璃带
+            else set(x,y,z,B.AIR);                                  // 内部镂空
+          }
+          if(!edge && (x-X0)%6===0 && z===Math.round(c))
+            for(let y=y0;y<=y1;y++) set(x,y,z,B.WHITE);             // 稀疏内部结构柱
+        }
+      }
+      const yTop=4+STOREYS*4, hTop=h+(STOREYS-2)*0.4;
+      for(let z=Math.round(c-hTop);z<=Math.round(c+hTop);z++) set(x,yTop,z,B.WHITE);  // 屋面
+    }
+    // 地面层架空柱廊（仅立柱，其余开放，模拟 pilotis 悬浮效果）
+    for(let x=X0;x<=X1;x+=5){
+      const u=(x-X0)/L, c=cz(u), h=half(u);
+      for(const z of [Math.round(c-h+0.6), Math.round(c), Math.round(c+h-0.6)])
+        for(let y=4;y<=7;y++) set(x,y,z,B.WHITE);
+    }
+    // 入口大堂玻璃盒子（西端，朝向来路）
+    for(let x=X0+2;x<=X0+9;x++){
+      const u=(x-X0)/L, c=cz(u), h=half(u)*0.55;
+      for(let z=Math.round(c-h);z<=Math.round(c+h);z++)
+        for(let y=4;y<=7;y++) set(x,y,z, (y===7)?B.WHITE:B.GLASS);
+    }
+    // 出挑雨棚（西端朝向连接步道，钢框 + 立柱）
+    {
+      const u0=0.05, c0=cz(u0), h0=half(u0);
+      const zN0=Math.round(c0-h0)-1, zS0=Math.round(c0+h0)+1;
+      for(let x=X0-6;x<=X0-1;x++) for(let z=zN0;z<=zS0;z++)
+        set(x,7,z, (x===X0-6||z===zN0||z===zS0)?B.STEEL:B.WHITE);
+      for(const zc of [zN0+1,zS0-1]) for(let y=4;y<=6;y++) set(X0-3,y,zc,B.STEEL);
+    }
+    // 连接步道（从 Campus 3.0 东端接过来）
+    for(let x=142;x<=X0-1;x++) for(let z=-2;z<=2;z++) set(x,3,z,B.PATH);
+    // 建筑周边草坪广场铺装（避免草地凸出遮挡底层柱廊）
+    for(let x=X0-2;x<=X1+2;x++){
+      const u=clamp((x-X0)/L,0,1), c=cz(u), h=half(u);
+      for(let z=Math.round(c-h-2);z<=Math.round(c+h+2);z++)
+        if(get(x,3,z)===B.GRASS && Math.abs(z-c)<h*0.7) set(x,3,z,B.TILE);
+    }
+    // 门前绿化
+    for(const [tx,tz] of [[X0-8,-14],[X0-8,0],[X1+2,-10],[X1+2,4]]) placeTree(tx,tz,rand);
+  }
+
   /* ---- 6.8 西侧大型停车场（卫星图中的大片车位）---- */
   {
     const LX0=-104, LX1=-71, LZ0=-38, LZ1=38;
@@ -1112,6 +1170,7 @@ function generate(){
     if(x>16&&x<58&&z>-20&&z<20) continue;       // 主楼
     if(x>-40&&x<-6&&z>-54&&z<-22) continue;     // 实验楼
     if(x>78&&z>22&&z<46) continue;              // Campus 3.0 绿篱区
+    if(x>140&&z>-25&&z<15) continue;            // ViTrox Education 飘带大楼场地
     if(Math.abs(x)<7&&z>20) continue;           // 主入口步道
     if(get(x,3,z)!==B.GRASS) continue;
     placeTree(x,z,rand); planted++;
@@ -1180,6 +1239,12 @@ const INFO_POINTS = [
       zh:'展台上是 ViTrox Gallery 的镇馆之宝——公司创立初期打造的第一台机器视觉智能相机。2000 年，几位年轻工程师放弃跨国公司的安稳工作出来创业，起步时资源有限，靠的就是这台自己研发的智能相机：它能「看懂」电路板和芯片，自动找出人眼难以察觉的缺陷。正是这台相机为 ViTrox 赢得了第一批客户，也孕育出今天所有的 AOI、AXI 检测系统。伟大的事业，往往就从一台小小的相机开始。',
       en:"On this pedestal sits the crown jewel of the ViTrox Gallery — the first machine-vision smart camera built in the company's earliest days. In 2000, a few young engineers gave up secure jobs at a multinational to start their own venture with very limited resources; what they had was this self-developed smart camera that could 'understand' circuit boards and chips, automatically spotting defects the human eye would miss. That camera won ViTrox its first customers and seeded every AOI and AXI inspection system that followed. Great ventures often begin with one small camera.",
       ms:'Di atas pedestal ini terletak khazanah utama Galeri ViTrox — kamera pintar penglihatan mesin pertama yang dibina pada awal penubuhan syarikat. Pada tahun 2000, beberapa jurutera muda melepaskan kerjaya selesa di syarikat multinasional untuk memulakan usaha sendiri dengan sumber yang sangat terhad; senjata mereka ialah kamera pintar buatan sendiri ini, yang mampu "memahami" papan litar dan cip serta mengesan kecacatan yang sukar dilihat mata manusia. Kamera inilah yang memenangi pelanggan pertama ViTrox dan menjadi benih semua sistem pemeriksaan AOI dan AXI hari ini. Usaha yang besar sering bermula dengan sebuah kamera yang kecil.' } },
+  { x:145, y:4, z:0,
+    title:{ zh:'⑨ ViTrox Education · 品牌重塑', en:'⑨ ViTrox Education · Rebranding', ms:'⑨ ViTrox Education · Penjenamaan Semula' },
+    text:{
+      zh:'眼前这栋流线型的白色大楼就是 ViTrox Education——紧邻 Campus 3.0 新建的教育大楼。ViTrox 最近完成了品牌重塑：旗下的 ViTrox College、ViTrox TVET 和 ViTrox Corporate Academy 现在统一使用「ViTrox」的签名式样，代表公司对教育与人才培养的专注使命，也让教育品牌与母公司的科技声望连接得更紧密，一眼就能认出彼此是同一个家族。走进大楼底层架空的柱廊，感受一下这道弯曲的玻璃飘带立面吧！',
+      en:"The flowing white building ahead is ViTrox Education, newly built right beside Campus 3.0. ViTrox recently completed a rebrand: ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share a unified 'ViTrox' signature, representing the company's dedicated mission to education and talent development, and aligning the education brands more closely with the parent company's technology prestige — instantly recognisable as one family. Walk through the open ground-floor colonnade and take in the curving glass ribbon facade!",
+      ms:'Bangunan putih yang melengkung di hadapan ini ialah ViTrox Education, baru dibina bersebelahan Campus 3.0. ViTrox baru selesai menjenamakan semula: ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus syarikat terhadap pendidikan dan pembangunan bakat, sekali gus menyelaraskan jenama pendidikan dengan lebih rapat dengan prestij teknologi syarikat induk — dikenali serta-merta sebagai satu keluarga. Berjalanlah melalui laluan bertiang terbuka di tingkat bawah dan nikmati fasad reben kaca yang melengkung ini!' } },
 ];
 
 /* ================================================================
@@ -2123,9 +2188,9 @@ const NPCS = [
   { name:'Ahmad', color:0x2c4a86, expr:'neutral', x:3.5, y:4, z:55.5, baseYaw:Math.PI,
     role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
     dialog:{
-      zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 8 个金色信息方块，按 E 就能学到建筑知识！',
-      en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 8 golden info blocks around the campus and press E to learn!',
-      ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 8 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
+      zh:'欢迎来到 ViTrox Campus 2.0！沿着这条步道直走就是没有大门的入口——对，我们这里连大门都不需要。记得找找园区里 9 个金色信息方块，按 E 就能学到建筑知识！',
+      en:'Welcome to ViTrox Campus 2.0! Follow this path straight ahead and you will reach the entrance with no door — yes, we do not even need a gate here. Look for the 9 golden info blocks around the campus and press E to learn!',
+      ms:'Selamat datang ke ViTrox Campus 2.0! Ikut laluan ini terus dan anda akan sampai ke pintu masuk tanpa pintu — ya, kami tidak perlukan pagar pun. Cari 9 blok maklumat emas di sekitar kampus dan tekan E untuk belajar!' } },
   { name:'Siti', color:0x1b9aaa, expr:'smile', style:'hijab', range:1.5, x:0.5, y:4, z:18.8, baseYaw:Math.PI,
     role:{ zh:'前台接待', en:'Receptionist', ms:'Penyambut Tetamu' },
     dialog:{
@@ -2208,6 +2273,12 @@ const NPCS = [
       zh:'我是设计团队的建筑师。Campus 3.0 延续了 2.0 的语言：白色板楼、细长的竖窗、铺满光伏板的屋顶。这方鱼池不只是好看——水面能给庭院降温，鱼和睡莲让工程师们放松眼睛和心情。',
       en:'I am an architect from the design team. Campus 3.0 continues the language of 2.0: white slabs, slender vertical windows, rooftops full of solar panels. This pond is not just pretty — the water cools the court, and the fish and lilies help engineers rest their eyes and minds.',
       ms:'Saya arkitek daripada pasukan reka bentuk. Campus 3.0 meneruskan bahasa 2.0: blok putih, tingkap menegak yang ramping, bumbung penuh panel solar. Kolam ini bukan sekadar cantik — airnya menyejukkan laman, dan ikan serta teratai membantu jurutera merehatkan mata dan minda.' } },
+  { name:'Dr. Farah', color:0x1f3a5f, expr:'smile', style:'f', range:3, x:148, y:4, z:0, baseYaw:Math.PI/2,
+    role:{ zh:'讲师 · ViTrox Education', en:'Lecturer · ViTrox Education', ms:'Pensyarah · ViTrox Education' },
+    dialog:{
+      zh:'欢迎来到 ViTrox Education！我在这里教书。我们最近才完成品牌重塑——ViTrox College、ViTrox TVET 和 ViTrox Corporate Academy 现在都统一用「ViTrox」的签名式样，代表我们对教育与人才培养的专注使命，也让学生和企业一眼就能认出我们和母公司是同一个家族。欢迎进来看看这栋弯曲的玻璃飘带大楼！',
+      en:"Welcome to ViTrox Education! I teach here. We just completed a rebrand — ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share one unified 'ViTrox' signature, representing our dedicated mission to education and talent development, so students and partners instantly recognise us as part of the same family as our parent company. Come take a look at this curving glass-ribbon building!",
+      ms:'Selamat datang ke ViTrox Education! Saya mengajar di sini. Kami baru selesai menjenamakan semula — ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus kami terhadap pendidikan dan pembangunan bakat, supaya pelajar dan rakan kongsi terus mengenali kami sebagai sebahagian keluarga yang sama dengan syarikat induk. Jemput masuk melihat bangunan reben kaca yang melengkung ini!' } },
 ];
 const npcObjs = [];
 for(const n of NPCS){
