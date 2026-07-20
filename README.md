@@ -104,7 +104,10 @@ the staff canteen.
   dashboard. The two computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
-  (Artificial Intelligence).
+  (Artificial Intelligence). Next to Dr Lim SC's station are 3 more computers with
+  differently-coloured screens covering the real ViTrox College Diploma in Computer
+  Science programme: blue for the course introduction, orange for the programme
+  structure, and purple for entry requirements.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 

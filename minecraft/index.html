@@ -738,11 +738,11 @@ function placeTree(x,z,rand){
   set(x,top+1,z,B.LEAF);
 }
 
-function placeComputer(x,z,facing,floorY=4,cmId=null){
+function placeComputer(x,z,facing,floorY=4,kind=null){
   // 桌椅用体素方块（跟食堂家具同一风格）；电脑本体（显示器+主机）用实例化网格
   set(x,floorY,z,B.WHITE);                 // 白色书桌
   set(x,floorY,z+facing,B.PLANK);          // 椅子（在过道一侧）
-  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, cmId });
+  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, kind });
 }
 
 function buildBox(x0,x1,z0,z1,storeys,openings){
@@ -1027,6 +1027,8 @@ function generate(){
     // 两间电脑室第一排（z=-13 / z=3）共 10 台绿屏电脑，逐一对应 CodingMine 第一~十章
     for(const x of COLS){ placeComputer(x,-13, 1,16,'cm'); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
     for(const x of COLS){ placeComputer(x, 3,  1,16,'cm'); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
+    // Lim SC 博士站台旁的 3 台文凭信息机（蓝=课程介绍/橙=课程结构/紫=入学资格），x=44 让位给他本人
+    for(const [x,kind] of [[41,'intro'],[46,'structure'],[52,'admission']]) placeComputer(x,-8,1,16,kind);
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -1719,10 +1721,14 @@ const COMP_GEO = {
 const COMP_MAT = {
   bezel: new THREE.MeshBasicMaterial({color:0x25272b}),
   screen:new THREE.MeshBasicMaterial({color:0x8ecbe8}),
-  screenCM:new THREE.MeshBasicMaterial({color:0x2ee6a8}),  // CodingMine 工作站：绿色终端屏幕，一眼可辨
+  screenCM:new THREE.MeshBasicMaterial({color:0x2ee6a8}),        // CodingMine 工作站：绿色终端屏幕，一眼可辨
+  screenIntro:new THREE.MeshBasicMaterial({color:0x3d8bff}),     // 文凭「课程介绍」信息机：蓝屏
+  screenStructure:new THREE.MeshBasicMaterial({color:0xf5a623}), // 文凭「课程结构」信息机：橙屏
+  screenAdmission:new THREE.MeshBasicMaterial({color:0xb066ff}), // 文凭「入学资格」信息机：紫屏
   keyboard:new THREE.MeshBasicMaterial({color:0xd8dadd}),
   led:   new THREE.MeshBasicMaterial({color:0x2fa7ff}),
 };
+const COMP_SCREEN_BY_KIND = { cm:'screenCM', intro:'screenIntro', structure:'screenStructure', admission:'screenAdmission' };
 function buildCarMeshes(){
   carGroup.clear();
   const buckets = new Map();   // 按 几何体+材质 分桶 → InstancedMesh，全场仅 ~25 次绘制
@@ -1774,8 +1780,9 @@ function buildCarMeshes(){
     const rot = c.facing>=0 ? 0 : Math.PI;
     const ca=Math.cos(rot), sa=Math.sin(rot);
     const T=off=>[ c.x + off[0]*ca + off[2]*sa, c.y+off[1], c.z - off[0]*sa + off[2]*ca ];
-    const screenMat = c.cmId ? COMP_MAT.screenCM : COMP_MAT.screen;
-    const screenKey = c.cmId ? 'cScreenCM' : 'cScreen';
+    const screenMatKey = COMP_SCREEN_BY_KIND[c.kind];
+    const screenMat = screenMatKey ? COMP_MAT[screenMatKey] : COMP_MAT.screen;
+    const screenKey = screenMatKey ? 'cScreen_'+c.kind : 'cScreen';
     put('cBase',  COMP_GEO.base,     MACH_MAT.dark,      T([0,0.015,0]),    rot);
     put('cStand', COMP_GEO.stand,    MACH_MAT.dark,      T([0,0.11,0]),     rot);
     put('cBezel', COMP_GEO.bezel,    COMP_MAT.bezel,     T([0,0.37,0]),     rot);
@@ -1965,6 +1972,28 @@ function toast(msg){
 const CODINGMINE = {
   company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
 };
+/* Lim SC 博士站台旁的 3 台文凭信息机——蓝屏「课程介绍」/橙屏「课程结构」/紫屏「入学资格」，
+   都是 Diploma in Computer Science 的真实招生内容（college.vitrox.edu.my/diploma 第 4 页）*/
+const DIPLOMA_KIOSKS = [
+  { id:'dk1', x:41, z:-8, floorY:16, kind:'intro',
+    title:{ zh:'💻 课程介绍 · Diploma in Computer Science', en:'💻 Course Introduction · Diploma in Computer Science', ms:'💻 Pengenalan Kursus · Diploma in Computer Science' },
+    text:{
+      zh:'ViTrox College 的「Diploma in Computer Science」文凭课程是一个全面且贴近产业需求的课程，为学生打好计算机科学的基础知识与实践能力，涵盖离散数学、操作系统、系统分析与设计、编程语言（C++、Python、Java）、关系型数据库管理、前端与后端脚本开发，以及各种业界相关课程。课程为期2年（含实习），学费 RM24,000，每年1月、6月、10月开课；认证编号 (N/0613/4/0032) 11/2028 (MQA/FA16867)，由马来西亚技术人员局（MBOT）与马来西亚学术资格鉴定机构（MQA）认证。',
+      en:"ViTrox College's Diploma in Computer Science is a comprehensive, industry-focused programme that gives students the fundamental knowledge and practical skills for a career in computer science — covering Discrete Mathematics, Operating Systems, Systems Analysis & Design, programming languages (C++, Python, Java), Relational Database Management, front-end and back-end scripting, and various industry-relevant courses. It runs for 2 years (including internship), costs RM24,000, with intakes every January, June and October; accredited (N/0613/4/0032) 11/2028 (MQA/FA16867) by the Malaysian Board of Technologists (MBOT) and the Malaysian Qualifications Agency (MQA).",
+      ms:'Diploma in Computer Science di ViTrox College ialah program menyeluruh dan berfokuskan industri yang memberikan pelajar pengetahuan asas serta kemahiran praktikal untuk kerjaya dalam sains komputer — merangkumi Matematik Diskret, Sistem Operasi, Analisis & Reka Bentuk Sistem, bahasa pengaturcaraan (C++, Python, Java), Pengurusan Pangkalan Data Hubungan, skrip bahagian hadapan dan belakang, serta pelbagai kursus berkaitan industri. Program ini mengambil masa 2 tahun (termasuk latihan industri), berharga RM24,000, dengan pengambilan setiap Januari, Jun dan Oktober; diiktiraf (N/0613/4/0032) 11/2028 (MQA/FA16867) oleh Malaysian Board of Technologists (MBOT) dan Malaysian Qualifications Agency (MQA).' } },
+  { id:'dk2', x:46, z:-8, floorY:16, kind:'structure',
+    title:{ zh:'🗂️ 课程结构 · Diploma in Computer Science', en:'🗂️ Programme Structure · Diploma in Computer Science', ms:'🗂️ Struktur Program · Diploma in Computer Science' },
+    text:{
+      zh:'这个文凭课程分两年学习：第一年打基础，包括编程与解题、数据库、基础代数、离散数学、数据通讯与网络、面向对象编程、系统分析与设计、计算机组织与架构、数据结构等；第二年深入软件工程、操作系统、概率与统计、微积分基础、人工智能基础，并完成两学期毕业专题（Final Year Project）和3个月企业实习。此外还有「工作本位学习」（WBL）选修课，可选云计算、移动应用、网页编程或数据科学基础。',
+      en:"The diploma is studied over two years. Year 1 builds the fundamentals — Programming & Problem Solving, Database, Basic Algebra, Discrete Mathematics, Data Communication and Networking, Object-Oriented Programming, System Analysis & Design, Computer Organisation & Architecture, Data Structures and more. Year 2 goes deeper into Software Engineering, Operating Systems, Probability and Statistics, Fundamentals of Calculus and Fundamentals of Artificial Intelligence, plus two semesters of a Final Year Project and 3 months of Industrial Training. There are also Work-Based Learning (WBL) electives — Cloud Computing, Mobile Application, Web Programming or Data Science fundamentals.",
+      ms:'Diploma ini dipelajari sepanjang dua tahun. Tahun 1 membina asas — Pengaturcaraan & Penyelesaian Masalah, Pangkalan Data, Asas Algebra, Matematik Diskret, Komunikasi Data dan Rangkaian, Pengaturcaraan Berorientasikan Objek, Analisis & Reka Bentuk Sistem, Organisasi & Seni Bina Komputer, Struktur Data dan lain-lain. Tahun 2 mendalami Kejuruteraan Perisian, Sistem Operasi, Kebarangkalian dan Statistik, Asas Kalkulus serta Asas Kecerdasan Buatan, ditambah dua semester Projek Tahun Akhir dan 3 bulan Latihan Industri. Terdapat juga elektif Pembelajaran Berasaskan Kerja (WBL) — asas Pengkomputeran Awan, Aplikasi Mudah Alih, Pengaturcaraan Web atau Sains Data.' } },
+  { id:'dk3', x:52, z:-8, floorY:16, kind:'admission',
+    title:{ zh:'📋 入学资格 · Diploma in Computer Science', en:'📋 Entry Requirements · Diploma in Computer Science', ms:'📋 Syarat Kemasukan · Diploma in Computer Science' },
+    text:{
+      zh:'入学门槛依你手上的学历而不同：SPM 至少3个学分（含数学），并在马来文、历史、英文三科及格；O-Level / IGCSE 任三科C级以上（含数学，英文须及格）；STPM 任一科C级（GP 2.00）以上加数学学分，英文达SPM及格水平；UEC 任三科B级以上（含数学，英文须及格）；证书课程（Level 3, MQF）CGPA 2.00以上并有数学学分；相关领域的认证证书（SKM Level 3）加数学学分，如有需要须完成一学期衔接课程。',
+      en:"Entry requirements depend on your existing qualification: SPM needs at least 3 credits (including Mathematics), plus passes in Bahasa Melayu, Sejarah and English; O-Level/IGCSE needs Grade C in any 3 subjects (including Mathematics, with a pass in English); STPM needs a minimum Grade C (GP 2.00) in any subject plus a Mathematics credit, with English at SPM-pass level; UEC needs Grade B in any 3 subjects (including Mathematics, with a pass in English); a Certificate (Level 3, MQF) needs CGPA 2.00+ with a Mathematics credit; an Accredited Certificate (SKM Level 3) needs a Mathematics credit and, if required, one semester of a bridging programme.",
+      ms:'Syarat kemasukan bergantung kepada kelayakan sedia ada anda: SPM memerlukan sekurang-kurangnya 3 kredit (termasuk Matematik), serta lulus Bahasa Melayu, Sejarah dan Bahasa Inggeris; O-Level/IGCSE memerlukan Gred C dalam mana-mana 3 subjek (termasuk Matematik, dengan lulus Bahasa Inggeris); STPM memerlukan sekurang-kurangnya Gred C (GP 2.00) dalam mana-mana subjek serta kredit Matematik, dengan Bahasa Inggeris pada tahap lulus SPM; UEC memerlukan Gred B dalam mana-mana 3 subjek (termasuk Matematik, dengan lulus Bahasa Inggeris); Sijil (Tahap 3, MQF) memerlukan CGPA 2.00+ dengan kredit Matematik; Sijil Teriktiraf (SKM Tahap 3) memerlukan kredit Matematik dan, jika diperlukan, satu semester program jambatan.' } },
+];
 const CM_TERMINALS = [                       // 两间电脑室共 10 台绿屏电脑，每台固定对应一章（工位 N → 第 N 章）
   { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0 },
   { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1 },
@@ -2495,13 +2524,25 @@ function closeInfo(){
   if(!locked && !touchPlay) overlayEl.classList.remove('hidden');
 }
 document.getElementById('btn-close').addEventListener('click',closeInfo);
+function openDiplomaKiosk(i){
+  const p=DIPLOMA_KIOSKS[i];
+  document.getElementById('modal-title').textContent = p.title[lang];
+  document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
+  document.getElementById('modal-text').textContent = p.text[lang];
+  modalEl.classList.remove('hidden');
+  modalOpen=true;
+  currentSpeech = p.title[lang] + '. ' + p.text[lang];
+  currentGender = ttsGender;
+  if(ttsAuto) speakText(currentSpeech, currentGender);
+  blip(660,0.12);
+}
 
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
 const promptText=document.getElementById('prompt-text');
-let nearInfo=-1, nearNpc=-1, nearCM=-1;
+let nearInfo=-1, nearNpc=-1, nearCM=-1, nearKiosk=-1;
 function checkInfoProximity(){
-  nearInfo=-1; nearNpc=-1; nearCM=-1;
+  nearInfo=-1; nearNpc=-1; nearCM=-1; nearKiosk=-1;
   let best=3.8;
   INFO_POINTS.forEach((p,i)=>{
     const d=Math.hypot(p.x+0.5-player.pos.x, p.y-player.pos.y, p.z+0.5-player.pos.z);
@@ -2522,6 +2563,13 @@ function checkInfoProximity(){
       if(d<bestC){ bestC=d; nearCM=i; }
     });
   }
+  if(nearInfo<0 && nearNpc<0 && nearCM<0){
+    let bestK=3.2;
+    DIPLOMA_KIOSKS.forEach((k,i)=>{
+      const d=Math.hypot(k.x+0.5-player.pos.x, k.floorY-player.pos.y, k.z+0.5-player.pos.z);
+      if(d<bestK){ bestK=d; nearKiosk=i; }
+    });
+  }
   if(modalOpen){ promptEl.style.display='none'; return; }
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
@@ -2534,6 +2582,9 @@ function checkInfoProximity(){
     const ch = CM_CHAPTERS[CM_TERMINALS[nearCM].chapterIdx];
     const {done,total} = cmChapterProgress(ch);
     promptText.textContent = ' 💻 ' + ch.title[lang] + (done===total ? t('promptCMRedo') : t('promptCMStart'));
+    promptEl.style.display='block';
+  }else if(nearKiosk>=0){
+    promptText.textContent = ' ' + DIPLOMA_KIOSKS[nearKiosk].title[lang] + t('promptLearn');
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -2969,9 +3020,9 @@ const NPCS = [
   { name:'Ts Dr Lim SC', color:0x2c3e50, tie:0x1b9aaa, expr:'smile', range:2, x:44, y:16, z:-8, baseYaw:0,
     role:{ zh:'Programme Leader · 软件工程', en:'Programme Leader, Computing School · Software Engineering', ms:'Programme Leader, Computing School · Kejuruteraan Perisian' },
     dialog:{
-      zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，同时是 ViTrox College「Diploma in Computer Science」文凭课程的 Programme Leader。这是一个为期2年（含实习）、通过 MQA 与 MBOT 认证（编号 N/0613/4/0032）的文凭课程，学费 RM24,000，每年1月、6月、10月开课。第一年打基础——编程与解题、数据库、离散数学、系统分析与设计、数据结构等；第二年深入软件工程、操作系统与人工智能基础，还有3个月企业实习和毕业专题。入学条件也很灵活：SPM至少3个学分（含数学，另加马来文、历史、英文及格）；O-Level/IGCSE三科C级以上（含数学）；STPM任一科C级以上加数学学分；UEC三科B级以上（含数学）；或相关证书课程（CGPA 2.00以上）。想看完整课程结构和入学详情，欢迎到 college.vitrox.edu.my/diploma（第 4 页）查询！旁边绿屏的电脑是我们给新生设计的 CodingMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
-      en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I'm the Programme Leader for the Diploma in Computer Science at ViTrox College — a 2-year programme (including internship), accredited by MQA and MBOT (N/0613/4/0032), with tuition of RM24,000 and intakes every January, June and October. Year 1 builds the fundamentals — Programming & Problem Solving, Database, Discrete Mathematics, System Analysis & Design, Data Structures and more; Year 2 goes deeper into Software Engineering, Operating Systems and Fundamentals of Artificial Intelligence, plus a 3-month industrial training and a Final Year Project. Entry is flexible too: at least 3 credits in SPM (including Mathematics, plus passes in Bahasa Melayu, Sejarah and English); 3 subjects at Grade C in O-Level/IGCSE (including Mathematics); Grade C in any subject plus a Mathematics credit for STPM; 3 subjects at Grade B for UEC; or a relevant Certificate with CGPA 2.00+. For the full course structure and entry details, check out college.vitrox.edu.my/diploma (page 4). The green-screen computers nearby are the CodingMine exercise we designed for new students — learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
-      ms:'Selamat datang ke makmal komputer Computing School! Saya Dr Lim SC, dan saya juga memiliki kelayakan Ts (Teknologis). Saya Programme Leader untuk Diploma in Computer Science di ViTrox College — program 2 tahun (termasuk latihan industri), diiktiraf oleh MQA dan MBOT (N/0613/4/0032), dengan yuran RM24,000 dan pengambilan setiap Januari, Jun dan Oktober. Tahun 1 membina asas — Pengaturcaraan & Penyelesaian Masalah, Pangkalan Data, Matematik Diskret, Analisis & Reka Bentuk Sistem, Struktur Data dan lain-lain; Tahun 2 mendalami Kejuruteraan Perisian, Sistem Operasi dan Asas Kecerdasan Buatan, ditambah 3 bulan latihan industri dan Projek Tahun Akhir. Kemasukan juga fleksibel: sekurang-kurangnya 3 kredit dalam SPM (termasuk Matematik, serta lulus Bahasa Melayu, Sejarah dan Bahasa Inggeris); 3 subjek Gred C dalam O-Level/IGCSE (termasuk Matematik); Gred C dalam mana-mana subjek serta kredit Matematik untuk STPM; 3 subjek Gred B untuk UEC; atau Sijil yang berkaitan dengan CGPA 2.00+. Untuk struktur kursus penuh dan maklumat kemasukan, layari college.vitrox.edu.my/diploma (halaman 4). Komputer skrin hijau berdekatan ialah latihan CodingMine yang kami reka untuk pelajar baharu — belajar asas sintaks C/C++ melalui kisah sebuah syarikat fiksyen. Jemput duduk dan cuba!' } },
+      zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，同时是 ViTrox College「Diploma in Computer Science」文凭课程的 Programme Leader——从需求分析、系统设计到测试维护，教学生怎么把一个想法变成可靠的软件产品。想了解这个文凭课程的完整内容，可以到 college.vitrox.edu.my/diploma（第 4 页）查询。旁边绿屏的电脑是我们给新生设计的 CodingMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
+      en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I'm also the Programme Leader for the Diploma in Computer Science at ViTrox College — covering everything from requirements analysis and system design to testing and maintenance, teaching students how to turn an idea into a reliable software product. For the full programme details, check out college.vitrox.edu.my/diploma (page 4). The green-screen computers nearby are the CodingMine exercise we designed for new students, learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
+      ms:'Selamat datang ke makmal komputer Computing School! Saya Dr Lim SC, dan saya juga memiliki kelayakan Ts (Teknologis). Saya juga Programme Leader untuk Diploma in Computer Science di ViTrox College — merangkumi analisis keperluan, reka bentuk sistem, hingga pengujian dan penyelenggaraan, mengajar pelajar cara mengubah satu idea menjadi produk perisian yang boleh dipercayai. Untuk maklumat penuh program ini, layari college.vitrox.edu.my/diploma (halaman 4). Komputer skrin hijau berdekatan ialah latihan CodingMine yang kami reka untuk pelajar baharu, belajar asas sintaks C/C++ melalui kisah sebuah syarikat fiksyen. Jemput duduk dan cuba!' } },
   { name:'Ms Syira', color:0x6a4c93, expr:'happy', style:'f', range:2, x:49, y:16, z:-2, baseYaw:Math.PI,
     role:{ zh:'讲师 · 数据科学', en:'Lecturer · Data Science', ms:'Pensyarah · Sains Data' },
     dialog:{
@@ -3196,6 +3247,7 @@ document.addEventListener('keydown',e=>{
     if(playing() && nearInfo>=0){ openInfo(nearInfo); return; }
     if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
     if(playing() && nearCM>=0){ openCodingMine(nearCM); return; }
+    if(playing() && nearKiosk>=0){ openDiplomaKiosk(nearKiosk); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
     quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return;
@@ -3425,6 +3477,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     else if(nearInfo>=0) openInfo(nearInfo);
     else if(nearNpc>=0) openNpc(nearNpc);
     else if(nearCM>=0) openCodingMine(nearCM);
+    else if(nearKiosk>=0) openDiplomaKiosk(nearKiosk);
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
     touchPlay=false;
@@ -3458,6 +3511,8 @@ window.__test = {
     chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, ...cmChapterProgress(ch) })),
     terminals:CM_TERMINALS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY})) }),
   openCodingMine, openCMChapter, answerCM, closeCM,
+  diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,kind:k.kind})) }),
+  openDiplomaKiosk,
 };
 </script>
 </body>
