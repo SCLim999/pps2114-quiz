@@ -96,7 +96,8 @@ the staff canteen.
   computer language are, practise C/C++ syntax with `player.say(...)`, tell strings
   apart from numbers, and help the CEO debug a broken snippet. Correct answers earn
   points shown live in the HUD and in the quest dashboard (press Q); progress is
-  saved to `localStorage`.
+  saved to `localStorage`. The two computer rooms are also staffed by 4 Computing
+  School lecturers (Ts Dr Lim SC, Ms Syira, Ms Khor JY, Mr Eng YK) you can talk to.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
