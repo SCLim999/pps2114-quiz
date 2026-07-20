@@ -744,6 +744,11 @@ function placeComputer(x,z,facing,floorY=4,kind=null){
   set(x,floorY,z+facing,B.PLANK);          // 椅子（在过道一侧）
   COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, kind });
 }
+function placeKiosk(x,z,floorY,kind){
+  // 站立式信息机：只有底座，没有座椅——跟教室里坐着用的电脑区分开
+  set(x,floorY,z,B.WHITE);
+  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing:1, kind });
+}
 
 function buildBox(x0,x1,z0,z1,storeys,openings){
   const yTop = 3 + storeys*4;   // 屋面板所在层
@@ -1027,8 +1032,6 @@ function generate(){
     // 两间电脑室第一排（z=-13 / z=3）共 10 台绿屏电脑，逐一对应 CodingMine 第一~十章
     for(const x of COLS){ placeComputer(x,-13, 1,16,'cm'); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
     for(const x of COLS){ placeComputer(x, 3,  1,16,'cm'); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
-    // Lim SC 博士站台旁的 3 台文凭信息机（蓝=课程介绍/橙=课程结构/紫=入学资格），x=44 让位给他本人
-    for(const [x,kind] of [[41,'intro'],[46,'structure'],[52,'admission']]) placeComputer(x,-8,1,16,kind);
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -1256,6 +1259,8 @@ function generate(){
     }
     // 连接步道（从 Campus 3.0 东端接过来）
     for(let x=142;x<=X0-1;x++) for(let z=-2;z<=2;z++) set(x,3,z,B.PATH);
+    // 步道上的 3 台文凭信息机（站立式，蓝=课程介绍/橙=课程结构/紫=入学资格）
+    for(const [x,kind] of [[142,'intro'],[145,'structure'],[148,'admission']]) placeKiosk(x,-2,4,kind);
     // 建筑周边草坪广场铺装（避免草地凸出遮挡底层柱廊）
     for(let x=X0-2;x<=X1+2;x++){
       const u=clamp((x-X0)/L,0,1), c=cz(u), h=half(u);
@@ -1972,27 +1977,27 @@ function toast(msg){
 const CODINGMINE = {
   company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
 };
-/* Lim SC 博士站台旁的 3 台文凭信息机——蓝屏「课程介绍」/橙屏「课程结构」/紫屏「入学资格」，
-   都是 Diploma in Computer Science 的真实招生内容（college.vitrox.edu.my/diploma 第 4 页）*/
+/* ViTrox Education 步道上的 3 台站立式文凭信息机——蓝屏「课程介绍」/橙屏「课程结构」/紫屏「入学资格」，
+   都是 Diploma in Computer Science 的真实招生内容（college.vitrox.edu.my/diploma 第 4 页），内容力求简短 */
 const DIPLOMA_KIOSKS = [
-  { id:'dk1', x:41, z:-8, floorY:16, kind:'intro',
+  { id:'dk1', x:142, z:-2, floorY:4, kind:'intro',
     title:{ zh:'💻 课程介绍 · Diploma in Computer Science', en:'💻 Course Introduction · Diploma in Computer Science', ms:'💻 Pengenalan Kursus · Diploma in Computer Science' },
     text:{
-      zh:'ViTrox College 的「Diploma in Computer Science」文凭课程是一个全面且贴近产业需求的课程，为学生打好计算机科学的基础知识与实践能力，涵盖离散数学、操作系统、系统分析与设计、编程语言（C++、Python、Java）、关系型数据库管理、前端与后端脚本开发，以及各种业界相关课程。课程为期2年（含实习），学费 RM24,000，每年1月、6月、10月开课；认证编号 (N/0613/4/0032) 11/2028 (MQA/FA16867)，由马来西亚技术人员局（MBOT）与马来西亚学术资格鉴定机构（MQA）认证。',
-      en:"ViTrox College's Diploma in Computer Science is a comprehensive, industry-focused programme that gives students the fundamental knowledge and practical skills for a career in computer science — covering Discrete Mathematics, Operating Systems, Systems Analysis & Design, programming languages (C++, Python, Java), Relational Database Management, front-end and back-end scripting, and various industry-relevant courses. It runs for 2 years (including internship), costs RM24,000, with intakes every January, June and October; accredited (N/0613/4/0032) 11/2028 (MQA/FA16867) by the Malaysian Board of Technologists (MBOT) and the Malaysian Qualifications Agency (MQA).",
-      ms:'Diploma in Computer Science di ViTrox College ialah program menyeluruh dan berfokuskan industri yang memberikan pelajar pengetahuan asas serta kemahiran praktikal untuk kerjaya dalam sains komputer — merangkumi Matematik Diskret, Sistem Operasi, Analisis & Reka Bentuk Sistem, bahasa pengaturcaraan (C++, Python, Java), Pengurusan Pangkalan Data Hubungan, skrip bahagian hadapan dan belakang, serta pelbagai kursus berkaitan industri. Program ini mengambil masa 2 tahun (termasuk latihan industri), berharga RM24,000, dengan pengambilan setiap Januari, Jun dan Oktober; diiktiraf (N/0613/4/0032) 11/2028 (MQA/FA16867) oleh Malaysian Board of Technologists (MBOT) dan Malaysian Qualifications Agency (MQA).' } },
-  { id:'dk2', x:46, z:-8, floorY:16, kind:'structure',
+      zh:'Diploma in Computer Science：为期2年（含实习），学费 RM24,000，每年1、6、10月开课；由 MBOT 与 MQA 认证（N/0613/4/0032）。核心课程涵盖编程、数据库、离散数学与系统分析设计。',
+      en:'Diploma in Computer Science: a 2-year programme (incl. internship), RM24,000, with January/June/October intakes. Accredited by MBOT and MQA (N/0613/4/0032). Covers programming, databases, discrete maths and systems analysis.',
+      ms:'Diploma in Computer Science: program 2 tahun (termasuk latihan industri), RM24,000, pengambilan Januari/Jun/Oktober. Diiktiraf oleh MBOT dan MQA (N/0613/4/0032). Merangkumi pengaturcaraan, pangkalan data, matematik diskret dan analisis sistem.' } },
+  { id:'dk2', x:145, z:-2, floorY:4, kind:'structure',
     title:{ zh:'🗂️ 课程结构 · Diploma in Computer Science', en:'🗂️ Programme Structure · Diploma in Computer Science', ms:'🗂️ Struktur Program · Diploma in Computer Science' },
     text:{
-      zh:'这个文凭课程分两年学习：第一年打基础，包括编程与解题、数据库、基础代数、离散数学、数据通讯与网络、面向对象编程、系统分析与设计、计算机组织与架构、数据结构等；第二年深入软件工程、操作系统、概率与统计、微积分基础、人工智能基础，并完成两学期毕业专题（Final Year Project）和3个月企业实习。此外还有「工作本位学习」（WBL）选修课，可选云计算、移动应用、网页编程或数据科学基础。',
-      en:"The diploma is studied over two years. Year 1 builds the fundamentals — Programming & Problem Solving, Database, Basic Algebra, Discrete Mathematics, Data Communication and Networking, Object-Oriented Programming, System Analysis & Design, Computer Organisation & Architecture, Data Structures and more. Year 2 goes deeper into Software Engineering, Operating Systems, Probability and Statistics, Fundamentals of Calculus and Fundamentals of Artificial Intelligence, plus two semesters of a Final Year Project and 3 months of Industrial Training. There are also Work-Based Learning (WBL) electives — Cloud Computing, Mobile Application, Web Programming or Data Science fundamentals.",
-      ms:'Diploma ini dipelajari sepanjang dua tahun. Tahun 1 membina asas — Pengaturcaraan & Penyelesaian Masalah, Pangkalan Data, Asas Algebra, Matematik Diskret, Komunikasi Data dan Rangkaian, Pengaturcaraan Berorientasikan Objek, Analisis & Reka Bentuk Sistem, Organisasi & Seni Bina Komputer, Struktur Data dan lain-lain. Tahun 2 mendalami Kejuruteraan Perisian, Sistem Operasi, Kebarangkalian dan Statistik, Asas Kalkulus serta Asas Kecerdasan Buatan, ditambah dua semester Projek Tahun Akhir dan 3 bulan Latihan Industri. Terdapat juga elektif Pembelajaran Berasaskan Kerja (WBL) — asas Pengkomputeran Awan, Aplikasi Mudah Alih, Pengaturcaraan Web atau Sains Data.' } },
-  { id:'dk3', x:52, z:-8, floorY:16, kind:'admission',
+      zh:'第一年：编程与解题、数据库、离散数学、系统分析设计、数据结构等基础课。第二年：软件工程、操作系统、人工智能基础，加3个月实习与毕业专题。选修：云计算/移动应用/网页/数据科学。',
+      en:'Year 1: programming, databases, discrete maths, systems analysis, data structures. Year 2: software engineering, operating systems, AI fundamentals, plus a 3-month internship and Final Year Project. Electives: cloud, mobile, web or data science.',
+      ms:'Tahun 1: pengaturcaraan, pangkalan data, matematik diskret, analisis sistem, struktur data. Tahun 2: kejuruteraan perisian, sistem operasi, asas AI, ditambah 3 bulan latihan industri dan Projek Tahun Akhir. Elektif: awan, mudah alih, web atau sains data.' } },
+  { id:'dk3', x:148, z:-2, floorY:4, kind:'admission',
     title:{ zh:'📋 入学资格 · Diploma in Computer Science', en:'📋 Entry Requirements · Diploma in Computer Science', ms:'📋 Syarat Kemasukan · Diploma in Computer Science' },
     text:{
-      zh:'入学门槛依你手上的学历而不同：SPM 至少3个学分（含数学），并在马来文、历史、英文三科及格；O-Level / IGCSE 任三科C级以上（含数学，英文须及格）；STPM 任一科C级（GP 2.00）以上加数学学分，英文达SPM及格水平；UEC 任三科B级以上（含数学，英文须及格）；证书课程（Level 3, MQF）CGPA 2.00以上并有数学学分；相关领域的认证证书（SKM Level 3）加数学学分，如有需要须完成一学期衔接课程。',
-      en:"Entry requirements depend on your existing qualification: SPM needs at least 3 credits (including Mathematics), plus passes in Bahasa Melayu, Sejarah and English; O-Level/IGCSE needs Grade C in any 3 subjects (including Mathematics, with a pass in English); STPM needs a minimum Grade C (GP 2.00) in any subject plus a Mathematics credit, with English at SPM-pass level; UEC needs Grade B in any 3 subjects (including Mathematics, with a pass in English); a Certificate (Level 3, MQF) needs CGPA 2.00+ with a Mathematics credit; an Accredited Certificate (SKM Level 3) needs a Mathematics credit and, if required, one semester of a bridging programme.",
-      ms:'Syarat kemasukan bergantung kepada kelayakan sedia ada anda: SPM memerlukan sekurang-kurangnya 3 kredit (termasuk Matematik), serta lulus Bahasa Melayu, Sejarah dan Bahasa Inggeris; O-Level/IGCSE memerlukan Gred C dalam mana-mana 3 subjek (termasuk Matematik, dengan lulus Bahasa Inggeris); STPM memerlukan sekurang-kurangnya Gred C (GP 2.00) dalam mana-mana subjek serta kredit Matematik, dengan Bahasa Inggeris pada tahap lulus SPM; UEC memerlukan Gred B dalam mana-mana 3 subjek (termasuk Matematik, dengan lulus Bahasa Inggeris); Sijil (Tahap 3, MQF) memerlukan CGPA 2.00+ dengan kredit Matematik; Sijil Teriktiraf (SKM Tahap 3) memerlukan kredit Matematik dan, jika diperlukan, satu semester program jambatan.' } },
+      zh:'SPM：3学分含数学；O-Level/IGCSE：3科C级含数学；STPM：任一科C级加数学学分；UEC：3科B级含数学；证书课程：CGPA 2.00+含数学学分。各途径均须英文及格。',
+      en:'SPM: 3 credits incl. Maths. O-Level/IGCSE: 3 subjects at Grade C incl. Maths. STPM: Grade C in any subject + a Maths credit. UEC: 3 subjects at Grade B incl. Maths. Certificate: CGPA 2.00+ with a Maths credit. An English pass is required for every route.',
+      ms:'SPM: 3 kredit termasuk Matematik. O-Level/IGCSE: 3 subjek Gred C termasuk Matematik. STPM: Gred C dalam mana-mana subjek + kredit Matematik. UEC: 3 subjek Gred B termasuk Matematik. Sijil: CGPA 2.00+ dengan kredit Matematik. Lulus Bahasa Inggeris diperlukan untuk setiap laluan.' } },
 ];
 const CM_TERMINALS = [                       // 两间电脑室共 10 台绿屏电脑，每台固定对应一章（工位 N → 第 N 章）
   { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0 },
