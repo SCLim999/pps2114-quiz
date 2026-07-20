@@ -85,9 +85,9 @@ punching through the circular form.
   on "auto-read" in the start menu to have it read automatically every time. No
   internet or account needed; hidden automatically if the browser doesn't support it.
 - **Male/female voices**: NPC dialogue automatically picks a voice matching the
-  character's look (male guards/engineers/founders vs. female Siti/Mei Ling/Priya/
-  Dr. Farah); a 👨/👩 picker in the start menu sets the narrator voice used for the
-  architecture lessons themselves.
+  character's look (male guards/engineers/founders/Dr Janaka Low vs. female Siti/
+  Mei Ling/Priya); a 👨/👩 picker in the start menu sets the narrator voice used
+  for the architecture lessons themselves.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
