@@ -196,6 +196,27 @@
   #modal .panel { border-color:#c9a227; }
   #modal h1 { color:#ffd75e; font-size:21px; }
   #modal .en { color:#9fb8d8; font-size:12px; font-style:italic; }
+
+  /* ---------- CodingMine 编程小任务 ---------- */
+  #quiz .panel { border-color:#2ee6a8; }
+  #quiz h1 { color:#2ee6a8; font-size:21px; }
+  #quiz .en { color:#9fb8d8; font-size:12px; font-style:italic; }
+  #quiz-code {
+    background:#0d1b16; border:1px solid #1e4a3a; border-radius:8px; padding:12px 14px;
+    color:#9df5cd; font-family:"Consolas","Menlo",monospace; font-size:13px; line-height:1.6;
+    white-space:pre; overflow-x:auto; margin:10px 0;
+  }
+  #quiz-options { display:flex; flex-direction:column; gap:8px; margin:12px 0; }
+  #quiz-options .btn {
+    margin:0; text-align:left; background:#1c3a52; box-shadow:none; font-size:14px; padding:10px 16px;
+  }
+  #quiz-options .btn:hover:not(:disabled) { background:#25506f; }
+  #quiz-options .btn:disabled { cursor:default; opacity:.85; }
+  #quiz-options .btn.right { background:#256525; color:#cfffcf; }
+  #quiz-options .btn.picked-wrong { background:#7a2020; color:#ffd7d7; }
+  #quiz-feedback { font-size:14px; font-weight:bold; min-height:1.2em; }
+  #quiz-feedback.correct { color:#6ee787; }
+  #quiz-feedback.wrong { color:#ff9b9b; }
 </style>
 </head>
 <body>
@@ -204,7 +225,7 @@
 
 <div id="crosshair"></div>
 <div id="pos"></div>
-<div id="chip"><span id="chip-main"></span><span id="chip-mp"></span></div>
+<div id="chip"><span id="chip-main"></span><span id="chip-cm"></span><span id="chip-mp"></span></div>
 <div id="prompt"><kbd>E</kbd><span id="prompt-text"></span></div>
 <div id="toast"></div>
 <div id="quests"><h3 id="quests-title"></h3><ul id="quest-list"></ul></div>
@@ -275,6 +296,23 @@
   </div>
 </div>
 
+<!-- CodingMine 编程小任务弹窗 -->
+<div class="overlay hidden" id="quiz">
+  <div class="panel">
+    <h1 id="quiz-title"></h1>
+    <p class="en" id="quiz-sub"></p>
+    <p id="quiz-brief"></p>
+    <pre id="quiz-code" class="hidden"></pre>
+    <p id="quiz-prompt"></p>
+    <div id="quiz-options"></div>
+    <p id="quiz-feedback"></p>
+    <div class="modal-actions">
+      <button class="btn" id="quiz-next" style="display:none"></button>
+      <button class="btn gray" id="quiz-close"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
@@ -324,6 +362,11 @@ zh: {
   online:' · 🌐 {c} 人在线（{code}）',
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
+  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> 分',
+  promptCMStart:' — 按 E 开始任务', promptCMRedo:' — 按 E 重新挑战',
+  cmNext:'下一题 ▶', cmFinish:'完成任务', cmClose:'离开工作站（E）',
+  cmDashHeader:'💻 CodingMine 编程小任务',
+  cmScoreLine:'总分：{score} / {total}',
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
   ttsTitle:'朗读', ttsTitleStop:'停止朗读',
@@ -370,6 +413,11 @@ en: {
   online:' · 🌐 {c} online ({code})',
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
+  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> pts',
+  promptCMStart:' — press E to start the task', promptCMRedo:' — press E to try again',
+  cmNext:'Next ▶', cmFinish:'Finish task', cmClose:'Leave workstation (E)',
+  cmDashHeader:'💻 CodingMine Coding Tasks',
+  cmScoreLine:'Total score: {score} / {total}',
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
   ttsTitle:'Read aloud', ttsTitleStop:'Stop reading',
@@ -416,6 +464,11 @@ ms: {
   online:' · 🌐 {c} dlm talian ({code})',
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
+  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> mata',
+  promptCMStart:' — tekan E untuk mula tugasan', promptCMRedo:' — tekan E untuk cuba lagi',
+  cmNext:'Seterusnya ▶', cmFinish:'Selesaikan tugasan', cmClose:'Tinggalkan stesen kerja (E)',
+  cmDashHeader:'💻 Tugasan Pengaturcaraan CodingMine',
+  cmScoreLine:'Jumlah markah: {score} / {total}',
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
   ttsTitle:'Baca kuat', ttsTitleStop:'Henti membaca',
@@ -684,11 +737,11 @@ function placeTree(x,z,rand){
   set(x,top+1,z,B.LEAF);
 }
 
-function placeComputer(x,z,facing,floorY=4){
+function placeComputer(x,z,facing,floorY=4,cmId=null){
   // 桌椅用体素方块（跟食堂家具同一风格）；电脑本体（显示器+主机）用实例化网格
   set(x,floorY,z,B.WHITE);                 // 白色书桌
   set(x,floorY,z+facing,B.PLANK);          // 椅子（在过道一侧）
-  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing });
+  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, cmId });
 }
 
 function buildBox(x0,x1,z0,z1,storeys,openings){
@@ -970,7 +1023,8 @@ function generate(){
     for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
     for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    for(const x of COLS){ placeComputer(x,-13, 1,16); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
+    const CM_ID_BY_X = { 41:'ch1_t1', 43:'ch1_t2', 46:'ch1_t3' };       // 电脑室 1 第一排：CodingMine 第一章工作站
+    for(const x of COLS){ placeComputer(x,-13, 1,16, CM_ID_BY_X[x]||null); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
     for(const x of COLS){ placeComputer(x, 3,  1,16); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
   }
 
@@ -1658,6 +1712,7 @@ const COMP_GEO = {
 const COMP_MAT = {
   bezel: new THREE.MeshBasicMaterial({color:0x25272b}),
   screen:new THREE.MeshBasicMaterial({color:0x8ecbe8}),
+  screenCM:new THREE.MeshBasicMaterial({color:0x2ee6a8}),  // CodingMine 工作站：绿色终端屏幕，一眼可辨
   keyboard:new THREE.MeshBasicMaterial({color:0xd8dadd}),
   led:   new THREE.MeshBasicMaterial({color:0x2fa7ff}),
 };
@@ -1712,10 +1767,12 @@ function buildCarMeshes(){
     const rot = c.facing>=0 ? 0 : Math.PI;
     const ca=Math.cos(rot), sa=Math.sin(rot);
     const T=off=>[ c.x + off[0]*ca + off[2]*sa, c.y+off[1], c.z - off[0]*sa + off[2]*ca ];
+    const screenMat = c.cmId ? COMP_MAT.screenCM : COMP_MAT.screen;
+    const screenKey = c.cmId ? 'cScreenCM' : 'cScreen';
     put('cBase',  COMP_GEO.base,     MACH_MAT.dark,      T([0,0.015,0]),    rot);
     put('cStand', COMP_GEO.stand,    MACH_MAT.dark,      T([0,0.11,0]),     rot);
     put('cBezel', COMP_GEO.bezel,    COMP_MAT.bezel,     T([0,0.37,0]),     rot);
-    put('cScreen',COMP_GEO.screen,   COMP_MAT.screen,    T([0,0.37,0.03]),  rot);
+    put(screenKey,COMP_GEO.screen,   screenMat,          T([0,0.37,0.03]),  rot);
     put('cKbd',   COMP_GEO.keyboard, COMP_MAT.keyboard,  T([0,0.015,0.30]), rot);
     put('cTower', COMP_GEO.tower,    MACH_MAT.dark,      T([0.26,0.13,0]),  rot);
     put('cLed',   COMP_GEO.led,      COMP_MAT.led,       T([0.26,0.13,0.12]),rot);
@@ -1887,12 +1944,124 @@ function toast(msg){
   toastTimer=setTimeout(()=>toastEl.style.display='none',2200);
 }
 
+/* ================================================================
+   CodingMine 编程小任务 —— 四楼电脑室的 3 台绿屏电脑
+   每章设定在虚构软件公司 CodingMine 背景下，玩家扮演初级程序员，
+   通过帮同事/CEO 解决技术难题来学习编程；答对累计分数，存入 localStorage。
+================================================================ */
+const CODINGMINE = {
+  company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
+};
+const CM_CHAPTER1 = {
+  id:'ch1',
+  title:{ zh:'第一章 · All that Syntax（语法结构与 Bug 修复）', en:'Chapter 1 · All that Syntax', ms:'Bab 1 · All that Syntax' },
+};
+const CM_STATIONS = [
+  { id:'ch1_t1', x:41, z:-13, floorY:16,
+    name:{ zh:'工位一 · 认识 CodingMine', en:'Station 1 · Meet CodingMine', ms:'Stesen 1 · Kenali CodingMine' },
+    brief:{
+      zh:'CodingMine（编码矿业）是一家专注机器视觉软件的公司，你刚入职，成为一名初级程序员。CEO 说：写程序前要先设计「算法」——也就是解决问题的一步步指令；再用「计算机语言」（比如 C/C++）把这些指令写成计算机看得懂的代码。C++ 里，文字内容（字符串 String）必须用双引号 " " 包起来，数字不用引号，每条语句结尾要加分号 ;。CEO 想让游戏角色用 player.say(...) 打个招呼，帮他检查一下这行代码对不对！',
+      en:'CodingMine is a machine-vision software company, and you have just joined as a junior programmer. The CEO says: before writing any program, you design an "algorithm" — step-by-step instructions for solving a problem — then translate it into a "computer language" (like C/C++) that the computer can understand. In C++, text content (a String) must be wrapped in double quotes " ", numbers need no quotes, and every statement ends with a semicolon ;. The CEO wants the character to say hello using player.say(...) — help check whether this line is correct!',
+      ms:'CodingMine ialah syarikat perisian penglihatan mesin, dan anda baru menyertai sebagai pengaturcara junior. Kata CEO: sebelum menulis sebarang program, reka bentuk dahulu "algoritma" — arahan langkah demi langkah untuk menyelesaikan masalah — kemudian terjemahkan ke dalam "bahasa komputer" (seperti C/C++) yang boleh difahami komputer. Dalam C++, kandungan teks (String) mesti dibalut tanda petik dua " ", nombor tidak memerlukan tanda petik, dan setiap penyataan berakhir dengan koma bertitik ;. CEO mahu watak permainan menyapa menggunakan player.say(...) — bantu semak sama ada baris ini betul!',
+    },
+    questions:[
+      { id:'ch1_t1_q1', points:10,
+        prompt:{ zh:'下面哪一行代码可以正确地让角色说出 Hello World？', en:'Which line correctly makes the character say Hello World?', ms:'Baris manakah yang betul untuk watak menyebut Hello World?' },
+        options:{
+          zh:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
+          en:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
+          ms:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
+        },
+        correct:1,
+        explain:{
+          zh:'字符串必须用引号包住（且要配对：全用双引号或全用单引号，不能混用或漏掉）；C++ 对大小写敏感，Player 和 player 是两个不同的名字；每条语句结尾都要加分号 ;。',
+          en:'A string must be wrapped in matching quotes (all double or all single — never mixed or missing); C++ is case-sensitive, so Player and player are different names; every statement must end with a semicolon ;.',
+          ms:'Rentetan (string) mesti dibalut tanda petik yang sepadan (semua petik dua atau semua petik tunggal — jangan campur atau tertinggal); C++ sensitif huruf besar/kecil, jadi Player dan player ialah nama berbeza; setiap penyataan mesti berakhir dengan koma bertitik ;.',
+        } },
+    ] },
+  { id:'ch1_t2', x:43, z:-13, floorY:16,
+    name:{ zh:'工位二 · 字符串还是数字？', en:'Station 2 · String or Number?', ms:'Stesen 2 · Rentetan atau Nombor?' },
+    brief:{
+      zh:'CEO 说，团队最近老是把「字符串」和「数字」搞混，导致程序出错。在 C++ 里，用引号包起来的（如 "25"）是字符串（String）——哪怕看起来像数字，它也只是文字；没有引号的（如 25）才是数字（Number），可以直接做加减乘除运算。来做几道练习，帮团队分清楚吧！',
+      en:'The CEO says the team keeps mixing up "strings" and "numbers", causing bugs. In C++, anything wrapped in quotes (like "25") is a String — even if it looks like a number, it is just text; something without quotes (like 25) is a Number, which can be used directly in arithmetic. Do a few practice questions to help the team get it straight!',
+      ms:'Kata CEO, pasukan sering keliru antara "rentetan" dan "nombor", menyebabkan pepijat. Dalam C++, apa-apa yang dibalut tanda petik (seperti "25") ialah String — walaupun kelihatan seperti nombor, ia cuma teks; sesuatu tanpa tanda petik (seperti 25) ialah Nombor, yang boleh terus digunakan dalam pengiraan. Jawab beberapa soalan latihan untuk membantu pasukan memahaminya!',
+    },
+    questions:[
+      { id:'ch1_t2_q1', points:10,
+        prompt:{ zh:'以下哪一个是「字符串」（String）？', en:'Which one of these is a "String"?', ms:'Yang manakah satu "String"?' },
+        options:{ zh:['100','"Batu Kawan"','3.14'], en:['100','"Batu Kawan"','3.14'], ms:['100','"Batu Kawan"','3.14'] },
+        correct:1,
+        explain:{
+          zh:'"Batu Kawan" 被双引号包住，所以是字符串；100 和 3.14 没有引号，是数字。',
+          en:'"Batu Kawan" is wrapped in double quotes, so it is a string; 100 and 3.14 have no quotes, so they are numbers.',
+          ms:'"Batu Kawan" dibalut tanda petik dua, jadi ia rentetan; 100 dan 3.14 tiada tanda petik, jadi ia nombor.',
+        } },
+      { id:'ch1_t2_q2', points:10,
+        prompt:{ zh:'以下哪一个是「数字」（Number），不是字符串？', en:'Which one of these is a "Number", not a string?', ms:'Yang manakah satu "Nombor", bukan rentetan?' },
+        options:{ zh:['"42"','42','"forty-two"'], en:['"42"','42','"forty-two"'], ms:['"42"','42','"forty-two"'] },
+        correct:1,
+        explain:{
+          zh:'42 没有引号，是真正可以计算的数字；"42" 虽然看起来像数字，但有引号，只是文字。',
+          en:'42 has no quotes, so it is a real, calculable number; "42" looks like a number but the quotes make it just text.',
+          ms:'42 tiada tanda petik, jadi ia nombor sebenar yang boleh dikira; "42" kelihatan seperti nombor tetapi tanda petik menjadikannya sekadar teks.',
+        } },
+      { id:'ch1_t2_q3', points:10, code:'int x = 10;',
+        prompt:{ zh:'在代码 int x = 10; 里，10 是：', en:'In the code int x = 10;, the 10 is a:', ms:'Dalam kod int x = 10;, 10 itu ialah:' },
+        options:{ zh:['字符串（String）','数字（Number）'], en:['String','Number'], ms:['String','Nombor'] },
+        correct:1,
+        explain:{
+          zh:'10 没有加引号，而且被声明成 int（整数）类型，所以是数字。',
+          en:'10 has no quotes and is declared as an int (integer) type, so it is a number.',
+          ms:'10 tiada tanda petik dan diisytiharkan sebagai jenis int (integer), jadi ia nombor.',
+        } },
+    ] },
+  { id:'ch1_t3', x:46, z:-13, floorY:16,
+    name:{ zh:'工位三 · 帮 CEO 修 Bug', en:"Station 3 · Fix the CEO's Bug", ms:'Stesen 3 · Betulkan Bug CEO' },
+    brief:{
+      zh:'CEO 昨晚自己写了一段 C++ 代码，想统计一个分数，结果编译不过！他有点尴尬，想请你这个新来的初级程序员帮忙看看——这正是学习「调试」（Debugging）的好机会：仔细读代码，找出哪里不对。',
+      en:"The CEO wrote a bit of C++ code late last night to tally up a score, and it won't compile! A little embarrassed, he's asking you, the new junior programmer, to take a look — a great chance to practise \"debugging\": read the code carefully and spot what's wrong.",
+      ms:'CEO menulis sedikit kod C++ lewat malam tadi untuk mengira skor, tetapi ia gagal dikompil! Agak segan, dia meminta anda, pengaturcara junior baharu, untuk menyemaknya — peluang baik untuk berlatih "debugging": baca kod dengan teliti dan cari kesilapannya.',
+    },
+    questions:[
+      { id:'ch1_t3_q1', points:10,
+        code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    int score = "100"\n    cout << score << endl;\n    return 0;\n}',
+        prompt:{ zh:'这段代码有两处错误，应该怎么修？', en:'This code has two mistakes — how should it be fixed?', ms:'Kod ini mempunyai dua kesilapan — bagaimana ia patut dibetulkan?' },
+        options:{
+          zh:['把 "100" 改成 100，并在这一行结尾加上分号 ;','把 int 改成 string 就可以，其他不用改','把 cout 改成 print 就行了','这段代码完全正确，不需要修改'],
+          en:['Change "100" to 100, and add a semicolon ; at the end of that line','Just change int to string — nothing else needs changing','Just change cout to print','This code is completely correct, no changes needed'],
+          ms:['Tukar "100" kepada 100, dan tambah koma bertitik ; di hujung baris itu','Cuma tukar int kepada string — tiada lagi yang perlu diubah','Cuma tukar cout kepada print','Kod ini betul sepenuhnya, tiada perubahan diperlukan'],
+        },
+        correct:0,
+        explain:{
+          zh:'字符串常量（带引号的 "100"）不能直接赋值给 int（整数）类型的变量，要去掉引号变成 100；另外 C++ 每条语句结尾都必须有分号 ;，这一行漏掉了。',
+          en:'A string literal (the quoted "100") cannot be assigned directly to an int variable — the quotes must be removed to make it 100; also, every C++ statement must end with a semicolon ;, which this line is missing.',
+          ms:'Literal rentetan (yang berpetik "100") tidak boleh terus diberikan kepada pemboleh ubah jenis int — tanda petik mesti dibuang supaya menjadi 100; selain itu, setiap penyataan C++ mesti berakhir dengan koma bertitik ;, yang tiada pada baris ini.',
+        } },
+    ] },
+];
+function cmTotalPoints(){
+  return CM_STATIONS.reduce((sum,st)=>sum+st.questions.reduce((s,q)=>s+q.points,0),0);
+}
+function cmStationDone(st){ return st.questions.every(q=>cmDone.has(q.id)); }
+
+let cmScore = 0;
+const cmDone = new Set();
+try{
+  const raw = localStorage.getItem('vitroxcraft_codingmine');
+  if(raw){ const d=JSON.parse(raw); cmScore = d.score||0; (d.done||[]).forEach(id=>cmDone.add(id)); }
+}catch(e){}
+function saveCM(){
+  try{ localStorage.setItem('vitroxcraft_codingmine', JSON.stringify({ score:cmScore, done:[...cmDone] })); }catch(e){}
+}
+
 /* ---- 任务/进度 ---- */
 const visited = new Set();
 const questList=document.getElementById('quest-list');
 function refreshQuests(){
   document.getElementById('chip-main').innerHTML =
     t('chipMain', { n:visited.size, total:INFO_POINTS.length });
+  document.getElementById('chip-cm').innerHTML =
+    t('chipCM', { score:cmScore, total:cmTotalPoints() });
   questList.innerHTML='';
   INFO_POINTS.forEach((p,i)=>{
     const li=document.createElement('li');
@@ -1900,6 +2069,21 @@ function refreshQuests(){
     if(visited.has(i)) li.classList.add('done');
     questList.appendChild(li);
   });
+  const cmHeader=document.createElement('li');
+  cmHeader.textContent = t('cmDashHeader') + ' — ' + CM_CHAPTER1.title[lang];
+  cmHeader.style.cssText = 'list-style:none; margin-top:10px; color:#7fc3ff;';
+  questList.appendChild(cmHeader);
+  CM_STATIONS.forEach(st=>{
+    const done = st.questions.filter(q=>cmDone.has(q.id)).length;
+    const li=document.createElement('li');
+    li.textContent = st.name[lang] + ' (' + done + '/' + st.questions.length + ')';
+    if(done===st.questions.length) li.classList.add('done');
+    questList.appendChild(li);
+  });
+  const scoreLi=document.createElement('li');
+  scoreLi.textContent = t('cmScoreLine', { score:cmScore, total:cmTotalPoints() });
+  scoreLi.style.cssText = 'list-style:none; margin-top:6px; color:#ffd75e;';
+  questList.appendChild(scoreLi);
 }
 refreshQuests();
 
@@ -2025,9 +2209,9 @@ document.getElementById('btn-close').addEventListener('click',closeInfo);
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
 const promptText=document.getElementById('prompt-text');
-let nearInfo=-1, nearNpc=-1;
+let nearInfo=-1, nearNpc=-1, nearCM=-1;
 function checkInfoProximity(){
-  nearInfo=-1; nearNpc=-1;
+  nearInfo=-1; nearNpc=-1; nearCM=-1;
   let best=3.8;
   INFO_POINTS.forEach((p,i)=>{
     const d=Math.hypot(p.x+0.5-player.pos.x, p.y-player.pos.y, p.z+0.5-player.pos.z);
@@ -2041,6 +2225,13 @@ function checkInfoProximity(){
       if(d<bestN){ bestN=d; nearNpc=i; }
     });
   }
+  if(nearInfo<0 && nearNpc<0){
+    let bestC=3.2;
+    CM_STATIONS.forEach((s,i)=>{
+      const d=Math.hypot(s.x+0.5-player.pos.x, s.floorY-player.pos.y, s.z+0.5-player.pos.z);
+      if(d<bestC){ bestC=d; nearCM=i; }
+    });
+  }
   if(modalOpen){ promptEl.style.display='none'; return; }
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
@@ -2048,6 +2239,11 @@ function checkInfoProximity(){
     promptEl.style.display='block';
   }else if(nearNpc>=0){
     promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + t('promptTalk');
+    promptEl.style.display='block';
+  }else if(nearCM>=0){
+    const st = CM_STATIONS[nearCM];
+    promptText.textContent = ' 💻 ' + st.name[lang] +
+      (cmStationDone(st) ? t('promptCMRedo') : t('promptCMStart'));
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -2559,6 +2755,75 @@ function openNpc(i){
   blip(520,0.1);
 }
 
+let cmStationIdx=-1, cmQIdx=0;
+const quizEl = document.getElementById('quiz');
+function renderCM(){
+  const st = CM_STATIONS[cmStationIdx];
+  const q = st.questions[cmQIdx];
+  document.getElementById('quiz-title').textContent = '💻 ' + CODINGMINE.company[lang] + ' — ' + CM_CHAPTER1.title[lang];
+  document.getElementById('quiz-sub').textContent = st.name[lang] + '  ·  ' + (cmQIdx+1) + '/' + st.questions.length;
+  const briefEl = document.getElementById('quiz-brief');
+  if(cmQIdx===0 && st.brief){ briefEl.textContent = st.brief[lang]; briefEl.classList.remove('hidden'); }
+  else briefEl.classList.add('hidden');
+  const codeEl = document.getElementById('quiz-code');
+  if(q.code){ codeEl.textContent = q.code; codeEl.classList.remove('hidden'); }
+  else codeEl.classList.add('hidden');
+  document.getElementById('quiz-prompt').textContent = q.prompt[lang];
+  const optsEl = document.getElementById('quiz-options');
+  optsEl.innerHTML = '';
+  q.options[lang].forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='btn';
+    b.textContent = String.fromCharCode(65+i) + '. ' + opt;
+    b.addEventListener('click', ()=>answerCM(i));
+    optsEl.appendChild(b);
+  });
+  const fb=document.getElementById('quiz-feedback');
+  fb.textContent=''; fb.className='';
+  document.getElementById('quiz-next').style.display='none';
+  document.getElementById('quiz-next').textContent = (cmQIdx===st.questions.length-1) ? t('cmFinish') : t('cmNext');
+}
+function answerCM(i){
+  const st = CM_STATIONS[cmStationIdx];
+  const q = st.questions[cmQIdx];
+  const optsEl = document.getElementById('quiz-options');
+  if([...optsEl.children].some(b=>b.disabled)) return;   // 已作答，忽略重复点击
+  const correct = i===q.correct;
+  const fb=document.getElementById('quiz-feedback');
+  fb.textContent = (correct ? '✅ ' : '❌ ') + q.explain[lang];
+  fb.className = correct ? 'correct' : 'wrong';
+  [...optsEl.children].forEach((b,bi)=>{
+    b.disabled=true;
+    if(bi===q.correct) b.classList.add('right');
+    else if(bi===i) b.classList.add('picked-wrong');
+  });
+  if(correct && !cmDone.has(q.id)){
+    cmDone.add(q.id); cmScore += q.points; saveCM(); refreshQuests();
+    blip(880,0.12);
+  }else{
+    blip(220,0.1);
+  }
+  document.getElementById('quiz-next').style.display='inline-block';
+}
+document.getElementById('quiz-next').addEventListener('click', ()=>{
+  const st = CM_STATIONS[cmStationIdx];
+  if(cmQIdx < st.questions.length-1){ cmQIdx++; renderCM(); }
+  else closeCM();
+});
+function openCodingMine(i){
+  cmStationIdx=i; cmQIdx=0;
+  renderCM();
+  quizEl.classList.remove('hidden');
+  modalOpen = true;
+  blip(660,0.12);
+}
+function closeCM(){
+  quizEl.classList.add('hidden');
+  modalOpen = false;
+  if(!locked && !touchPlay) overlayEl.classList.remove('hidden');
+}
+document.getElementById('quiz-close').addEventListener('click', closeCM);
+
 document.getElementById('btn-host').addEventListener('click', hostRoom);
 document.getElementById('btn-join').addEventListener('click', ()=>{
   joinRoom(document.getElementById('room-code').value);
@@ -2600,11 +2865,14 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.code==='KeyE'){
-    if(modalOpen){ closeInfo(); return; }
+    if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return; }
     if(playing() && nearInfo>=0){ openInfo(nearInfo); return; }
     if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
+    if(playing() && nearCM>=0){ openCodingMine(nearCM); return; }
   }
-  if(modalOpen && (e.code==='Escape'||e.code==='Enter')){ closeInfo(); return; }
+  if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
+    quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return;
+  }
   if(!locked) return;
   keys.add(e.code);
   if(e.code==='KeyF'){
@@ -2700,6 +2968,8 @@ function applyLang(){
   put('voice-gender-lbl', t('voiceGenderLbl'));
   if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
   if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
+  put('quiz-close', t('cmClose'));
+  if(!quizEl.classList.contains('hidden')) renderCM();   // CodingMine 弹窗开着时也跟着切换语言
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>
@@ -2822,9 +3092,10 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
                   ()=>clearInterval(mineTimer));
   bind('tb-place',()=>doPlace());
   bind('tb-act',  ()=>{
-    if(modalOpen) closeInfo();
+    if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); }
     else if(nearInfo>=0) openInfo(nearInfo);
     else if(nearNpc>=0) openNpc(nearNpc);
+    else if(nearCM>=0) openCodingMine(nearCM);
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
     touchPlay=false;
@@ -2854,6 +3125,8 @@ window.__test = {
   tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
   guessVoiceGender, pickVoice,
   COMPUTERS,
+  codingMine: ()=>({ score:cmScore, total:cmTotalPoints(), done:[...cmDone], stations:CM_STATIONS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY})), nearCM }),
+  openCodingMine, answerCM, closeCM,
 };
 </script>
 </body>
