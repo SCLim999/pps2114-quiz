@@ -2374,21 +2374,6 @@ function refreshQuests(){
     if(visited.has(i)) li.classList.add('done');
     questList.appendChild(li);
   });
-  const cmHeader=document.createElement('li');
-  cmHeader.textContent = t('cmDashHeader');
-  cmHeader.style.cssText = 'list-style:none; margin-top:10px; color:#7fc3ff;';
-  questList.appendChild(cmHeader);
-  CM_CHAPTERS.forEach(ch=>{
-    const {done,total} = cmChapterProgress(ch);
-    const li=document.createElement('li');
-    li.textContent = ch.title[lang] + ' (' + done + '/' + total + ')';
-    if(done===total) li.classList.add('done');
-    questList.appendChild(li);
-  });
-  const scoreLi=document.createElement('li');
-  scoreLi.textContent = t('cmScoreLine', { score:cmScore, total:cmTotalPoints() });
-  scoreLi.style.cssText = 'list-style:none; margin-top:6px; color:#ffd75e;';
-  questList.appendChild(scoreLi);
 }
 refreshQuests();
 

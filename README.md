@@ -98,10 +98,10 @@ the staff canteen.
   points total), covering algorithms & C/C++ syntax, 3D coordinates, variables,
   arrays/lists, for loops, if-else, while loops, functions, decomposition, and an
   open-ended capstone challenge — all with C/C++ code examples. Correct answers
-  earn points shown live in the HUD and in the quest dashboard (press Q); progress
-  is saved to `localStorage`. A big blackboard mounted on the wall between the
-  two rooms (visible from both sides) shows live progress and score across all
-  10 chapters. The two computer rooms are also staffed by 4 Computing School
+  earn points shown live in the HUD; progress is saved to `localStorage`. A big
+  blackboard mounted on the wall between the two rooms (visible from both
+  sides) shows live progress and score across all 10 chapters — the classroom
+  dashboard. The two computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
   (Artificial Intelligence).
