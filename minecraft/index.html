@@ -1358,11 +1358,11 @@ const INFO_POINTS = [
       en:'Welcome to ViTrox Campus 3.0! In June 2021 ViTrox acquired 21.03 acres of land right beside its campus as part of a 10-year expansion masterplan to grow a high-tech ecosystem at Batu Kawan Industrial Park. The new campus continues the language of Campus 2.0 — white slab blocks with slender vertical windows and rooftops covered in solar panels — and between the two blocks lies this fish-pond court: willows, water lilies and a small fenced round island bring garden calm to the factory and help temper the microclimate. Walk out on the timber bridge and look for the lilies!',
       ms:'Selamat datang ke ViTrox Campus 3.0! Pada Jun 2021, ViTrox memperoleh 21.03 ekar tanah bersebelahan kampusnya sebagai sebahagian pelan induk pengembangan 10 tahun untuk membina ekosistem teknologi tinggi di Taman Perindustrian Batu Kawan. Kampus baharu ini meneruskan bahasa Campus 2.0 — blok putih dengan tingkap menegak yang ramping dan bumbung dipenuhi panel solar — dan di antara dua blok terletak laman kolam ikan ini: pokok willow, teratai dan pulau bulat berpagar membawa ketenangan taman ke kilang serta membantu menyederhanakan iklim mikro. Naiklah ke jambatan kayu dan lihat teratainya!' } },
   { x:17, y:4, z:10,
-    title:{ zh:'⑧ 初代智能相机', en:'⑧ The First Smart Camera', ms:'⑧ Kamera Pintar Yang Pertama' },
+    title:{ zh:'⑧ 启发 ViTrox 的相机', en:'⑧ The Camera That Inspired ViTrox', ms:'⑧ Kamera Yang Mengilhamkan ViTrox' },
     text:{
-      zh:'展台上是 ViTrox Gallery 的镇馆之宝——公司创立初期打造的第一台机器视觉智能相机。2000 年，几位年轻工程师放弃跨国公司的安稳工作出来创业，起步时资源有限，靠的就是这台自己研发的智能相机：它能「看懂」电路板和芯片，自动找出人眼难以察觉的缺陷。正是这台相机为 ViTrox 赢得了第一批客户，也孕育出今天所有的 AOI、AXI 检测系统。伟大的事业，往往就从一台小小的相机开始。',
-      en:"On this pedestal sits the crown jewel of the ViTrox Gallery — the first machine-vision smart camera built in the company's earliest days. In 2000, a few young engineers gave up secure jobs at a multinational to start their own venture with very limited resources; what they had was this self-developed smart camera that could 'understand' circuit boards and chips, automatically spotting defects the human eye would miss. That camera won ViTrox its first customers and seeded every AOI and AXI inspection system that followed. Great ventures often begin with one small camera.",
-      ms:'Di atas pedestal ini terletak khazanah utama Galeri ViTrox — kamera pintar penglihatan mesin pertama yang dibina pada awal penubuhan syarikat. Pada tahun 2000, beberapa jurutera muda melepaskan kerjaya selesa di syarikat multinasional untuk memulakan usaha sendiri dengan sumber yang sangat terhad; senjata mereka ialah kamera pintar buatan sendiri ini, yang mampu "memahami" papan litar dan cip serta mengesan kecacatan yang sukar dilihat mata manusia. Kamera inilah yang memenangi pelanggan pertama ViTrox dan menjadi benih semua sistem pemeriksaan AOI dan AXI hari ini. Usaha yang besar sering bermula dengan sebuah kamera yang kecil.' } },
+      zh:'展台上是一台朴素的二手胶卷相机——却在 ViTrox 的历史里占有特别的份量。公司董事经理兼总裁 / CEO Chu Jenn Weng 出身并不富裕的家庭，但他从小就对摄影充满热情。母亲知道后，省吃俭用为他买下了这台二手相机。这份朴素却温暖的礼物点燃了他心中从未熄灭的好奇心——多年后，它也成为他日后创业、最终打造出 ViTrox 的灵感之一。伟大的事业，往往就从最微小的种子开始。',
+      en:"On this pedestal sits a humble second-hand analogue camera — yet it holds an outsized place in ViTrox's history. Chu Jenn Weng, the company's Managing Director, President and CEO, grew up in an underprivileged family, but he had always been passionate about photography since he was young. Knowing this, his mother saved up to buy him this second-hand camera. That small, heart-warming gift lit a spark of curiosity that never faded — and years later, it helped inspire him to build his own entrepreneurial career, one that eventually became ViTrox. Marvellous things really can grow from the tiniest of seeds.",
+      ms:'Di atas pedestal ini terdapat sebuah kamera analog terpakai yang sederhana — namun ia memegang tempat yang istimewa dalam sejarah ViTrox. Chu Jenn Weng, Pengarah Urusan, Presiden dan CEO syarikat, membesar dalam keluarga yang kurang berkemampuan, namun beliau sentiasa meminati fotografi sejak kecil. Mengetahui hal ini, ibunya menabung untuk membelikannya kamera terpakai ini. Hadiah kecil yang menyentuh hati itu menyalakan percikan rasa ingin tahu yang tidak pernah padam — bertahun-tahun kemudian, ia turut mengilhamkan beliau untuk membina kerjaya keusahawanannya sendiri, yang akhirnya menjadi ViTrox. Perkara yang menakjubkan sememangnya boleh tumbuh daripada benih yang paling kecil.' } },
   { x:145, y:4, z:0,
     title:{ zh:'⑨ ViTrox Education · 品牌重塑', en:'⑨ ViTrox Education · Rebranding', ms:'⑨ ViTrox Education · Penjenamaan Semula' },
     text:{
@@ -1624,7 +1624,7 @@ function galleryLabel(text){
   bridgeBanner.scale.set(3.6,0.9,1);
   bridgeBanner.position.set(0.5,9.0,22.6);
   grp.add(bridgeBanner);
-  // 镇馆之宝：初代智能相机（放在金色信息方块展台上，罩玻璃罩）
+  // 镇馆之宝：启发 ViTrox 的相机（放在金色信息方块展台上，罩玻璃罩）
   {
     const cam=new THREE.Group();
     cam.position.set(17.5,5.02,10.5);
@@ -1646,7 +1646,7 @@ function galleryLabel(text){
     const cover=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.85,0.95),gGlass);
     cover.position.y=0.42; cam.add(cover);
     grp.add(cam);
-    const camLbl=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('2000 · The First Smart Camera')}));
+    const camLbl=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('The Camera That Inspired ViTrox')}));
     camLbl.scale.set(2.5,0.62,1);
     camLbl.position.set(18.2,6.5,9.3);
     grp.add(camLbl);

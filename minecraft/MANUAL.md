@@ -94,7 +94,7 @@ https://sclim999.github.io/pps2114-quiz/minecraft/
 | ⑤ | 几何体量的碰撞 | 东侧白色大楼（VITROX 招牌楼）西南角外 |
 | ⑥ | 工业 × 人文校园 | VITROX 大楼内部一层（从面向庭院的开口进入） |
 | ⑦ | Campus 3.0 与鱼池庭院 | 沿东侧马路走到新园区，鱼池木桥南端 |
-| ⑧ | 初代智能相机 | ViTrox Gallery 走廊中段的金色展台（玻璃罩里的相机） |
+| ⑧ | 启发 ViTrox 的相机 | ViTrox Gallery 走廊中段的金色展台（玻璃罩里的相机） |
 | ⑨ | ViTrox Education 品牌重塑 | Campus 3.0 东侧的白色飘带大楼入口（讲师 Dr Janaka Low 所在处） |
 | ⑩ | 电脑室 · CodingMine 编程课堂 | VITROX 招牌大楼四楼电脑室，两室分隔墙的大黑板旁 |
 
