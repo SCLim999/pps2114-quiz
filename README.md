@@ -80,6 +80,10 @@ punching through the circular form.
 - **Multiplayer**: host a room from the start menu, share the 5-letter code, and
   classmates join over WebRTC (PeerJS) — positions and block edits sync live, no
   server needed.
+- **Text-to-speech**: a 🔊 button on every lesson/dialogue reads the current text
+  aloud in the selected language via the browser's built-in speech engine, or turn
+  on "auto-read" in the start menu to have it read automatically every time. No
+  internet or account needed; hidden automatically if the browser doesn't support it.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 

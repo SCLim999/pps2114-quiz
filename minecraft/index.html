@@ -135,6 +135,20 @@
   .lang-btn.active { background:#2b6fb3; color:#fff; border-color:#7fc3ff; }
   .lang-btn:hover { border-color:#7fc3ff; }
 
+  /* ---------- Text-to-speech ---------- */
+  .modal-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .tts-btn {
+    margin-top:16px; padding:12px 18px; font-size:19px; line-height:1;
+    background:#2b6fb3; box-shadow:0 3px 0 #1c4a78;
+  }
+  .tts-btn:hover { background:#3583d1; }
+  .tts-btn.speaking { background:#c9302c; box-shadow:0 3px 0 #7a1c19; }
+  .tts-toggle {
+    display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:#9fd0ff;
+    cursor:pointer; user-select:none;
+  }
+  .tts-toggle input { width:16px; height:16px; accent-color:#2b6fb3; cursor:pointer; }
+
   /* ---------- 触屏操作 UI ---------- */
   #touch-ui { position:fixed; inset:0; z-index:6; pointer-events:none; }
   #vjoy {
@@ -217,6 +231,9 @@
     <div class="mp-line"><span id="lbl-name"></span><input id="player-name" maxlength="12" placeholder="Steve"></div>
     <button class="btn" id="btn-start"></button>
     <button class="btn gray" id="btn-reset"></button>
+    <label class="tts-toggle hidden" id="tts-toggle-row">
+      <input type="checkbox" id="tts-auto-cb"><span id="tts-toggle-lbl"></span>
+    </label>
 
     <div class="mp-box">
       <h3 id="mp-title"></h3>
@@ -238,7 +255,10 @@
     <h1 id="modal-title"></h1>
     <p class="en" id="modal-en"></p>
     <p id="modal-text"></p>
-    <button class="btn" id="btn-close"></button>
+    <div class="modal-actions">
+      <button class="btn" id="btn-close"></button>
+      <button class="btn tts-btn hidden" id="btn-tts" title="Read aloud">🔊</button>
+    </div>
   </div>
 </div>
 
@@ -292,6 +312,8 @@ zh: {
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
   btnClose:'继续探索（E）',
+  ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
+  ttsTitle:'朗读', ttsTitleStop:'停止朗读',
   flyOn:'✈ 飞行模式：开（空格上升 / Shift 下降）', flyOff:'🚶 飞行模式：关',
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
@@ -335,6 +357,8 @@ en: {
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
   btnClose:'Continue exploring (E)',
+  ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
+  ttsTitle:'Read aloud', ttsTitleStop:'Stop reading',
   flyOn:'✈ Fly mode ON (Space up / Shift down)', flyOff:'🚶 Fly mode OFF',
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
@@ -378,6 +402,8 @@ ms: {
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
   btnClose:'Terus meneroka (E)',
+  ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
+  ttsTitle:'Baca kuat', ttsTitleStop:'Henti membaca',
   flyOn:'✈ Mod terbang: HIDUP (Space naik / Shift turun)', flyOff:'🚶 Mod terbang: MATI',
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
@@ -1805,6 +1831,65 @@ function refreshQuests(){
 }
 refreshQuests();
 
+/* ================================================================
+   文字转语音（Web Speech API，浏览器原生朗读，无需联网/密钥）
+================================================================ */
+const TTS_LANG = { zh:'zh-CN', en:'en-US', ms:'ms-MY' };
+const ttsSupported = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+let ttsAuto = false;
+try{ ttsAuto = localStorage.getItem('vitroxcraft_tts_auto')==='1'; }catch(e){}
+let currentSpeech = null;      // 当前弹窗可朗读的文本
+const ttsBtn = document.getElementById('btn-tts');
+
+function pickVoice(bcp47){
+  if(!ttsSupported) return null;
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length) return null;
+  return voices.find(v=>v.lang===bcp47)
+      || voices.find(v=>v.lang && v.lang.toLowerCase().startsWith(bcp47.slice(0,2)))
+      || null;
+}
+function speakText(text){
+  if(!ttsSupported || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = TTS_LANG[lang] || 'en-US';
+  const v = pickVoice(u.lang);
+  if(v) u.voice = v;
+  u.rate = 0.96; u.pitch = 1.0;
+  u.onstart = ()=>setTtsSpeaking(true);
+  u.onend   = ()=>setTtsSpeaking(false);
+  u.onerror = ()=>setTtsSpeaking(false);
+  window.speechSynthesis.speak(u);
+}
+function stopSpeak(){ if(ttsSupported) window.speechSynthesis.cancel(); setTtsSpeaking(false); }
+function setTtsSpeaking(on){
+  if(!ttsBtn) return;
+  ttsBtn.textContent = on ? '⏹' : '🔊';
+  ttsBtn.title = on ? t('ttsTitleStop') : t('ttsTitle');
+  ttsBtn.classList.toggle('speaking', on);
+}
+if(ttsBtn) ttsBtn.addEventListener('click',()=>{
+  if(window.speechSynthesis && window.speechSynthesis.speaking) stopSpeak();
+  else speakText(currentSpeech);
+});
+const ttsToggleRow = document.getElementById('tts-toggle-row');
+const ttsAutoCb = document.getElementById('tts-auto-cb');
+if(ttsSupported){
+  if(ttsBtn) ttsBtn.classList.remove('hidden');
+  if(ttsToggleRow) ttsToggleRow.classList.remove('hidden');
+  if(ttsAutoCb){
+    ttsAutoCb.checked = ttsAuto;
+    ttsAutoCb.addEventListener('change',()=>{
+      ttsAuto = ttsAutoCb.checked;
+      try{ localStorage.setItem('vitroxcraft_tts_auto', ttsAuto?'1':'0'); }catch(e){}
+      toast(ttsAuto ? t('ttsOn') : t('ttsOff'));
+    });
+  }
+  // Chrome 的语音列表是异步加载的，首次可能为空，加载完成后无需额外处理（下次朗读会自动选到）
+  if(window.speechSynthesis.onvoiceschanged!==undefined) window.speechSynthesis.onvoiceschanged=()=>{};
+}
+
 /* ---- 信息弹窗 ---- */
 const modalEl=document.getElementById('modal');
 function openInfo(i){
@@ -1814,6 +1899,8 @@ function openInfo(i){
   document.getElementById('modal-text').textContent = p.text[lang];
   modalEl.classList.remove('hidden');
   modalOpen=true;
+  currentSpeech = p.title[lang] + '. ' + p.text[lang];
+  if(ttsAuto) speakText(currentSpeech);
   const isNew = !visited.has(i);
   visited.add(i); refreshQuests();
   blip(660,0.12);
@@ -1824,6 +1911,7 @@ function openInfo(i){
 function closeInfo(){
   modalEl.classList.add('hidden');
   modalOpen=false;
+  stopSpeak();
   if(!locked && !touchPlay) overlayEl.classList.remove('hidden');
 }
 document.getElementById('btn-close').addEventListener('click',closeInfo);
@@ -2359,6 +2447,8 @@ function openNpc(i){
   document.getElementById('modal-text').textContent = n.dialog[lang];
   modalEl.classList.remove('hidden');
   modalOpen = true;
+  currentSpeech = n.dialog[lang];
+  if(ttsAuto) speakText(currentSpeech);
   blip(520,0.1);
 }
 
@@ -2499,6 +2589,9 @@ function applyLang(){
   put('ov-credit', t('credit'));
   put('quests-title', t('questsTitle'));
   put('btn-close', t('btnClose'));
+  put('tts-toggle-lbl', t('ttsToggle'));
+  if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
+  if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>
@@ -2648,7 +2741,9 @@ window.__test = {
   stats(){
     let solid=0; for(let i=0;i<vox.length;i++) if(vox[i]) solid++;
     return { solidBlocks:solid, chunkMeshes:chunks.size, infoPoints:INFO_POINTS.length };
-  }
+  },
+  openInfo, openNpc, closeInfo,
+  tts: ()=>({ supported:ttsSupported, auto:ttsAuto, currentSpeech, speaking: ttsSupported && window.speechSynthesis.speaking }),
 };
 </script>
 </body>
