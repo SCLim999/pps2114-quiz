@@ -1777,6 +1777,12 @@ function buildCarMeshes(){
     put('cTower', COMP_GEO.tower,    MACH_MAT.dark,      T([0.26,0.13,0]),  rot);
     put('cLed',   COMP_GEO.led,      COMP_MAT.led,       T([0.26,0.13,0.12]),rot);
   }
+  CM_STATIONS.forEach((st,i)=>{                            // CodingMine 工位悬浮编号牌
+    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture('Station '+(i+1)), depthTest:false }));
+    tag.scale.set(1.6,0.4,1);
+    tag.position.set(st.x+0.5, st.floorY+2.2, st.z+0.5);
+    carGroup.add(tag);
+  });
   const dummy=new THREE.Object3D();
   for(const b of buckets.values()){
     const im=new THREE.InstancedMesh(b.geo, b.mat, b.list.length);
