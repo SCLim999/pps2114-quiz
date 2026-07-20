@@ -308,7 +308,6 @@
     <p id="quiz-feedback"></p>
     <div class="modal-actions">
       <button class="btn" id="quiz-next" style="display:none"></button>
-      <button class="btn gray" id="quiz-back" style="display:none"></button>
       <button class="btn gray" id="quiz-close"></button>
     </div>
   </div>
@@ -364,10 +363,9 @@ zh: {
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> 分',
-  promptCMStart:' — 按 E 查看课程', cmBack:'◀ 返回课程列表',
+  promptCMStart:' — 按 E 开始', promptCMRedo:' — 按 E 复习',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
   cmDashHeader:'💻 CodingMine 编程课程',
-  cmMenuTitle:'课程列表', cmMenuHint:'选择一章开始练习：', cmChapterDone:'✔ 已完成',
   cmScoreLine:'总分：{score} / {total}',
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
@@ -416,10 +414,9 @@ en: {
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> pts',
-  promptCMStart:' — press E to view courses', cmBack:'◀ Back to course list',
+  promptCMStart:' — press E to start', promptCMRedo:' — press E to review',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
   cmDashHeader:'💻 CodingMine Coding Courses',
-  cmMenuTitle:'Course list', cmMenuHint:'Pick a chapter to start:', cmChapterDone:'✔ Done',
   cmScoreLine:'Total score: {score} / {total}',
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
@@ -468,10 +465,9 @@ ms: {
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> mata',
-  promptCMStart:' — tekan E untuk lihat kursus', cmBack:'◀ Kembali ke senarai kursus',
+  promptCMStart:' — tekan E untuk mula', promptCMRedo:' — tekan E untuk ulang kaji',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
   cmDashHeader:'💻 Kursus Pengaturcaraan CodingMine',
-  cmMenuTitle:'Senarai kursus', cmMenuHint:'Pilih satu bab untuk mula:', cmChapterDone:'✔ Selesai',
   cmScoreLine:'Jumlah markah: {score} / {total}',
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
@@ -1027,9 +1023,9 @@ function generate(){
     for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
     for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    const CM_ID_BY_X = { 41:'ch1_t1', 43:'ch1_t2', 46:'ch1_t3' };       // 电脑室 1 第一排：CodingMine 第一章工作站
-    for(const x of COLS){ placeComputer(x,-13, 1,16, CM_ID_BY_X[x]||null); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
-    for(const x of COLS){ placeComputer(x, 3,  1,16); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
+    // 两间电脑室第一排（z=-13 / z=3）共 10 台绿屏电脑，逐一对应 CodingMine 第一~十章
+    for(const x of COLS){ placeComputer(x,-13, 1,16,'cm'); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
+    for(const x of COLS){ placeComputer(x, 3,  1,16,'cm'); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -1962,10 +1958,17 @@ function toast(msg){
 const CODINGMINE = {
   company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
 };
-const CM_TERMINALS = [                       // 四楼电脑室 3 台绿屏电脑的物理位置（都通往同一套课程）
-  { id:'t1', x:41, z:-13, floorY:16 },
-  { id:'t2', x:43, z:-13, floorY:16 },
-  { id:'t3', x:46, z:-13, floorY:16 },
+const CM_TERMINALS = [                       // 两间电脑室共 10 台绿屏电脑，每台固定对应一章（工位 N → 第 N 章）
+  { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0 },
+  { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1 },
+  { id:'t3',  x:46, z:-13, floorY:16, chapterIdx:2 },
+  { id:'t4',  x:49, z:-13, floorY:16, chapterIdx:3 },
+  { id:'t5',  x:52, z:-13, floorY:16, chapterIdx:4 },
+  { id:'t6',  x:41, z:3,   floorY:16, chapterIdx:5 },
+  { id:'t7',  x:43, z:3,   floorY:16, chapterIdx:6 },
+  { id:'t8',  x:46, z:3,   floorY:16, chapterIdx:7 },
+  { id:'t9',  x:49, z:3,   floorY:16, chapterIdx:8 },
+  { id:'t10', x:52, z:3,   floorY:16, chapterIdx:9 },
 ];
 const CM_CHAPTERS = [
   { id:'ch1', title:{ zh:'第一章 · All that Syntax（语法结构与 Bug 修复）', en:'Chapter 1 · All that Syntax', ms:'Bab 1 · All that Syntax' },
@@ -2490,7 +2493,9 @@ function checkInfoProximity(){
     promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + t('promptTalk');
     promptEl.style.display='block';
   }else if(nearCM>=0){
-    promptText.textContent = ' 💻 ' + CODINGMINE.company[lang] + t('promptCMStart');
+    const ch = CM_CHAPTERS[CM_TERMINALS[nearCM].chapterIdx];
+    const {done,total} = cmChapterProgress(ch);
+    promptText.textContent = ' 💻 ' + ch.title[lang] + (done===total ? t('promptCMRedo') : t('promptCMStart'));
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -3027,36 +3032,8 @@ function openNpc(i){
   blip(520,0.1);
 }
 
-let cmView='menu', cmChapterIdx=-1, cmQIdx=0;
+let cmChapterIdx=-1, cmQIdx=0;
 const quizEl = document.getElementById('quiz');
-function renderCMMenu(){
-  document.getElementById('quiz-title').textContent = '💻 ' + CODINGMINE.company[lang] + ' — ' + t('cmMenuTitle');
-  const totalDone = CM_CHAPTERS.reduce((s,ch)=>s+cmChapterProgress(ch).done,0);
-  const totalQ = CM_CHAPTERS.reduce((s,ch)=>s+ch.questions.length,0);
-  document.getElementById('quiz-sub').textContent = t('cmMenuHint') + '  (' + totalDone + '/' + totalQ + ')';
-  document.getElementById('quiz-brief').classList.add('hidden');
-  document.getElementById('quiz-code').classList.add('hidden');
-  document.getElementById('quiz-prompt').textContent = '';
-  const fb=document.getElementById('quiz-feedback');
-  fb.textContent=''; fb.className='';
-  document.getElementById('quiz-next').style.display='none';
-  document.getElementById('quiz-back').style.display='none';
-  const optsEl = document.getElementById('quiz-options');
-  optsEl.innerHTML = '';
-  CM_CHAPTERS.forEach((ch,i)=>{
-    const {done,total} = cmChapterProgress(ch);
-    const b=document.createElement('button');
-    b.className='btn';
-    b.textContent = ch.title[lang] + '  (' + done + '/' + total + ')' + (done===total ? '  ' + t('cmChapterDone') : '');
-    if(done===total) b.classList.add('right');
-    b.addEventListener('click', ()=>openCMChapter(i));
-    optsEl.appendChild(b);
-  });
-}
-function openCMChapter(i){
-  cmView='quiz'; cmChapterIdx=i; cmQIdx=0;
-  renderCMQuiz();
-}
 function renderCMQuiz(){
   const ch = CM_CHAPTERS[cmChapterIdx];
   const q = ch.questions[cmQIdx];
@@ -3082,8 +3059,6 @@ function renderCMQuiz(){
   fb.textContent=''; fb.className='';
   document.getElementById('quiz-next').style.display='none';
   document.getElementById('quiz-next').textContent = (cmQIdx===ch.questions.length-1) ? t('cmFinish') : t('cmNext');
-  document.getElementById('quiz-back').style.display='inline-block';
-  document.getElementById('quiz-back').textContent = t('cmBack');
   quizEl.classList.remove('hidden');
 }
 function answerCM(i){
@@ -3111,15 +3086,19 @@ function answerCM(i){
 document.getElementById('quiz-next').addEventListener('click', ()=>{
   const ch = CM_CHAPTERS[cmChapterIdx];
   if(cmQIdx < ch.questions.length-1){ cmQIdx++; renderCMQuiz(); }
-  else{ cmView='menu'; renderCMMenu(); }
+  else closeCM();
 });
-document.getElementById('quiz-back').addEventListener('click', ()=>{ cmView='menu'; renderCMMenu(); });
-function openCodingMine(){
-  cmView='menu';
-  renderCMMenu();
-  quizEl.classList.remove('hidden');
+function openCodingMine(terminalIdx){
+  cmChapterIdx = CM_TERMINALS[terminalIdx].chapterIdx;
+  cmQIdx = 0;
+  renderCMQuiz();
   modalOpen = true;
   blip(660,0.12);
+}
+function openCMChapter(chapterIdx){                      // 直接跳到指定章节（供测试/调试使用）
+  cmChapterIdx = chapterIdx; cmQIdx = 0;
+  renderCMQuiz();
+  modalOpen = true;
 }
 function closeCM(){
   quizEl.classList.add('hidden');
@@ -3273,9 +3252,7 @@ function applyLang(){
   if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
   if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
   put('quiz-close', t('cmClose'));
-  if(!quizEl.classList.contains('hidden')){               // CodingMine 弹窗开着时也跟着切换语言
-    if(cmView==='menu') renderCMMenu(); else renderCMQuiz();
-  }
+  if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // CodingMine 弹窗开着时也跟着切换语言
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>

@@ -90,9 +90,10 @@ the staff canteen.
   character's look (male guards/engineers/founders/Dr Janaka Low vs. female Siti/
   Mei Ling/Priya); a 👨/👩 picker in the start menu sets the narrator voice used
   for the architecture lessons themselves.
-- **CodingMine C/C++ curriculum**: 3 of the computers in Computer Room 1 (green
-  screens) are interactive workstations set in a fictional software company,
-  "CodingMine" — press E to open a 10-chapter course list (23 questions, 230
+- **CodingMine C/C++ curriculum**: 10 of the computers (green screens, one per
+  room's front row) are interactive workstations set in a fictional software
+  company, "CodingMine" — each one is a fixed Station 1-10, and walking up to a
+  station and pressing E jumps straight into that chapter (23 questions, 230
   points total), covering algorithms & C/C++ syntax, 3D coordinates, variables,
   arrays/lists, for loops, if-else, while loops, functions, decomposition, and an
   open-ended capstone challenge — all with C/C++ code examples. Correct answers
