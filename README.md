@@ -102,7 +102,7 @@ the staff canteen.
   is saved to `localStorage`. A big blackboard mounted on the wall between the
   two rooms (visible from both sides) shows live progress and score across all
   10 chapters. The two computer rooms are also staffed by 4 Computing School
-  lecturers you can talk to: Ts Dr Lim SC (Head · Software Engineering),
+  lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
   (Artificial Intelligence).
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.

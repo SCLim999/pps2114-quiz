@@ -71,9 +71,10 @@
   }
 
   #quests {
-    position:fixed; right:10px; top:60px; width:260px; background:rgba(0,0,0,.55);
+    position:fixed; right:10px; top:60px; bottom:10px; width:260px; background:rgba(0,0,0,.55);
     color:#fff; padding:12px 14px; border-radius:10px; font-size:13px; z-index:5;
     display:none; border:1px solid rgba(255,255,255,.25);
+    overflow-y:auto;
   }
   #quests h3 { font-size:14px; margin-bottom:8px; color:#ffd75e; }
   #quests li { list-style:none; margin:4px 0; }
@@ -2975,7 +2976,7 @@ const NPCS = [
       ms:'Selamat datang ke ViTrox Education! Saya mengajar di sini. Kami baru selesai menjenamakan semula — ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus kami terhadap pendidikan dan pembangunan bakat, supaya pelajar dan rakan kongsi terus mengenali kami sebagai sebahagian keluarga yang sama dengan syarikat induk. Jemput masuk melihat bangunan reben kaca yang melengkung ini!' } },
   /* —— Computing School 核心人物兼讲师：常驻 VITROX 招牌大楼四楼电脑室 —— */
   { name:'Ts Dr Lim SC', color:0x2c3e50, tie:0x1b9aaa, expr:'smile', range:2, x:44, y:16, z:-8, baseYaw:0,
-    role:{ zh:'计算机学院 院长 · 软件工程', en:'Head, Computing School · Software Engineering', ms:'Ketua, Computing School · Kejuruteraan Perisian' },
+    role:{ zh:'Programme Leader · 软件工程', en:'Programme Leader, Computing School · Software Engineering', ms:'Programme Leader, Computing School · Kejuruteraan Perisian' },
     dialog:{
       zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，主要教授软件工程——从需求分析、系统设计到测试维护，教学生怎么把一个想法变成可靠的软件产品。旁边绿屏的电脑是我们给新生设计的 CodingMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
       en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I mainly teach Software Engineering — from requirements analysis and system design to testing and maintenance, teaching students how to turn an idea into a reliable software product. The green-screen computers nearby are the CodingMine exercise we designed for new students, learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
