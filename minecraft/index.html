@@ -149,6 +149,13 @@
     cursor:pointer; user-select:none;
   }
   .tts-toggle input { width:16px; height:16px; accent-color:#2b6fb3; cursor:pointer; }
+  .voice-row { display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#9fd0ff; }
+  .voice-btn {
+    padding:4px 10px; font-size:16px; border-radius:16px; cursor:pointer;
+    border:1px solid #4a7ab5; background:transparent; color:#9fd0ff;
+  }
+  .voice-btn.active { background:#2b6fb3; color:#fff; border-color:#7fc3ff; }
+  .voice-btn:hover { border-color:#7fc3ff; }
 
   /* ---------- 触屏操作 UI ---------- */
   #touch-ui { position:fixed; inset:0; z-index:6; pointer-events:none; }
@@ -235,6 +242,11 @@
     <label class="tts-toggle hidden" id="tts-toggle-row">
       <input type="checkbox" id="tts-auto-cb"><span id="tts-toggle-lbl"></span>
     </label>
+    <div class="voice-row hidden" id="voice-gender-row">
+      <span id="voice-gender-lbl"></span>
+      <button class="voice-btn" data-gender="m" id="voice-btn-m">👨</button>
+      <button class="voice-btn" data-gender="f" id="voice-btn-f">👩</button>
+    </div>
 
     <div class="mp-box">
       <h3 id="mp-title"></h3>
@@ -315,6 +327,7 @@ zh: {
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
   ttsTitle:'朗读', ttsTitleStop:'停止朗读',
+  voiceGenderLbl:'讲解旁白声音：', voiceSet:'旁白声音已切换',
   flyOn:'✈ 飞行模式：开（空格上升 / Shift 下降）', flyOff:'🚶 飞行模式：关',
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
@@ -360,6 +373,7 @@ en: {
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
   ttsTitle:'Read aloud', ttsTitleStop:'Stop reading',
+  voiceGenderLbl:'Narrator voice:', voiceSet:'Narrator voice switched',
   flyOn:'✈ Fly mode ON (Space up / Shift down)', flyOff:'🚶 Fly mode OFF',
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
@@ -405,6 +419,7 @@ ms: {
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
   ttsTitle:'Baca kuat', ttsTitleStop:'Henti membaca',
+  voiceGenderLbl:'Suara narator:', voiceSet:'Suara narator ditukar',
   flyOn:'✈ Mod terbang: HIDUP (Space naik / Shift turun)', flyOff:'🚶 Mod terbang: MATI',
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
@@ -1839,23 +1854,41 @@ const TTS_LANG = { zh:'zh-CN', en:'en-US', ms:'ms-MY' };
 const ttsSupported = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
 let ttsAuto = false;
 try{ ttsAuto = localStorage.getItem('vitroxcraft_tts_auto')==='1'; }catch(e){}
+let ttsGender = 'f';
+try{ const g=localStorage.getItem('vitroxcraft_tts_gender'); if(g==='m'||g==='f') ttsGender=g; }catch(e){}
 let currentSpeech = null;      // 当前弹窗可朗读的文本
+let currentGender = 'f';       // 当前弹窗应使用的朗读声音性别
 const ttsBtn = document.getElementById('btn-tts');
 
-function pickVoice(bcp47){
+// 语音 API 不直接提供性别字段，按常见语音名称关键词猜测男/女声
+const VOICE_FEMALE_HINTS = ['female','woman','girl','zira','aria','jenny','susan','samantha','victoria','karen','moira','tessa','女','晓晓','xiaoxiao','ting-ting','tingting','mei-jia','meijia','yaoyao','sin-ji','sinji','danielle','salli','joanna','ivy','kendra','kimberly','amy','emma','olivia','siti','nur'];
+const VOICE_MALE_HINTS   = ['male','man','guy','david','mark','james','daniel','fred','george','ryan','alex','matthew','justin','joey','男','云扬','yunyang','云健','yunjian','kangkang','brian','eric'];
+function guessVoiceGender(voice){
+  const n = (voice.name||'').toLowerCase();
+  if(VOICE_FEMALE_HINTS.some(k=>k && n.includes(k))) return 'f';
+  if(VOICE_MALE_HINTS.some(k=>k && n.includes(k))) return 'm';
+  return null;
+}
+function pickVoice(bcp47, genderPref){
   if(!ttsSupported) return null;
   const voices = window.speechSynthesis.getVoices();
   if(!voices.length) return null;
-  return voices.find(v=>v.lang===bcp47)
-      || voices.find(v=>v.lang && v.lang.toLowerCase().startsWith(bcp47.slice(0,2)))
-      || null;
+  const prefix = bcp47.slice(0,2).toLowerCase();
+  const candidates = voices.filter(v=>v.lang===bcp47)
+    .concat(voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith(prefix) && v.lang!==bcp47));
+  if(!candidates.length) return null;
+  if(genderPref){
+    const match = candidates.find(v=>guessVoiceGender(v)===genderPref);
+    if(match) return match;
+  }
+  return candidates[0];
 }
-function speakText(text){
+function speakText(text, genderPref){
   if(!ttsSupported || !text) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = TTS_LANG[lang] || 'en-US';
-  const v = pickVoice(u.lang);
+  const v = pickVoice(u.lang, genderPref);
   if(v) u.voice = v;
   u.rate = 0.96; u.pitch = 1.0;
   u.onstart = ()=>setTtsSpeaking(true);
@@ -1872,13 +1905,28 @@ function setTtsSpeaking(on){
 }
 if(ttsBtn) ttsBtn.addEventListener('click',()=>{
   if(window.speechSynthesis && window.speechSynthesis.speaking) stopSpeak();
-  else speakText(currentSpeech);
+  else speakText(currentSpeech, currentGender);
 });
 const ttsToggleRow = document.getElementById('tts-toggle-row');
+const voiceGenderRow = document.getElementById('voice-gender-row');
+const voiceBtnM = document.getElementById('voice-btn-m');
+const voiceBtnF = document.getElementById('voice-btn-f');
+function refreshVoiceGenderBtns(){
+  if(voiceBtnM) voiceBtnM.classList.toggle('active', ttsGender==='m');
+  if(voiceBtnF) voiceBtnF.classList.toggle('active', ttsGender==='f');
+}
+[voiceBtnM, voiceBtnF].forEach(b=>{ if(!b) return; b.addEventListener('click',()=>{
+  ttsGender = b.dataset.gender;
+  try{ localStorage.setItem('vitroxcraft_tts_gender', ttsGender); }catch(e){}
+  refreshVoiceGenderBtns();
+  toast(t('voiceSet'));
+}); });
+refreshVoiceGenderBtns();
 const ttsAutoCb = document.getElementById('tts-auto-cb');
 if(ttsSupported){
   if(ttsBtn) ttsBtn.classList.remove('hidden');
   if(ttsToggleRow) ttsToggleRow.classList.remove('hidden');
+  if(voiceGenderRow) voiceGenderRow.classList.remove('hidden');
   if(ttsAutoCb){
     ttsAutoCb.checked = ttsAuto;
     ttsAutoCb.addEventListener('change',()=>{
@@ -1901,7 +1949,8 @@ function openInfo(i){
   modalEl.classList.remove('hidden');
   modalOpen=true;
   currentSpeech = p.title[lang] + '. ' + p.text[lang];
-  if(ttsAuto) speakText(currentSpeech);
+  currentGender = ttsGender;                    // 建筑知识点没有固定角色，用用户选择的旁白声音
+  if(ttsAuto) speakText(currentSpeech, currentGender);
   const isNew = !visited.has(i);
   visited.add(i); refreshQuests();
   blip(660,0.12);
@@ -2449,7 +2498,8 @@ function openNpc(i){
   modalEl.classList.remove('hidden');
   modalOpen = true;
   currentSpeech = n.dialog[lang];
-  if(ttsAuto) speakText(currentSpeech);
+  currentGender = (n.style==='f'||n.style==='hijab') ? 'f' : 'm';   // 按角色造型自动选男/女声
+  if(ttsAuto) speakText(currentSpeech, currentGender);
   blip(520,0.1);
 }
 
@@ -2591,6 +2641,7 @@ function applyLang(){
   put('quests-title', t('questsTitle'));
   put('btn-close', t('btnClose'));
   put('tts-toggle-lbl', t('ttsToggle'));
+  put('voice-gender-lbl', t('voiceGenderLbl'));
   if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
   if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
   refreshQuests();
@@ -2744,7 +2795,8 @@ window.__test = {
     return { solidBlocks:solid, chunkMeshes:chunks.size, infoPoints:INFO_POINTS.length };
   },
   openInfo, openNpc, closeInfo,
-  tts: ()=>({ supported:ttsSupported, auto:ttsAuto, currentSpeech, speaking: ttsSupported && window.speechSynthesis.speaking }),
+  tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
+  guessVoiceGender, pickVoice,
 };
 </script>
 </body>
