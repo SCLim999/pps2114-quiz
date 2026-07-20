@@ -70,7 +70,8 @@ recreates the [ViTrox Campus 2.0 by CYC Architect](https://www.cycarch.com/vitro
 (Batu Kawan, Penang) — central circular courtyard, radial layout, circular landscape
 ramp, doorless entrance, green roof, and the rectangular production/office blocks
 punching through the circular form, including two computer rooms (~20 PCs total)
-next to the staff canteen inside the VITROX-lettered building.
+on the 4th floor of the VITROX-lettered building, reached via a staircase next to
+the staff canteen.
 
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).

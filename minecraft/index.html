@@ -684,11 +684,11 @@ function placeTree(x,z,rand){
   set(x,top+1,z,B.LEAF);
 }
 
-function placeComputer(x,z,facing){
+function placeComputer(x,z,facing,floorY=4){
   // 桌椅用体素方块（跟食堂家具同一风格）；电脑本体（显示器+主机）用实例化网格
-  set(x,4,z,B.WHITE);                 // 白色书桌
-  set(x,4,z+facing,B.PLANK);          // 椅子（在过道一侧）
-  COMPUTERS.push({ x:x+0.5, y:5, z:z+0.5, facing });
+  set(x,floorY,z,B.WHITE);                 // 白色书桌
+  set(x,floorY,z+facing,B.PLANK);          // 椅子（在过道一侧）
+  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing });
 }
 
 function buildBox(x0,x1,z0,z1,storeys,openings){
@@ -956,16 +956,22 @@ function generate(){
     }
   }
 
-  /* ---- 5.9 电脑室（VITROX 大楼东半层，两间，共 20 台电脑）---- */
+  /* ---- 5.9 电脑室楼梯（食堂旁的空地直跑楼梯，一路通往四楼电脑室）---- */
   {
-    for(let x=39;x<=53;x++) for(let z=-15;z<=15;z++) set(x,3,z,B.TILE); // 地坪（与楼内其他区域一致）
-    for(let x=39;x<=53;x++) for(let y=4;y<=6;y++) set(x,y,0,B.WHITE);   // 两室分隔墙（南=电脑室1，北=电脑室2）
-    for(let z of [-1,0,1]) for(let y=4;y<=6;y++) set(39,y,z,B.AIR);     // 分隔墙留一个连通门洞
-    for(const [px,pz] of [[39,-6],[39,-1],[39,1],[39,6]]) for(const dz of [-1,0,1])
-      set(px,3,pz+dz,B.BLUE);                                          // 食堂门洞→电脑室的蓝色地毯引导
+    for(const pz of [-6,6]) for(const dz of [-1,0,1])
+      set(39,3,pz+dz,B.BLUE);                                          // 食堂门洞→楼梯间的蓝色地毯引导
+    for(let i=0;i<=11;i++) set(41+i, 4+i, 8, B.GRAY);                  // 直跑楼梯：地面 → 四楼
+    for(const [sy,x0,x1] of [[7,42,43],[11,46,47],[15,50,51]])
+      for(let x=x0;x<=x1;x++) set(x,sy,8,B.AIR);                       // 各层楼板开洞，留出楼梯净空
+  }
+
+  /* ---- 5.10 电脑室（VITROX 大楼四楼东半层，两间，共 20 台电脑）---- */
+  {
+    for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
+    for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    for(const x of COLS){ placeComputer(x,-13, 1); placeComputer(x,-3,-1); } // 电脑室 1（z=-15..-1）
-    for(const x of COLS){ placeComputer(x, 3,  1); placeComputer(x,13,-1); } // 电脑室 2（z=1..15）
+    for(const x of COLS){ placeComputer(x,-13, 1,16); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
+    for(const x of COLS){ placeComputer(x, 3,  1,16); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
   }
 
   /* ---- 6. 入口广场与步道 ---- */
