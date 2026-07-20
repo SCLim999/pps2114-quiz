@@ -75,8 +75,9 @@ the staff canteen.
 
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).
-- Walk (WASD), fly (F), break/place blocks (mouse), and visit the **9 golden info
-  blocks** to read architecture lessons about the building's design.
+- Walk (WASD), fly (F), break/place blocks (mouse), and visit the **10 golden info
+  blocks** to read architecture lessons about the building's design (including
+  one at the computer lab's blackboard).
 - **Trilingual**: the whole UI and all lessons switch between 中文 / English /
   Bahasa Melayu (top-right of the start menu; auto-detected on first load).
 - **Multiplayer**: host a room from the start menu, share the 5-letter code, and
@@ -98,10 +99,12 @@ the staff canteen.
   arrays/lists, for loops, if-else, while loops, functions, decomposition, and an
   open-ended capstone challenge — all with C/C++ code examples. Correct answers
   earn points shown live in the HUD and in the quest dashboard (press Q); progress
-  is saved to `localStorage`. The two computer rooms are also staffed by 4
-  Computing School lecturers you can talk to: Ts Dr Lim SC (Head · Software
-  Engineering), Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter),
-  and Mr Eng YK (Artificial Intelligence).
+  is saved to `localStorage`. A big blackboard mounted on the wall between the
+  two rooms (visible from both sides) shows live progress and score across all
+  10 chapters. The two computer rooms are also staffed by 4 Computing School
+  lecturers you can talk to: Ts Dr Lim SC (Head · Software Engineering),
+  Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
+  (Artificial Intelligence).
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
