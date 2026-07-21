@@ -95,17 +95,18 @@ the staff canteen.
   character's look (male guards/engineers/founders/Dr Janaka Low vs. female Siti/
   Mei Ling/Priya); a 👨/👩 picker in the start menu sets the narrator voice used
   for the architecture lessons themselves.
-- **CodingMine C/C++ curriculum**: 10 of the computers (green screens, one per
-  room's front row) are interactive workstations set in a fictional software
-  company, "CodingMine" — each one is a fixed Station 1-10, and walking up to a
-  station and pressing E jumps straight into that chapter (23 questions, 230
-  points total), covering algorithms & C/C++ syntax, 3D coordinates, variables,
-  arrays/lists, for loops, if-else, while loops, functions, decomposition, and an
-  open-ended capstone challenge — all with C/C++ code examples. Correct answers
-  earn points shown live in the HUD; progress is saved to `localStorage`. A big
-  blackboard mounted on the wall between the two rooms (visible from both
-  sides) shows live progress and score across all 10 chapters — the classroom
-  dashboard. The two computer rooms are also staffed by 4 Computing School
+- **CodingMine IT quiz stations**: 10 computers (one per room's front row),
+  each with a *different screen colour* and a *single* multiple-choice question
+  on a different computing topic — Introduction to Computing, C++ Programming,
+  Database, Information Technology, Data Science, Artificial Intelligence,
+  Networking & Internet, Operating System, HTML, and Software Design. Questions
+  are short and fun, aimed at primary/secondary-school level. Walk up to a
+  station and press E to answer; correct answers earn points shown live in the
+  HUD (100 points total), saved to `localStorage`. A big blackboard mounted on
+  the wall between the two rooms (visible from both sides) shows live progress
+  per topic and total score — and if a multiplayer room is active, a second
+  column shows a live leaderboard of every connected player's score. The two
+  computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
   (Artificial Intelligence). Scattered through the ground-floor pilotis of the

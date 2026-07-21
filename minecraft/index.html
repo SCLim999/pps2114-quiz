@@ -402,6 +402,7 @@ zh: {
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
   cmDashHeader:'💻 CodingMine 编程课程',
   cmScoreLine:'总分：{score} / {total}',
+  cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
   ttsTitle:'朗读', ttsTitleStop:'停止朗读',
@@ -456,6 +457,7 @@ en: {
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
   cmDashHeader:'💻 CodingMine Coding Courses',
   cmScoreLine:'Total score: {score} / {total}',
+  cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
   ttsTitle:'Read aloud', ttsTitleStop:'Stop reading',
@@ -510,6 +512,7 @@ ms: {
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
   cmDashHeader:'💻 Kursus Pengaturcaraan CodingMine',
   cmScoreLine:'Jumlah markah: {score} / {total}',
+  cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
   ttsTitle:'Baca kuat', ttsTitleStop:'Henti membaca',
@@ -1064,9 +1067,9 @@ function generate(){
     for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
     for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    // 两间电脑室第一排（z=-13 / z=3）共 10 台绿屏电脑，逐一对应 CodingMine 第一~十章
-    for(const x of COLS){ placeComputer(x,-13, 1,16,'cm'); placeComputer(x,-3,-1,16); } // 电脑室 1（z=-15..-1）
-    for(const x of COLS){ placeComputer(x, 3,  1,16,'cm'); placeComputer(x,13,-1,16); } // 电脑室 2（z=1..15）
+    // 两间电脑室第一排（z=-13 / z=3）共 10 台电脑，每台颜色不同，逐一对应 CodingMine 第一~十台主题
+    CM_TERMINALS.forEach(term => placeComputer(term.x, term.z, 1, term.floorY, term.color));
+    for(const x of COLS){ placeComputer(x,-3,-1,16); placeComputer(x,13,-1,16); }       // 第二排：纯装饰座位，屏幕用默认色
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -1755,6 +1758,13 @@ function refreshDiplomaKioskTags(){
     k._tag.material.needsUpdate = true;
   });
 }
+function refreshCMTerminalTags(){
+  CM_TERMINALS.forEach((st,i)=>{
+    if(!st._tag) return;
+    st._tag.material.map = nameTagTexture((i+1) + '. ' + CM_CHAPTERS[st.chapterIdx].tag[lang]);
+    st._tag.material.needsUpdate = true;
+  });
+}
 
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
 const carGroup = new THREE.Group(); scene.add(carGroup);
@@ -1822,11 +1832,13 @@ const COMP_GEO = {
 const COMP_MAT = {
   bezel: new THREE.MeshBasicMaterial({color:0x25272b}),
   screen:new THREE.MeshBasicMaterial({color:0x8ecbe8}),
-  screenCM:new THREE.MeshBasicMaterial({color:0x2ee6a8}),        // CodingMine 工作站：绿色终端屏幕，一眼可辨
   keyboard:new THREE.MeshBasicMaterial({color:0xd8dadd}),
   led:   new THREE.MeshBasicMaterial({color:0x2fa7ff}),
 };
-const COMP_SCREEN_BY_KIND = { cm:'screenCM' };
+const cmScreenMatCache = {};                    // CodingMine 工作站：每台颜色不同，材质按颜色缓存复用
+function cmScreenMat(hex){
+  return cmScreenMatCache[hex] || (cmScreenMatCache[hex] = new THREE.MeshBasicMaterial({color:hex}));
+}
 function buildCarMeshes(){
   carGroup.clear();
   const buckets = new Map();   // 按 几何体+材质 分桶 → InstancedMesh，全场仅 ~25 次绘制
@@ -1878,9 +1890,9 @@ function buildCarMeshes(){
     const rot = c.facing>=0 ? 0 : Math.PI;
     const ca=Math.cos(rot), sa=Math.sin(rot);
     const T=off=>[ c.x + off[0]*ca + off[2]*sa, c.y+off[1], c.z - off[0]*sa + off[2]*ca ];
-    const screenMatKey = COMP_SCREEN_BY_KIND[c.kind];
-    const screenMat = screenMatKey ? COMP_MAT[screenMatKey] : COMP_MAT.screen;
-    const screenKey = screenMatKey ? 'cScreen_'+c.kind : 'cScreen';
+    const isCmScreen = typeof c.kind === 'number';
+    const screenMat = isCmScreen ? cmScreenMat(c.kind) : COMP_MAT.screen;
+    const screenKey = isCmScreen ? 'cScreen_'+c.kind.toString(16) : 'cScreen';
     put('cBase',  COMP_GEO.base,     MACH_MAT.dark,      T([0,0.015,0]),    rot);
     put('cStand', COMP_GEO.stand,    MACH_MAT.dark,      T([0,0.11,0]),     rot);
     put('cBezel', COMP_GEO.bezel,    COMP_MAT.bezel,     T([0,0.37,0]),     rot);
@@ -1889,10 +1901,12 @@ function buildCarMeshes(){
     put('cTower', COMP_GEO.tower,    MACH_MAT.dark,      T([0.26,0.13,0]),  rot);
     put('cLed',   COMP_GEO.led,      COMP_MAT.led,       T([0.26,0.13,0.12]),rot);
   }
-  CM_TERMINALS.forEach((st,i)=>{                           // CodingMine 工位悬浮编号牌
-    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture('Station '+(i+1)), depthTest:false }));
-    tag.scale.set(1.6,0.4,1);
+  CM_TERMINALS.forEach((st,i)=>{                           // CodingMine 工位悬浮编号牌：显示主题名称
+    const label = (i+1) + '. ' + CM_CHAPTERS[st.chapterIdx].tag[lang];
+    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture(label), depthTest:false }));
+    tag.scale.set(1.8,0.45,1);
     tag.position.set(st.x+0.5, st.floorY+2.2, st.z+0.5);
+    st._tag = tag;
     carGroup.add(tag);
   });
   const dummy=new THREE.Object3D();
@@ -2110,333 +2124,237 @@ const DIPLOMA_KIOSKS = [
       en:'Diploma in Electrical and Electronic Engineering covers the practical side of electricity — from designing and testing circuitry, machine control and high-power transmission systems (Electrical) to low-voltage electronic circuits, devices and communication systems (Electronic).',
       ms:'Diploma in Electrical and Electronic Engineering menumpu kepada aplikasi praktikal elektrik — Kejuruteraan Elektrik merangkumi reka bentuk litar penghantaran, kawalan mesin dan sistem kuasa tinggi; Kejuruteraan Elektronik pula menumpu kepada litar elektronik voltan rendah, peranti dan sistem komunikasi.' } },
 ];
-const CM_TERMINALS = [                       // 两间电脑室共 10 台绿屏电脑，每台固定对应一章（工位 N → 第 N 章）
-  { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0 },
-  { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1 },
-  { id:'t3',  x:46, z:-13, floorY:16, chapterIdx:2 },
-  { id:'t4',  x:49, z:-13, floorY:16, chapterIdx:3 },
-  { id:'t5',  x:52, z:-13, floorY:16, chapterIdx:4 },
-  { id:'t6',  x:41, z:3,   floorY:16, chapterIdx:5 },
-  { id:'t7',  x:43, z:3,   floorY:16, chapterIdx:6 },
-  { id:'t8',  x:46, z:3,   floorY:16, chapterIdx:7 },
-  { id:'t9',  x:49, z:3,   floorY:16, chapterIdx:8 },
-  { id:'t10', x:52, z:3,   floorY:16, chapterIdx:9 },
+const CM_TERMINALS = [                       // 两间电脑室共 10 台电脑，每台颜色不同、固定对应一个 IT 主题，每题只有 1 道选择题
+  { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0, color:0x3d8bff },
+  { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1, color:0xff7f0e },
+  { id:'t3',  x:46, z:-13, floorY:16, chapterIdx:2, color:0x2ecc71 },
+  { id:'t4',  x:49, z:-13, floorY:16, chapterIdx:3, color:0xe74c3c },
+  { id:'t5',  x:52, z:-13, floorY:16, chapterIdx:4, color:0x9b59d0 },
+  { id:'t6',  x:41, z:3,   floorY:16, chapterIdx:5, color:0xff5fa2 },
+  { id:'t7',  x:43, z:3,   floorY:16, chapterIdx:6, color:0x17c9c9 },
+  { id:'t8',  x:46, z:3,   floorY:16, chapterIdx:7, color:0xf5d020 },
+  { id:'t9',  x:49, z:3,   floorY:16, chapterIdx:8, color:0xff3860 },
+  { id:'t10', x:52, z:3,   floorY:16, chapterIdx:9, color:0x6c5ce7 },
 ];
 const CM_CHAPTERS = [
-  { id:'ch1', title:{ zh:'第一章 · All that Syntax（语法结构与 Bug 修复）', en:'Chapter 1 · All that Syntax', ms:'Bab 1 · All that Syntax' },
+  { id:'ch1', tag:{ zh:'电脑入门', en:'Intro to Computing', ms:'Asas Komputer' },
+    title:{ zh:'第一台 · 电脑入门知识', en:'Station 1 · Introduction to Computing', ms:'Stesen 1 · Asas Pengkomputeran' },
     questions:[
-      { id:'ch1_t1_q1', points:10,
+      { id:'q1_intro', points:10,
         brief:{
-          zh:'CodingMine（编码矿业）是一家专注机器视觉软件的公司，你刚入职，成为一名初级程序员。CEO 说：写程序前要先设计「算法」——也就是解决问题的一步步指令；再用「计算机语言」（比如 C/C++）把这些指令写成计算机看得懂的代码。C++ 里，文字内容（字符串 String）必须用双引号 " " 包起来，数字不用引号，每条语句结尾要加分号 ;。CEO 想让游戏角色用 player.say(...) 打个招呼，帮他检查一下这行代码对不对！',
-          en:'CodingMine is a machine-vision software company, and you have just joined as a junior programmer. The CEO says: before writing any program, you design an "algorithm" — step-by-step instructions for solving a problem — then translate it into a "computer language" (like C/C++) that the computer can understand. In C++, text content (a String) must be wrapped in double quotes " ", numbers need no quotes, and every statement ends with a semicolon ;. The CEO wants the character to say hello using player.say(...) — help check whether this line is correct!',
-          ms:'CodingMine ialah syarikat perisian penglihatan mesin, dan anda baru menyertai sebagai pengaturcara junior. Kata CEO: sebelum menulis sebarang program, reka bentuk dahulu "algoritma" — arahan langkah demi langkah untuk menyelesaikan masalah — kemudian terjemahkan ke dalam "bahasa komputer" (seperti C/C++) yang boleh difahami komputer. Dalam C++, kandungan teks (String) mesti dibalut tanda petik dua " ", nombor tidak memerlukan tanda petik, dan setiap penyataan berakhir dengan koma bertitik ;. CEO mahu watak permainan menyapa menggunakan player.say(...) — bantu semak sama ada baris ini betul!',
+          zh:'欢迎来到电脑入门站！电脑之所以能做这么多事，是因为它由两大部分组成——摸得到的叫「硬件」（Hardware），只能看到画面、摸不到的程序叫「软件」（Software）。',
+          en:'Welcome to the Introduction to Computing station! A computer can do so much because it is made of two big parts — the parts you can physically touch are called "hardware", and the programs you see on screen (but can\'t touch) are called "software".',
+          ms:'Selamat datang ke stesen Asas Pengkomputeran! Komputer boleh buat begitu banyak perkara kerana ia terdiri daripada dua bahagian utama — bahagian yang boleh disentuh dipanggil "perkakasan" (hardware), manakala program yang dilihat di skrin (tetapi tidak boleh disentuh) dipanggil "perisian" (software).',
         },
-        prompt:{ zh:'下面哪一行代码可以正确地让角色说出 Hello World？', en:'Which line correctly makes the character say Hello World?', ms:'Baris manakah yang betul untuk watak menyebut Hello World?' },
+        prompt:{ zh:'下面哪一样东西属于「硬件」（Hardware）？', en:'Which of these is an example of "hardware"?', ms:'Yang manakah contoh "perkakasan" (hardware)?' },
         options:{
-          zh:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
-          en:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
-          ms:['player.say(Hello World);','player.say("Hello World");',"Player.say('Hello World);",'player.say("Hello World")'],
+          zh:['键盘 ⌨️','Microsoft Word 软件','一个手机 App','一段程序代码'],
+          en:['A keyboard ⌨️','Microsoft Word software','A mobile app','A line of program code'],
+          ms:['Papan kekunci ⌨️','Perisian Microsoft Word','Aplikasi telefon','Baris kod program'],
         },
-        correct:1,
+        correct:0,
         explain:{
-          zh:'字符串必须用引号包住（且要配对：全用双引号或全用单引号，不能混用或漏掉）；C++ 对大小写敏感，Player 和 player 是两个不同的名字；每条语句结尾都要加分号 ;。',
-          en:'A string must be wrapped in matching quotes (all double or all single — never mixed or missing); C++ is case-sensitive, so Player and player are different names; every statement must end with a semicolon ;.',
-          ms:'Rentetan (string) mesti dibalut tanda petik yang sepadan (semua petik dua atau semua petik tunggal — jangan campur atau tertinggal); C++ sensitif huruf besar/kecil, jadi Player dan player ialah nama berbeza; setiap penyataan mesti berakhir dengan koma bertitik ;.',
+          zh:'键盘是你摸得到的实体设备，所以是硬件；Word、App 和程序代码都是运行在电脑里的软件，摸不到。',
+          en:"A keyboard is a physical device you can touch, so it is hardware. Word, apps, and program code are all software that runs on the computer — you can't touch them.",
+          ms:'Papan kekunci ialah peranti fizikal yang boleh disentuh, jadi ia perkakasan. Word, aplikasi dan kod program semuanya perisian yang berjalan dalam komputer — tidak boleh disentuh.',
         } },
-      { id:'ch1_t2_q1', points:10,
+    ] },
+  { id:'ch2', tag:{ zh:'C++ 编程', en:'C++ Programming', ms:'Pengaturcaraan C++' },
+    title:{ zh:'第二台 · C++ 编程语言', en:'Station 2 · C++ Programming', ms:'Stesen 2 · Pengaturcaraan C++' },
+    questions:[
+      { id:'q2_cpp', points:10,
         brief:{
-          zh:'CEO 说，团队最近老是把「字符串」和「数字」搞混，导致程序出错。在 C++ 里，用引号包起来的（如 "25"）是字符串（String）——哪怕看起来像数字，它也只是文字；没有引号的（如 25）才是数字（Number），可以直接做加减乘除运算。来做几道练习，帮团队分清楚吧！',
-          en:'The CEO says the team keeps mixing up "strings" and "numbers", causing bugs. In C++, anything wrapped in quotes (like "25") is a String — even if it looks like a number, it is just text; something without quotes (like 25) is a Number, which can be used directly in arithmetic. Do a few practice questions to help the team get it straight!',
-          ms:'Kata CEO, pasukan sering keliru antara "rentetan" dan "nombor", menyebabkan pepijat. Dalam C++, apa-apa yang dibalut tanda petik (seperti "25") ialah String — walaupun kelihatan seperti nombor, ia cuma teks; sesuatu tanpa tanda petik (seperti 25) ialah Nombor, yang boleh terus digunakan dalam pengiraan. Jawab beberapa soalan latihan untuk membantu pasukan memahaminya!',
+          zh:'C++ 是一种历史悠久、至今仍被广泛使用的编程语言——很多电脑游戏和系统软件都是用它写的。写 C++ 程序时，每一行指令的结尾都要加上分号 ;，就像写句子要加句号一样。',
+          en:'C++ is an old but still widely-used programming language — many computer games and system software are written in it. In C++, every instruction line must end with a semicolon ;, just like a sentence ends with a full stop.',
+          ms:'C++ ialah bahasa pengaturcaraan lama tetapi masih digunakan secara meluas — banyak permainan komputer dan perisian sistem ditulis dengannya. Dalam C++, setiap baris arahan mesti berakhir dengan koma bertitik ;, sama seperti ayat berakhir dengan noktah.',
         },
-        prompt:{ zh:'以下哪一个是「字符串」（String）？', en:'Which one of these is a "String"?', ms:'Yang manakah satu "String"?' },
-        options:{ zh:['100','"Batu Kawan"','3.14'], en:['100','"Batu Kawan"','3.14'], ms:['100','"Batu Kawan"','3.14'] },
-        correct:1,
-        explain:{
-          zh:'"Batu Kawan" 被双引号包住，所以是字符串；100 和 3.14 没有引号，是数字。',
-          en:'"Batu Kawan" is wrapped in double quotes, so it is a string; 100 and 3.14 have no quotes, so they are numbers.',
-          ms:'"Batu Kawan" dibalut tanda petik dua, jadi ia rentetan; 100 dan 3.14 tiada tanda petik, jadi ia nombor.',
-        } },
-      { id:'ch1_t2_q2', points:10,
-        prompt:{ zh:'以下哪一个是「数字」（Number），不是字符串？', en:'Which one of these is a "Number", not a string?', ms:'Yang manakah satu "Nombor", bukan rentetan?' },
-        options:{ zh:['"42"','42','"forty-two"'], en:['"42"','42','"forty-two"'], ms:['"42"','42','"forty-two"'] },
-        correct:1,
-        explain:{
-          zh:'42 没有引号，是真正可以计算的数字；"42" 虽然看起来像数字，但有引号，只是文字。',
-          en:'42 has no quotes, so it is a real, calculable number; "42" looks like a number but the quotes make it just text.',
-          ms:'42 tiada tanda petik, jadi ia nombor sebenar yang boleh dikira; "42" kelihatan seperti nombor tetapi tanda petik menjadikannya sekadar teks.',
-        } },
-      { id:'ch1_t2_q3', points:10, code:'int x = 10;',
-        prompt:{ zh:'在代码 int x = 10; 里，10 是：', en:'In the code int x = 10;, the 10 is a:', ms:'Dalam kod int x = 10;, 10 itu ialah:' },
-        options:{ zh:['字符串（String）','数字（Number）'], en:['String','Number'], ms:['String','Nombor'] },
-        correct:1,
-        explain:{
-          zh:'10 没有加引号，而且被声明成 int（整数）类型，所以是数字。',
-          en:'10 has no quotes and is declared as an int (integer) type, so it is a number.',
-          ms:'10 tiada tanda petik dan diisytiharkan sebagai jenis int (integer), jadi ia nombor.',
-        } },
-      { id:'ch1_t3_q1', points:10,
-        brief:{
-          zh:'CEO 昨晚自己写了一段 C++ 代码，想统计一个分数，结果编译不过！他有点尴尬，想请你这个新来的初级程序员帮忙看看——这正是学习「调试」（Debugging）的好机会：仔细读代码，找出哪里不对。',
-          en:"The CEO wrote a bit of C++ code late last night to tally up a score, and it won't compile! A little embarrassed, he's asking you, the new junior programmer, to take a look — a great chance to practise \"debugging\": read the code carefully and spot what's wrong.",
-          ms:'CEO menulis sedikit kod C++ lewat malam tadi untuk mengira skor, tetapi ia gagal dikompil! Agak segan, dia meminta anda, pengaturcara junior baharu, untuk menyemaknya — peluang baik untuk berlatih "debugging": baca kod dengan teliti dan cari kesilapannya.',
-        },
-        code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    int score = "100"\n    cout << score << endl;\n    return 0;\n}',
-        prompt:{ zh:'这段代码有两处错误，应该怎么修？', en:'This code has two mistakes — how should it be fixed?', ms:'Kod ini mempunyai dua kesilapan — bagaimana ia patut dibetulkan?' },
+        prompt:{ zh:'下面哪一行是正确的 C++ 代码，可以在屏幕上显示 "Hello World"？', en:'Which line is correct C++ code to display "Hello World" on screen?', ms:'Baris manakah kod C++ yang betul untuk memaparkan "Hello World" pada skrin?' },
         options:{
-          zh:['把 "100" 改成 100，并在这一行结尾加上分号 ;','把 int 改成 string 就可以，其他不用改','把 cout 改成 print 就行了','这段代码完全正确，不需要修改'],
-          en:['Change "100" to 100, and add a semicolon ; at the end of that line','Just change int to string — nothing else needs changing','Just change cout to print','This code is completely correct, no changes needed'],
-          ms:['Tukar "100" kepada 100, dan tambah koma bertitik ; di hujung baris itu','Cuma tukar int kepada string — tiada lagi yang perlu diubah','Cuma tukar cout kepada print','Kod ini betul sepenuhnya, tiada perubahan diperlukan'],
+          zh:['std::cout << "Hello World";','print("Hello World")','<h1>Hello World</h1>','SELECT "Hello World";'],
+          en:['std::cout << "Hello World";','print("Hello World")','<h1>Hello World</h1>','SELECT "Hello World";'],
+          ms:['std::cout << "Hello World";','print("Hello World")','<h1>Hello World</h1>','SELECT "Hello World";'],
         },
         correct:0,
         explain:{
-          zh:'字符串常量（带引号的 "100"）不能直接赋值给 int（整数）类型的变量，要去掉引号变成 100；另外 C++ 每条语句结尾都必须有分号 ;，这一行漏掉了。',
-          en:'A string literal (the quoted "100") cannot be assigned directly to an int variable — the quotes must be removed to make it 100; also, every C++ statement must end with a semicolon ;, which this line is missing.',
-          ms:'Literal rentetan (yang berpetik "100") tidak boleh terus diberikan kepada pemboleh ubah jenis int — tanda petik mesti dibuang supaya menjadi 100; selain itu, setiap penyataan C++ mesti berakhir dengan koma bertitik ;, yang tiada pada baris ini.',
+          zh:'std::cout << ...; 是 C++ 用来打印文字的标准写法；print(...) 是 Python 的写法，<h1>...</h1> 是网页 HTML 标签，SELECT 是数据库 SQL 语句——都不是 C++。',
+          en:'std::cout << ...; is the standard C++ way to print text. print(...) is Python syntax, <h1>...</h1> is an HTML web tag, and SELECT is a database SQL statement — none of them are C++.',
+          ms:'std::cout << ...; ialah cara standard C++ untuk mencetak teks. print(...) ialah sintaks Python, <h1>...</h1> ialah tag web HTML, dan SELECT ialah penyataan SQL pangkalan data — semuanya bukan C++.',
         } },
     ] },
-  { id:'ch2', title:{ zh:'第二章 · 三维坐标与参数（Location, Location, Location）', en:'Chapter 2 · Location, Location, Location', ms:'Bab 2 · Location, Location, Location' },
+  { id:'ch3', tag:{ zh:'数据库', en:'Database', ms:'Pangkalan Data' },
+    title:{ zh:'第三台 · 数据库', en:'Station 3 · Database', ms:'Stesen 3 · Pangkalan Data' },
     questions:[
-      { id:'ch2_q1', points:10,
+      { id:'q3_db', points:10,
         brief:{
-          zh:'CodingMine 接到一个新项目：给客户的仓库天花板批量安装吊灯。程序员要先弄懂 Minecraft 世界的三维坐标系统——X、Y、Z 三个轴，以及「相对坐标」（以 Agent 当前位置为基准，而不是世界的绝对坐标）的概念，才能一次装对几十盏灯的位置。',
-          en:"CodingMine has a new project: bulk-installing ceiling lights across a client warehouse. Before that, a programmer needs to understand Minecraft's 3D coordinate system — the X, Y and Z axes — and the idea of \"relative coordinates\" (measured from the Agent's current position, not the world's absolute origin), so dozens of lights all land in the right spot.",
-          ms:'CodingMine mendapat projek baharu: memasang lampu siling secara pukal merentasi gudang pelanggan. Sebelum itu, pengaturcara perlu memahami sistem koordinat 3D Minecraft — paksi X, Y dan Z — dan konsep "koordinat relatif" (diukur daripada kedudukan semasa Agent, bukan titik asal mutlak dunia), supaya berpuluh lampu diletakkan di kedudukan yang betul.',
+          zh:'学校的成绩单、网购平台的商品清单，背后都存放在「数据库」里——一个专门用来有条理地储存和查找大量数据的系统。要跟数据库对话，程序员通常会用一种叫 SQL 的语言。',
+          en:"Your school report card and an online shop's product list are both stored in a \"database\" — a system designed to store and look up large amounts of data in an organised way. To talk to a database, programmers usually use a language called SQL.",
+          ms:'Kad laporan sekolah anda dan senarai produk kedai dalam talian kedua-duanya disimpan dalam "pangkalan data" — sistem yang direka untuk menyimpan dan mencari sejumlah besar data secara tersusun. Untuk berkomunikasi dengan pangkalan data, pengaturcara biasanya menggunakan bahasa bernama SQL.',
         },
-        prompt:{ zh:'在 Minecraft 的坐标系统里，哪一个轴代表「上下」（垂直高度）？', en:'In the Minecraft coordinate system, which axis represents "up and down" (vertical height)?', ms:'Dalam sistem koordinat Minecraft, paksi manakah mewakili "atas dan bawah" (ketinggian menegak)?' },
-        options:{ zh:['X 轴','Y 轴','Z 轴'], en:['The X axis','The Y axis','The Z axis'], ms:['Paksi X','Paksi Y','Paksi Z'] },
-        correct:1,
-        explain:{
-          zh:'Minecraft 用 Y 轴表示垂直高度（上下），X 和 Z 表示水平面的两个方向（例如南北、东西）。',
-          en:'Minecraft uses the Y axis for vertical height (up/down); X and Z represent the two horizontal directions (e.g. north-south, east-west).',
-          ms:'Minecraft menggunakan paksi Y untuk ketinggian menegak (atas/bawah); X dan Z mewakili dua arah mendatar (cth. utara-selatan, timur-barat).',
-        } },
-      { id:'ch2_q2', points:10,
-        code:'agent.setBlock(GLOWSTONE, RelativePosition(0,1,0));',
-        prompt:{ zh:'相对坐标 RelativePosition(0,1,0) 是以谁为基准，往哪个方向移动 1 格？', en:'What is RelativePosition(0,1,0) measured from, and which direction does it move 1 unit?', ms:'RelativePosition(0,1,0) diukur daripada apa, dan ke arah mana ia bergerak 1 unit?' },
+        prompt:{ zh:'SQL 语言主要是用来做什么的？', en:'What is the SQL language mainly used for?', ms:'Bahasa SQL digunakan terutamanya untuk apa?' },
         options:{
-          zh:['世界原点 (0,0,0)，往上 1 格','Agent 当前位置，往上 1 格','Agent 当前位置，往前 1 格','世界原点，往前 1 格'],
-          en:['The world origin (0,0,0), 1 unit up','The Agent’s current position, 1 unit up','The Agent’s current position, 1 unit forward','The world origin, 1 unit forward'],
-          ms:['Titik asal dunia (0,0,0), 1 unit ke atas','Kedudukan semasa Agent, 1 unit ke atas','Kedudukan semasa Agent, 1 unit ke hadapan','Titik asal dunia, 1 unit ke hadapan'],
+          zh:['在数据库里查询、新增或修改数据','设计手机 App 的按钮外观','让电脑连上 Wi-Fi','给图片加滤镜'],
+          en:['Querying, adding or editing data in a database','Designing the buttons in a mobile app','Connecting a computer to Wi-Fi','Adding filters to a photo'],
+          ms:['Menanya, menambah atau mengubah data dalam pangkalan data','Mereka bentuk butang dalam aplikasi telefon','Menyambungkan komputer ke Wi-Fi','Menambah penapis pada gambar'],
         },
-        correct:1,
+        correct:0,
         explain:{
-          zh:'相对坐标以 Agent（或玩家）当前所在位置为基准点，(0,1,0) 表示 Y 方向 +1，也就是「往上 1 格」，不需要知道世界的绝对坐标。',
-          en:"Relative coordinates are measured from the Agent's (or player's) current position; (0,1,0) means +1 on the Y axis — 1 unit up — with no need to know the world's absolute coordinates.",
-          ms:'Koordinat relatif diukur daripada kedudukan semasa Agent (atau pemain); (0,1,0) bermaksud +1 pada paksi Y — 1 unit ke atas — tanpa perlu mengetahui koordinat mutlak dunia.',
+          zh:'SQL（Structured Query Language）专门用来跟数据库沟通——查找、加入、更新或删除里面的数据。App 外观设计、连 Wi-Fi、加滤镜都跟 SQL 无关。',
+          en:'SQL (Structured Query Language) is specifically for talking to databases — finding, adding, updating or deleting data. It has nothing to do with app button design, Wi-Fi, or photo filters.',
+          ms:'SQL (Structured Query Language) direka khas untuk berkomunikasi dengan pangkalan data — mencari, menambah, mengemas kini atau memadam data. Ia tiada kaitan dengan reka bentuk butang aplikasi, Wi-Fi, atau penapis gambar.',
         } },
     ] },
-  { id:'ch3', title:{ zh:'第三章 · 变量的应用（A Varied Outcome）', en:'Chapter 3 · A Varied Outcome', ms:'Bab 3 · A Varied Outcome' },
+  { id:'ch4', tag:{ zh:'资讯科技', en:'Information Technology', ms:'Teknologi Maklumat' },
+    title:{ zh:'第四台 · 资讯科技（IT）', en:'Station 4 · Information Technology (IT)', ms:'Stesen 4 · Teknologi Maklumat (IT)' },
     questions:[
-      { id:'ch3_q1', points:10,
+      { id:'q4_it', points:10,
         brief:{
-          zh:'CEO 想为公司的智慧农场开发一套自动化软件，管理农作物的种植、分类和销售。这需要用「变量」记住不断变化的数字——比如目前种了几株小麦、卖出多少个南瓜。学会声明变量、认识数据类型，以及正确地更新变量，是这个项目的第一步。',
-          en:'The CEO wants an automation system for the company’s smart farm, managing crop planting, sorting and selling. That means using "variables" to keep track of numbers that keep changing — how many wheat plants are growing, how many pumpkins have been sold. Learning to declare variables, understand data types, and correctly update a variable is the first step of this project.',
-          ms:'CEO mahukan sistem automasi untuk ladang pintar syarikat, menguruskan penanaman, penyusunan dan penjualan tanaman. Ini bermakna menggunakan "pemboleh ubah" untuk menjejaki nombor yang sentiasa berubah — berapa batang gandum sedang membesar, berapa buah labu telah dijual. Belajar mengisytiharkan pemboleh ubah, memahami jenis data, dan mengemas kini pemboleh ubah dengan betul ialah langkah pertama projek ini.',
+          zh:'「IT」几乎无处不在——学校的电脑教室、医院的挂号系统、银行的手机 App，背后都需要 IT 人员来搭建和维护。',
+          en:'"IT" is everywhere — your school computer lab, a hospital\'s registration system, a bank\'s mobile app — they all need IT people to build and maintain them.',
+          ms:'"IT" ada di mana-mana — makmal komputer sekolah anda, sistem pendaftaran hospital, aplikasi telefon bank — semuanya memerlukan orang IT untuk membina dan menyelenggaranya.',
         },
-        prompt:{ zh:'在 C++ 里，下面哪一行正确地声明了一个名为 wheat_count 的整数变量，并赋值为 0？', en:'In C++, which line correctly declares an integer variable named wheat_count and sets it to 0?', ms:'Dalam C++, baris manakah dengan betul mengisytiharkan pemboleh ubah integer bernama wheat_count dan menetapkannya kepada 0?' },
-        options:{ zh:['int wheat_count = 0;','wheat_count = 0;','var wheat_count = 0;','0 = int wheat_count;'], en:['int wheat_count = 0;','wheat_count = 0;','var wheat_count = 0;','0 = int wheat_count;'], ms:['int wheat_count = 0;','wheat_count = 0;','var wheat_count = 0;','0 = int wheat_count;'] },
+        prompt:{ zh:'「IT」这个缩写代表什么？', en:'What does the abbreviation "IT" stand for?', ms:'Apakah singkatan "IT"?' },
+        options:{
+          zh:['Information Technology（资讯科技）','Internet Television（网络电视）','International Trade（国际贸易）','Intelligent Toy（智能玩具）'],
+          en:['Information Technology','Internet Television','International Trade','Intelligent Toy'],
+          ms:['Information Technology','Internet Television','International Trade','Intelligent Toy'],
+        },
         correct:0,
         explain:{
-          zh:'C++ 声明变量必须写明数据类型（这里是 int，表示整数），后面接变量名、= 和初始值，并以分号 ; 结尾——这跟不需要写类型的语言（例如 Python）不同。',
-          en:'C++ requires a data type (here, int for integer) before the variable name, followed by = and the initial value, ending with a semicolon ; — unlike languages that don\'t need a type keyword (e.g. Python).',
-          ms:'C++ memerlukan jenis data (di sini, int untuk integer) sebelum nama pemboleh ubah, diikuti = dan nilai awal, berakhir dengan koma bertitik ; — berbeza daripada bahasa yang tidak memerlukan kata kunci jenis (cth. Python).',
-        } },
-      { id:'ch3_q2', points:10,
-        prompt:{ zh:'农场每收获一次小麦，wheat_count 就要增加 1，下面哪一行代码可以做到？', en:'Every time the farm harvests wheat, wheat_count should go up by 1 — which line does that?', ms:'Setiap kali ladang menuai gandum, wheat_count perlu bertambah 1 — baris manakah melakukannya?' },
-        options:{ zh:['wheat_count = wheat_count + 1;','wheat_count == 1;','wheat_count - 1;','wheat_count = "1";'], en:['wheat_count = wheat_count + 1;','wheat_count == 1;','wheat_count - 1;','wheat_count = "1";'], ms:['wheat_count = wheat_count + 1;','wheat_count == 1;','wheat_count - 1;','wheat_count = "1";'] },
-        correct:0,
-        explain:{
-          zh:'要更新变量的值，需要把新的运算结果重新赋值给它；`==` 是比较是否相等，不是赋值；把整数变量赋值成带引号的 "1" 也会造成类型不匹配的错误。',
-          en:"To update a variable's value, you reassign it with the new result; `==` compares equality, it does not assign; assigning the quoted string \"1\" to an integer variable would also be a type mismatch.",
-          ms:'Untuk mengemas kini nilai pemboleh ubah, anda perlu memberikannya semula hasil baharu; `==` membandingkan kesamaan, ia bukan penetapan; memberikan rentetan berpetik "1" kepada pemboleh ubah integer juga akan menjadi ralat ketidaksepadanan jenis.',
+          zh:'IT 就是 Information Technology（资讯科技）的缩写，泛指跟电脑、数据和网络有关的所有技术工作。',
+          en:'IT stands for Information Technology — a broad term for all technical work involving computers, data and networks.',
+          ms:'IT bermaksud Information Technology (Teknologi Maklumat) — istilah luas untuk semua kerja teknikal yang melibatkan komputer, data dan rangkaian.',
         } },
     ] },
-  { id:'ch4', title:{ zh:'第四章 · 列表与列表方法（Animals Are Friends）', en:'Chapter 4 · Animals Are Friends', ms:'Bab 4 · Animals Are Friends' },
+  { id:'ch5', tag:{ zh:'数据科学', en:'Data Science', ms:'Sains Data' },
+    title:{ zh:'第五台 · 数据科学', en:'Station 5 · Data Science', ms:'Stesen 5 · Sains Data' },
     questions:[
-      { id:'ch4_q1', points:10,
+      { id:'q5_ds', points:10,
         brief:{
-          zh:'隔壁的动物医院请 CodingMine 写一套管理系统，把住院的小动物名字整理成一份「列表（List）」，还要能排序、归类和分批投喂。CodingMine 的 C++ 框架提供了一个 AnimalList 容器，用法跟数组很像，还多了 append、sort、reverse 这几个常用方法。这一章要学会列表的索引值——记住是从 0 开始数。',
-          en:'The animal hospital next door has asked CodingMine to build a management system, organising the names of hospitalised animals into a "List" that can be sorted, categorised, and fed in batches. CodingMine\'s C++ framework provides an AnimalList container that works much like an array, plus handy methods like append, sort and reverse. This chapter covers list indexing — remember, counting starts from 0.',
-          ms:'Hospital haiwan bersebelahan meminta CodingMine membina sistem pengurusan, menyusun nama haiwan yang dimasukkan ke wad ke dalam satu "List" yang boleh disusun, dikategorikan, dan diberi makan secara berkumpulan. Rangka kerja C++ CodingMine menyediakan bekas AnimalList yang berfungsi seperti tatasusunan, ditambah kaedah berguna seperti append, sort dan reverse. Bab ini merangkumi pengindeksan senarai — ingat, kiraan bermula daripada 0.',
+          zh:'视频网站怎么知道该推荐哪部影片给你？答案常常来自「数据科学」——从海量的数据里找出隐藏的规律和趋势。',
+          en:'How does a video app know which show to recommend to you? Often the answer is "data science" — finding hidden patterns and trends in huge amounts of data.',
+          ms:'Bagaimana aplikasi video tahu rancangan mana untuk disyorkan kepada anda? Selalunya jawapannya ialah "sains data" — mencari corak dan trend tersembunyi dalam data yang banyak.',
         },
-        code:'AnimalList animals = {"cat", "dog", "rabbit"};',
-        prompt:{ zh:'animals[0] 的值是？', en:'What is the value of animals[0]?', ms:'Apakah nilai animals[0]?' },
-        options:{ zh:['"cat"','"dog"','"rabbit"','报错，因为索引不能是 0'], en:['"cat"','"dog"','"rabbit"','An error, because index can’t be 0'], ms:['"cat"','"dog"','"rabbit"','Ralat, kerana indeks tidak boleh 0'] },
+        prompt:{ zh:'数据科学家最主要的工作是什么？', en:"What is a data scientist's main job?", ms:'Apakah kerja utama seorang saintis data?' },
+        options:{
+          zh:['从大量数据中找出规律，帮助做出更好的决定','负责修理电脑硬件故障','设计游戏里的关卡地图','管理公司的社交媒体账号'],
+          en:["Finding patterns in large amounts of data to help make better decisions",'Repairing broken computer hardware','Designing level maps in video games',"Managing a company's social media accounts"],
+          ms:['Mencari corak dalam data yang banyak untuk membantu membuat keputusan yang lebih baik','Membaiki kerosakan perkakasan komputer','Mereka bentuk peta aras dalam permainan video','Menguruskan akaun media sosial syarikat'],
+        },
         correct:0,
         explain:{
-          zh:'跟 C++ 数组一样，animals 的索引从 0 开始，所以 animals[0] 是第一个元素 "cat"。',
-          en:'Just like a C++ array, animals is indexed from 0, so animals[0] is the first element, "cat".',
-          ms:'Sama seperti tatasusunan C++, animals diindeks daripada 0, jadi animals[0] ialah elemen pertama, "cat".',
-        } },
-      { id:'ch4_q2', points:10,
-        prompt:{ zh:'动物医院想把一批新来的动物 "bird" 加进 animals 这个列表的最后面，应该用哪个方法？', en:'The hospital wants to add a newly-arrived animal, "bird", to the end of the animals list — which method should be used?', ms:'Hospital mahu menambah haiwan baharu, "bird", ke penghujung senarai animals — kaedah manakah patut digunakan?' },
-        options:{ zh:['animals.append("bird");','animals.sort("bird");','animals[4] = "bird";','animals.reverse("bird");'], en:['animals.append("bird");','animals.sort("bird");','animals[4] = "bird";','animals.reverse("bird");'], ms:['animals.append("bird");','animals.sort("bird");','animals[4] = "bird";','animals.reverse("bird");'] },
-        correct:0,
-        explain:{
-          zh:'append() 会把新元素加到列表最后面；sort() 是排序、reverse() 是反转顺序，都不是用来新增元素的，而且这两个方法也不需要传入参数。',
-          en:"append() adds a new element to the end of the list; sort() sorts and reverse() reverses the order — neither is for adding elements, and neither method takes an argument like that anyway.",
-          ms:'append() menambah elemen baharu ke penghujung senarai; sort() menyusun dan reverse() membalikkan susunan — kedua-duanya bukan untuk menambah elemen, dan kedua-dua kaedah ini juga tidak menerima argumen sedemikian.',
-        } },
-      { id:'ch4_q3', points:10,
-        code:'AnimalList animals = {"dog", "cat", "rabbit"};\nanimals.sort();',
-        prompt:{ zh:'执行以上代码后，animals 会变成？', en:'After running the code above, what does animals become?', ms:'Selepas menjalankan kod di atas, animals menjadi apa?' },
-        options:{ zh:['{"cat", "dog", "rabbit"}','{"rabbit", "dog", "cat"}','顺序不变','报错'], en:['{"cat", "dog", "rabbit"}','{"rabbit", "dog", "cat"}','The order is unchanged','An error'], ms:['{"cat", "dog", "rabbit"}','{"rabbit", "dog", "cat"}','Susunan tidak berubah','Ralat'] },
-        correct:0,
-        explain:{
-          zh:'sort() 会把列表按字母顺序（a→z）排列，"cat" < "dog" < "rabbit"，所以结果是 {"cat", "dog", "rabbit"}；如果想要反过来，可以再呼叫 reverse()。',
-          en:'sort() arranges the list alphabetically (a to z): "cat" < "dog" < "rabbit", so the result is {"cat", "dog", "rabbit"}; call reverse() afterwards if you want it the other way round.',
-          ms:'sort() menyusun senarai mengikut abjad (a hingga z): "cat" < "dog" < "rabbit", jadi hasilnya ialah {"cat", "dog", "rabbit"}; panggil reverse() selepas itu jika mahu susunan sebaliknya.',
+          zh:'数据科学家的核心工作就是分析大量数据、找出隐藏的规律，帮助企业或团队做出更明智的决定。硬件维修、关卡设计和社交媒体管理都是别的职位。',
+          en:"A data scientist's core job is analysing large datasets to find hidden patterns that help a business or team make smarter decisions. Hardware repair, level design and social media management are different roles.",
+          ms:'Kerja teras saintis data ialah menganalisis data yang banyak untuk mencari corak tersembunyi bagi membantu syarikat atau pasukan membuat keputusan yang lebih bijak. Pembaikan perkakasan, reka bentuk aras dan pengurusan media sosial adalah peranan lain.',
         } },
     ] },
-  { id:'ch5', title:{ zh:'第五章 · 智能代理与 For 循环（Agent and Loops）', en:'Chapter 5 · Agent and Loops', ms:'Bab 5 · Agent and Loops' },
+  { id:'ch6', tag:{ zh:'人工智能', en:'Artificial Intelligence', ms:'Kecerdasan Buatan' },
+    title:{ zh:'第六台 · 人工智能（AI）', en:'Station 6 · Artificial Intelligence (AI)', ms:'Stesen 6 · Kecerdasan Buatan (AI)' },
     questions:[
-      { id:'ch5_q1', points:10,
+      { id:'q6_ai', points:10,
         brief:{
-          zh:'CodingMine 第一次把 Minecraft 专属的机器人 Agent 派上用场——让它替人类做家务，比如循环搬运重物、洗衣服、吸尘。这需要用 for 循环重复执行同一个动作，还要特别小心 C++ 的「缩进与大括号 { }」——少写一个大括号，Agent 可能完全不听指挥！',
-          en:"CodingMine puts Minecraft's own Agent robot to work for the first time — having it do chores like repeatedly carrying heavy objects, doing laundry, or vacuuming. This needs a for loop to repeat the same action, and you'll need to watch C++'s indentation and curly braces { } carefully — miss a brace, and the Agent might not listen at all!",
-          ms:'CodingMine menggunakan robot Agent khas Minecraft buat kali pertama — menyuruhnya melakukan kerja rumah seperti mengangkut barang berat berulang kali, membasuh pakaian, atau mengemas debu. Ini memerlukan gelung for untuk mengulangi tindakan yang sama, dan anda perlu berhati-hati dengan indentasi dan kurungan dakap { } C++ — tertinggal satu dakap, Agent mungkin langsung tidak mengikut arahan!',
+          zh:'人工智能（AI）就是让电脑「学会」像人一样识别图像、理解语言，甚至做判断。ViTrox 的机器视觉检测系统，其实就用到了 AI 技术。',
+          en:"Artificial Intelligence (AI) is about teaching computers to recognise images, understand language, and even make judgements — a bit like humans do. ViTrox's own machine-vision inspection systems actually use AI technology.",
+          ms:"Kecerdasan Buatan (AI) ialah tentang mengajar komputer mengenali imej, memahami bahasa, malah membuat pertimbangan — sedikit seperti manusia. Sistem pemeriksaan penglihatan mesin ViTrox sendiri sebenarnya menggunakan teknologi AI.",
         },
-        code:'for(int i=0; i<5; i++){\n    agent.move(FORWARD, 1);\n}',
-        prompt:{ zh:'这段代码会让 Agent 往前移动几次？', en:'How many times will this code make the Agent move forward?', ms:'Berapa kali kod ini akan menyebabkan Agent bergerak ke hadapan?' },
-        options:{ zh:['1 次','4 次','5 次','无限次'], en:['1 time','4 times','5 times','Infinitely'], ms:['1 kali','4 kali','5 kali','Tanpa had'] },
-        correct:2,
+        prompt:{ zh:'下面哪一个是「人工智能」（AI）技术的例子？', en:'Which of these is an example of AI technology?', ms:'Yang manakah contoh teknologi AI?' },
+        options:{
+          zh:['手机的人脸解锁功能','一个普通计算器','手电筒 App','订书机'],
+          en:["A phone's face-unlock feature",'A basic calculator app','A flashlight app','A stapler'],
+          ms:['Fungsi buka kunci wajah pada telefon','Aplikasi kalkulator asas','Aplikasi lampu suluh','Pengokot kertas'],
+        },
+        correct:0,
         explain:{
-          zh:'for 循环的三部分：i=0（起始值）、i<5（只要成立就继续）、i++（每次循环结束后 i 加 1）；i 从 0 数到 4，一到 5 条件就不成立，所以总共执行了 5 次。',
-          en:'A for loop has three parts: i=0 (starting value), i<5 (keep going while true), and i++ (add 1 to i after each pass); i counts 0 through 4, and stops once it reaches 5 — a total of 5 runs.',
-          ms:'Gelung for mempunyai tiga bahagian: i=0 (nilai permulaan), i<5 (teruskan selagi benar), dan i++ (tambah 1 pada i selepas setiap laluan); i mengira 0 hingga 4, dan berhenti sebaik sahaja mencapai 5 — jumlah 5 kali.',
-        } },
-      { id:'ch5_q2', points:10,
-        prompt:{ zh:'C++ 用什么方式表示「这几行代码属于 for 循环里面」？', en:'How does C++ show that a few lines "belong inside" a for loop?', ms:'Bagaimana C++ menunjukkan beberapa baris "tergolong dalam" gelung for?' },
-        options:{ zh:['只靠每行结尾的分号 ;','用一对大括号 { } 把代码包起来','用括号 () 包住','不需要任何标记'], en:['Just the semicolon ; at the end of each line','Wrapping the code in a pair of curly braces { }','Wrapping it in parentheses ()','No marker is needed'], ms:['Cuma koma bertitik ; di hujung setiap baris','Membalut kod dengan sepasang kurungan dakap { }','Membalut dengan tanda kurungan ()','Tiada penanda diperlukan'] },
-        correct:1,
-        explain:{
-          zh:'C++ 用一对大括号 { } 把属于同一个区块的代码包起来（有些语言，例如 Python，改用缩进来表示）；分号 ; 仍然要写，但那是每一条语句自己的结尾，不是用来划分区块的。',
-          en:'C++ wraps the lines belonging to one block in a pair of curly braces { } (some languages, like Python, use indentation instead); a semicolon ; is still needed, but that just ends each individual statement — it doesn\'t mark a block.',
-          ms:'C++ membalut baris yang tergolong dalam satu blok dengan sepasang kurungan dakap { } (sesetengah bahasa, seperti Python, menggunakan indentasi sebaliknya); koma bertitik ; masih diperlukan, tetapi ia hanya menamatkan setiap penyataan — bukan menanda blok.',
+          zh:'人脸解锁需要 AI 学会辨认你的脸，属于人工智能技术；普通计算器和手电筒只是照固定规则执行指令，不算 AI；订书机根本不是电子产品。',
+          en:"Face-unlock needs AI to learn to recognise your face, so it's AI. A basic calculator and a flashlight just follow fixed rules — not AI. A stapler isn't even electronic.",
+          ms:'Buka kunci wajah memerlukan AI untuk belajar mengenali wajah anda, jadi ia AI. Kalkulator asas dan lampu suluh hanya mengikut peraturan tetap — bukan AI. Pengokot kertas bukan produk elektronik pun.',
         } },
     ] },
-  { id:'ch6', title:{ zh:'第六章 · 条件判断与布尔值（Driving Around）', en:'Chapter 6 · Driving Around', ms:'Bab 6 · Driving Around' },
+  { id:'ch7', tag:{ zh:'网络与互联网', en:'Networking & Internet', ms:'Rangkaian & Internet' },
+    title:{ zh:'第七台 · 网络与互联网', en:'Station 7 · Networking & Internet', ms:'Stesen 7 · Rangkaian & Internet' },
     questions:[
-      { id:'ch6_q1', points:10,
+      { id:'q7_net', points:10,
         brief:{
-          zh:'CodingMine 想教 Agent 机器人「开车」——让它能根据交通标志和路况，自动判断要往前走还是转弯。这需要用 if-else 条件语句和布尔逻辑（bool 类型，值为 true 或 false）：满足某个条件就做一件事，不满足就做另一件事。',
-          en:'CodingMine wants to teach the Agent to "drive" — automatically deciding whether to go forward or turn, based on traffic signs and road conditions. This needs if-else conditional statements and boolean logic (the bool type, with values true or false): do one thing when a condition holds, do something else when it doesn’t.',
-          ms:'CodingMine mahu mengajar Agent "memandu" — secara automatik memutuskan sama ada untuk bergerak ke hadapan atau membelok, berdasarkan papan tanda lalu lintas dan keadaan jalan. Ini memerlukan penyataan bersyarat if-else dan logik boolean (jenis bool, dengan nilai true atau false): buat satu perkara apabila syarat dipenuhi, buat perkara lain apabila tidak.',
+          zh:'互联网（Internet）是全世界电脑互相连接起来的巨大网络。你家里的 Wi-Fi 路由器，就是让手机和电脑无线连上这个网络的桥梁。',
+          en:"The Internet is a giant network connecting computers all over the world. The Wi-Fi router at your home is the bridge that lets your phone and computer connect to it wirelessly.",
+          ms:'Internet ialah rangkaian gergasi yang menghubungkan komputer di seluruh dunia. Penghala Wi-Fi di rumah anda ialah jambatan yang membolehkan telefon dan komputer anda menyambung kepadanya secara wayarles.',
         },
-        code:'if(is_red_light == true){\n    agent.stop();\n} else {\n    agent.move(FORWARD, 1);\n}',
-        prompt:{ zh:'如果前方是红灯（is_red_light 为 true），这段代码会怎么做？', en:'If there is a red light ahead (is_red_light is true), what does this code do?', ms:'Jika ada lampu merah di hadapan (is_red_light bernilai true), apakah yang dilakukan kod ini?' },
-        options:{ zh:['正确停下来，其他情况才前进','会出错，应该用 = 而不是 ==','会出错，布尔值不能用在 if 里','会出错，else 后面不能接大括号'], en:['Correctly stops; it moves forward otherwise','It errors — should use = instead of ==','It errors — booleans can’t be used in if','It errors — else can’t be followed by braces'], ms:['Betul berhenti; ia bergerak ke hadapan sebaliknya','Ralat — patut guna = bukan ==','Ralat — boolean tidak boleh digunakan dalam if','Ralat — else tidak boleh diikuti kurungan dakap'] },
+        prompt:{ zh:'Wi-Fi 这项技术主要是用来做什么的？', en:'What is Wi-Fi technology mainly used for?', ms:'Teknologi Wi-Fi digunakan terutamanya untuk apa?' },
+        options:{
+          zh:['让设备无线连接上网络','给手机电池充电','播放蓝牙音乐','打印文件'],
+          en:['Letting devices connect to a network wirelessly',"Charging a phone's battery",'Playing music over Bluetooth','Printing documents'],
+          ms:['Membolehkan peranti menyambung ke rangkaian secara wayarles','Mengecas bateri telefon','Memainkan muzik melalui Bluetooth','Mencetak dokumen'],
+        },
         correct:0,
         explain:{
-          zh:'`==` 用来比较两个值是否相等；if 条件为 true 时执行大括号里第一段代码，否则（else）执行第二段——这段代码是正确的，红灯时停下，其他情况前进。',
-          en:'`==` compares whether two values are equal; if the condition is true the first braced block runs, otherwise (else) the second block runs — this code is correct: it stops at a red light and moves forward otherwise.',
-          ms:'`==` membandingkan sama ada dua nilai adalah sama; jika syarat true blok pertama dalam kurungan dakap dijalankan, jika tidak (else) blok kedua dijalankan — kod ini betul: ia berhenti di lampu merah dan bergerak ke hadapan sebaliknya.',
-        } },
-      { id:'ch6_q2', points:10,
-        prompt:{ zh:'C++ 的布尔类型 bool 只能是以下哪两个值？', en:'A C++ bool value can only be which two values?', ms:'Nilai bool C++ hanya boleh menjadi dua nilai yang manakah?' },
-        options:{ zh:['0 和 1','"yes" 和 "no"','true 和 false','任何数字'], en:['0 and 1','"yes" and "no"','true and false','Any number'], ms:['0 dan 1','"yes" dan "no"','true dan false','Sebarang nombor'] },
-        correct:2,
-        explain:{
-          zh:'C++ 的 bool 类型只能是 true 或 false（小写），虽然背后用 1/0 存储，但程序里要写 true/false，而不是数字或字符串。',
-          en:'A C++ bool value can only be true or false (lowercase); although it is stored internally as 1/0, your code should write true/false, not a number or string.',
-          ms:'Nilai bool C++ hanya boleh true atau false (huruf kecil); walaupun disimpan secara dalaman sebagai 1/0, kod anda perlu menulis true/false, bukan nombor atau rentetan.',
+          zh:'Wi-Fi 是一种无线网络技术，让手机、电脑等设备不用接线也能连上网络。充电、蓝牙音乐和打印都是其他技术负责的事。',
+          en:'Wi-Fi is a wireless networking technology that lets devices like phones and computers connect to a network without cables. Charging, Bluetooth audio and printing are handled by other technologies.',
+          ms:'Wi-Fi ialah teknologi rangkaian wayarles yang membolehkan peranti seperti telefon dan komputer menyambung ke rangkaian tanpa wayar. Pengecasan, audio Bluetooth dan percetakan dikendalikan oleh teknologi lain.',
         } },
     ] },
-  { id:'ch7', title:{ zh:'第七章 · While 循环与应急响应（Emergency Response）', en:'Chapter 7 · Emergency Response', ms:'Bab 7 · Emergency Response' },
+  { id:'ch8', tag:{ zh:'操作系统', en:'Operating System', ms:'Sistem Operasi' },
+    title:{ zh:'第八台 · 操作系统', en:'Station 8 · Operating System', ms:'Stesen 8 · Sistem Operasi' },
     questions:[
-      { id:'ch7_q1', points:10,
+      { id:'q8_os', points:10,
         brief:{
-          zh:'一场模拟的自然灾害来袭，CodingMine 需要让 Agent 自动搭建防洪堤、防火隔离带，还要重建房屋地基。这一次要用 while 循环——「只要某个条件还成立，就一直重复做下去」，直到堤坝够高、隔离带够长为止。',
-          en:"A simulated natural disaster hits, and CodingMine needs the Agent to automatically build flood barriers, firebreaks, and rebuild house foundations. This time it takes a while loop — 'keep repeating as long as a condition still holds' — until the barrier is tall enough or the firebreak long enough.",
-          ms:'Bencana alam simulasi melanda, dan CodingMine memerlukan Agent untuk secara automatik membina benteng banjir, jalur pencegah kebakaran, dan membina semula asas rumah. Kali ini memerlukan gelung while — "terus ulang selagi satu syarat masih dipenuhi" — sehingga benteng cukup tinggi atau jalur cukup panjang.',
+          zh:'操作系统（Operating System）是电脑开机后第一个运行的软件，负责管理硬件和其他所有程序——没有它，电脑连屏幕都点不亮。',
+          en:'An Operating System (OS) is the first software that runs when you turn on a computer — it manages the hardware and all other programs. Without it, the computer could not even turn on its screen.',
+          ms:'Sistem Operasi (OS) ialah perisian pertama yang berjalan apabila komputer dihidupkan — ia menguruskan perkakasan dan semua program lain. Tanpanya, komputer tidak dapat menghidupkan skrinnya pun.',
         },
-        code:'int water_level = 0;\nwhile(water_level < 5){\n    agent.setBlock(SANDSTONE);\n    water_level = water_level + 1;\n}',
-        prompt:{ zh:'这段 while 循环会执行几次 setBlock？', en:'How many times will this while loop call setBlock?', ms:'Berapa kali gelung while ini akan memanggil setBlock?' },
-        options:{ zh:['0 次','4 次','5 次','无限次，永远不会停'], en:['0 times','4 times','5 times','Infinitely — it never stops'], ms:['0 kali','4 kali','5 kali','Tanpa had — tidak pernah berhenti'] },
-        correct:2,
-        explain:{
-          zh:'water_level 从 0 开始，每次循环加 1，直到不再满足 water_level < 5（也就是等于 5）才停止，一共执行了 5 次（0,1,2,3,4）。',
-          en:'water_level starts at 0 and increases by 1 each loop, stopping once water_level < 5 is no longer true (i.e. it reaches 5) — a total of 5 executions (0,1,2,3,4).',
-          ms:'water_level bermula pada 0 dan bertambah 1 setiap gelung, berhenti apabila water_level < 5 tidak lagi benar (iaitu mencapai 5) — jumlah 5 pelaksanaan (0,1,2,3,4).',
-        } },
-      { id:'ch7_q2', points:10,
-        prompt:{ zh:'如果忘记在循环里写 water_level = water_level + 1;，会发生什么？', en:'What happens if you forget to write water_level = water_level + 1; inside the loop?', ms:'Apakah yang berlaku jika anda terlupa menulis water_level = water_level + 1; di dalam gelung?' },
-        options:{ zh:['循环会执行无限次（死循环），因为条件永远成立','循环完全不会执行','程序会自动帮你加 1','不会有任何影响'], en:['The loop runs forever (an infinite loop), since the condition stays true','The loop never runs at all','The program automatically adds 1 for you','There is no effect at all'], ms:['Gelung berjalan selama-lamanya (gelung tak terhingga), kerana syarat kekal benar','Gelung langsung tidak berjalan','Program secara automatik menambah 1 untuk anda','Tiada kesan langsung'] },
+        prompt:{ zh:'下面哪一个是电脑的「操作系统」（Operating System）？', en:'Which of these is a computer "Operating System"?', ms:'Yang manakah "Sistem Operasi" komputer?' },
+        options:{
+          zh:['Windows','Microsoft Word','Google Chrome','Instagram'],
+          en:['Windows','Microsoft Word','Google Chrome','Instagram'],
+          ms:['Windows','Microsoft Word','Google Chrome','Instagram'],
+        },
         correct:0,
         explain:{
-          zh:'while 循环会一直检查条件，如果 water_level 永远不变，条件 water_level < 5 就永远成立，导致死循环——这是 while 循环最常见的错误之一。',
-          en:'A while loop keeps rechecking its condition; if water_level never changes, water_level < 5 stays true forever, causing an infinite loop — one of the most common while-loop mistakes.',
-          ms:'Gelung while sentiasa menyemak semula syaratnya; jika water_level tidak pernah berubah, water_level < 5 kekal benar selama-lamanya, menyebabkan gelung tak terhingga — salah satu kesilapan gelung while yang paling biasa.',
+          zh:'Windows（以及 macOS、Linux）是操作系统，负责管理整台电脑；Word、Chrome、Instagram 都只是安装在操作系统「上面」运行的一般应用程序。',
+          en:'Windows (along with macOS and Linux) is an operating system that manages the whole computer. Word, Chrome and Instagram are just regular apps that run "on top of" the operating system.',
+          ms:'Windows (bersama macOS dan Linux) ialah sistem operasi yang menguruskan keseluruhan komputer. Word, Chrome dan Instagram hanyalah aplikasi biasa yang berjalan "di atas" sistem operasi.',
         } },
     ] },
-  { id:'ch8', title:{ zh:'第八章 · 综合应用与函数（Functions）', en:'Chapter 8 · Functions', ms:'Bab 8 · Functions' },
+  { id:'ch9', tag:{ zh:'网页制作 HTML', en:'HTML', ms:'HTML' },
+    title:{ zh:'第九台 · 网页制作（HTML）', en:'Station 9 · HTML', ms:'Stesen 9 · HTML' },
     questions:[
-      { id:'ch8_q1', points:10,
+      { id:'q9_html', points:10,
         brief:{
-          zh:'项目越做越大，CodingMine 的代码开始出现很多重复的动作。这一章学习如何定义（define）和呼叫（call）自定义函数，把重复的代码包成一个「积木」，需要用的时候呼叫一下就好，让企业级的大项目也能保持整洁。',
-          en:"As projects grow bigger, CodingMine's code starts filling up with repeated actions. This chapter is about defining and calling custom functions — wrapping repeated code into a single reusable \"building block\" you can call whenever needed, keeping even big enterprise-scale projects tidy.",
-          ms:'Apabila projek semakin besar, kod CodingMine mula dipenuhi tindakan berulang. Bab ini mengenai mentakrif dan memanggil fungsi tersuai — membungkus kod berulang menjadi satu "blok binaan" yang boleh digunakan semula, dipanggil bila-bila masa diperlukan, mengekalkan kekemasan walaupun untuk projek berskala enterprise yang besar.',
+          zh:'你现在浏览的每一个网页，骨架几乎都是用 HTML（超文本标记语言）搭建起来的——它负责安排标题、段落、图片、按钮该放在哪里。',
+          en:'Almost every webpage you browse is built on an HTML (HyperText Markup Language) skeleton — it decides where the headings, paragraphs, images and buttons go.',
+          ms:'Hampir setiap laman web yang anda layari dibina di atas rangka HTML (HyperText Markup Language) — ia menentukan di mana tajuk, perenggan, imej dan butang diletakkan.',
         },
-        prompt:{ zh:'下面哪一行代码正确地「定义」了一个名为 build_wall、不需要回传值的函数？', en:'Which line correctly "defines" a function named build_wall that returns no value?', ms:'Baris manakah dengan betul "mentakrif" fungsi bernama build_wall yang tidak memulangkan sebarang nilai?' },
-        options:{ zh:['void build_wall() { }','def build_wall():','function build_wall()','build_wall() = void;'], en:['void build_wall() { }','def build_wall():','function build_wall()','build_wall() = void;'], ms:['void build_wall() { }','def build_wall():','function build_wall()','build_wall() = void;'] },
+        prompt:{ zh:'HTML 主要是用来做什么的？', en:'What is HTML mainly used for?', ms:'HTML digunakan terutamanya untuk apa?' },
+        options:{
+          zh:['搭建网页的结构（标题、段落、图片等）','编辑照片滤镜','播放在线视频','管理电子邮件收件箱'],
+          en:['Building the structure of a webpage (headings, paragraphs, images, etc.)','Editing photo filters','Streaming online video','Managing an email inbox'],
+          ms:['Membina struktur laman web (tajuk, perenggan, imej, dll.)','Menyunting penapis foto','Menstriming video dalam talian','Menguruskan peti masuk e-mel'],
+        },
         correct:0,
         explain:{
-          zh:'C++ 定义函数要写回传类型（这里没有回传值，用 void）、函数名和括号，再用一对大括号 { } 包住函数内容——这跟用 `def` 加冒号的写法不同。',
-          en:'A C++ function needs a return type (void, since this one returns nothing), the function name and parentheses, with the body wrapped in a pair of curly braces { } — different from writing `def` followed by a colon.',
-          ms:'Fungsi C++ memerlukan jenis pulangan (void, kerana fungsi ini tidak memulangkan apa-apa), nama fungsi dan kurungan, dengan isi kandungan dibalut sepasang kurungan dakap { } — berbeza daripada menulis `def` diikuti titik bertindih.',
-        } },
-      { id:'ch8_q2', points:10,
-        prompt:{ zh:'定义好 build_wall() 函数后，如果想在程序的三个不同地方各盖一次墙，最好的做法是？', en:'Once build_wall() is defined, what’s the best way to build a wall in three different places in the program?', ms:'Setelah build_wall() ditakrifkan, apakah cara terbaik untuk membina dinding di tiga tempat berbeza dalam program?' },
-        options:{ zh:['把函数内的代码复制贴上 3 次','呼叫 build_wall(); 三次','重新定义 3 个一模一样的函数','不可能重复使用'], en:['Copy-paste the code inside the function 3 times','Call build_wall(); three times','Define 3 identical functions again','It can’t be reused'], ms:['Salin-tampal kod dalam fungsi itu 3 kali','Panggil build_wall(); tiga kali','Takrifkan semula 3 fungsi yang sama','Ia tidak boleh digunakan semula'] },
-        correct:1,
-        explain:{
-          zh:'函数最大的好处就是「写一次，呼叫（调用）很多次」，可以大幅减少重复代码，这也是「综合应用与函数」这一章的核心。',
-          en:'The biggest benefit of a function is "write once, call many times", cutting down on repeated code — the core idea of this chapter.',
-          ms:'Kelebihan terbesar fungsi ialah "tulis sekali, panggil berkali-kali", mengurangkan kod berulang — idea teras bab ini.',
+          zh:'HTML 是网页的骨架语言，用「标签」标记出标题、段落、图片、链接等各个部分应该长什么样、放在哪里。它不负责照片滤镜、播放视频或收发邮件。',
+          en:"HTML is the skeleton language of a webpage — it uses \"tags\" to mark out where headings, paragraphs, images and links go and what they look like. It doesn't handle photo filters, video streaming, or email.",
+          ms:'HTML ialah bahasa rangka laman web — ia menggunakan "tag" untuk menandakan di mana tajuk, perenggan, imej dan pautan diletakkan serta rupanya. Ia tidak mengendalikan penapis foto, penstriman video, atau e-mel.',
         } },
     ] },
-  { id:'ch9', title:{ zh:'第九章 · 问题拆解与小游戏开发（All Fun and Games）', en:'Chapter 9 · All Fun and Games', ms:'Bab 9 · All Fun and Games' },
+  { id:'ch10', tag:{ zh:'软件设计', en:'Software Design', ms:'Reka Bentuk Perisian' },
+    title:{ zh:'第十台 · 软件设计', en:'Station 10 · Software Design', ms:'Stesen 10 · Reka Bentuk Perisian' },
     questions:[
-      { id:'ch9_q1', points:10,
+      { id:'q10_design', points:10,
         brief:{
-          zh:'不再是零散的练习——CodingMine 要用前面学到的所有基础，从零写出一个完整的交互小游戏，包含操控角色的控制器、发射机制和计分板。第一步永远是「问题拆解（Decomposition）」：把一个庞大的项目拆成几个可以分别完成的小任务。',
-          en:'No more scattered exercises — CodingMine now uses everything learned so far to build a complete interactive mini-game from scratch, with a character controller, a shooting mechanic, and a scoreboard. The first step is always "decomposition": breaking a huge project into smaller tasks that can be tackled one at a time.',
-          ms:'Tiada lagi latihan berselerak — CodingMine kini menggunakan semua yang telah dipelajari untuk membina permainan mini interaktif yang lengkap dari awal, dengan pengawal watak, mekanisme menembak, dan papan skor. Langkah pertama sentiasa "dekomposisi": memecahkan projek besar kepada tugasan kecil yang boleh diselesaikan satu demi satu.',
+          zh:'在写第一行代码之前，好的软件设计师会先做一件更重要的事——先搞清楚「用户到底需要什么」，再动手规划怎么解决。',
+          en:'Before writing a single line of code, a good software designer does something more important first — figuring out what users actually need, then planning how to solve it.',
+          ms:'Sebelum menulis satu baris kod pun, pereka bentuk perisian yang baik akan buat sesuatu yang lebih penting dahulu — memahami apa yang sebenarnya pengguna perlukan, kemudian merancang cara menyelesaikannya.',
         },
-        prompt:{ zh:'要从零开发一个「控制器 + 发射机制 + 计分板」的小游戏，「问题拆解（Decomposition）」的意思最接近：', en:'To build a "controller + shooting mechanic + scoreboard" mini-game from scratch, "decomposition" means most nearly:', ms:'Untuk membina permainan mini "pengawal + mekanisme menembak + papan skor" dari awal, "dekomposisi" bermaksud paling hampir dengan:' },
-        options:{ zh:['把一个大问题拆成几个小问题，各个击破','把所有代码写在同一个函数里','尽量不要拆分，一次写完比较快','只写控制器，其他两个不重要'], en:['Breaking one big problem into several small ones, tackled one by one','Writing all the code in a single function','Avoiding any breakdown — writing it all in one go is faster','Only writing the controller; the other two don’t matter'], ms:['Memecahkan satu masalah besar kepada beberapa masalah kecil, ditangani satu demi satu','Menulis semua kod dalam satu fungsi sahaja','Elakkan sebarang pemecahan — menulis semuanya sekaligus lebih pantas','Hanya menulis pengawal; dua lagi tidak penting'] },
-        correct:0,
-        explain:{
-          zh:'问题拆解是把复杂的大任务（完整小游戏）拆成可以分别处理的小任务（控制器、发射机制、计分板），是编程里最重要的思维方式之一。',
-          en:'Decomposition means breaking a complex task (a complete mini-game) into smaller tasks that can be handled separately (controller, shooting mechanic, scoreboard) — one of the most important ways of thinking in programming.',
-          ms:'Dekomposisi bermaksud memecahkan tugasan yang kompleks (permainan mini yang lengkap) kepada tugasan kecil yang boleh ditangani secara berasingan (pengawal, mekanisme menembak, papan skor) — satu daripada cara berfikir paling penting dalam pengaturcaraan.',
-        } },
-      { id:'ch9_q2', points:10,
-        prompt:{ zh:'在这个小游戏里，「计分板（scoreboard）」最适合用之前学过的哪个概念来实现「分数不断累加」？', en:'In this mini-game, which previously-learned concept best implements a scoreboard whose score keeps adding up?', ms:'Dalam permainan mini ini, konsep yang dipelajari sebelum ini manakah paling sesuai untuk melaksanakan papan skor yang skornya sentiasa bertambah?' },
-        options:{ zh:['变量的更新（score = score + 1）','if-else 条件判断','列表的 sort()','函数的定义'], en:['Updating a variable (score = score + 1)','if-else conditionals','A list’s sort()','Defining a function'], ms:['Mengemas kini pemboleh ubah (score = score + 1)','Bersyarat if-else','sort() bagi senarai','Mentakrif fungsi'] },
-        correct:0,
-        explain:{
-          zh:'计分需要一个会不断变化的数值，正是「变量的应用」章节学过的「变量更新」——用 score = score + 1 每得一分就累加。',
-          en:'Keeping score needs a value that keeps changing — exactly the "variable update" from the "A Varied Outcome" chapter: score = score + 1 adds a point every time.',
-          ms:'Mengekalkan skor memerlukan nilai yang sentiasa berubah — tepat seperti "kemas kini pemboleh ubah" daripada bab "A Varied Outcome": score = score + 1 menambah satu mata setiap kali.',
-        } },
-    ] },
-  { id:'ch10', title:{ zh:'第十章 · 课程毕业项目与创意挑战', en:'Chapter 10 · Graduation Project & Creative Challenge', ms:'Bab 10 · Projek Bergraduat & Cabaran Kreatif' },
-    questions:[
-      { id:'ch10_q1', points:10,
-        brief:{
-          zh:'恭喜走到这里！这是一个开放式的沙盒挑战，没有标准答案——你可以运用学到的所有基础，自由设计复杂的自动化建筑、刷怪塔，或是任何你能想到的机关。CodingMine 想告诉你最后一件事：写程序最重要的心态，是什么？',
-          en:"Congratulations on making it this far! This is an open-ended sandbox challenge with no fixed answer — use everything you've learned to freely design complex automated builds, mob farms, or any contraption you can imagine. One last thing CodingMine wants to leave you with: what's the most important mindset for writing programs?",
-          ms:'Tahniah kerana sampai ke sini! Ini ialah cabaran sandbox terbuka tanpa jawapan tetap — gunakan semua yang telah anda pelajari untuk mereka bentuk secara bebas binaan automatik yang kompleks, ladang mob, atau apa-apa saja kontraption yang anda bayangkan. Satu perkara terakhir yang CodingMine mahu tinggalkan: apakah sikap paling penting dalam menulis program?',
+        prompt:{ zh:'在设计一个新的手机 App 之前，最重要的第一步是什么？', en:"Before designing a new mobile app, what's the most important first step?", ms:'Sebelum mereka bentuk aplikasi telefon baharu, apakah langkah pertama yang paling penting?' },
+        options:{
+          zh:['先了解用户到底需要什么','先决定 App 图标要用什么颜色','直接打开电脑开始写代码','先写好使用说明书'],
+          en:['First understand what users actually need','First decide what colour the app icon should be','Jump straight into writing code','Write the user manual first'],
+          ms:['Fahami dahulu apa yang sebenarnya pengguna perlukan','Tentukan dahulu warna ikon aplikasi','Terus mula menulis kod','Tulis dahulu manual pengguna'],
         },
-        prompt:{ zh:'毕业项目是开放式沙盒挑战，没有标准答案。以下哪一种心态最适合用来完成它？', en:'The graduation project is an open-ended sandbox challenge with no fixed answer. Which mindset best suits completing it?', ms:'Projek bergraduat ialah cabaran sandbox terbuka tanpa jawapan tetap. Sikap manakah paling sesuai untuk menyelesaikannya?' },
-        options:{ zh:['大胆尝试、从报错信息中学习，不断修改','一定要一次就写对，中途不能出错','只能用前面章节教过的语法，不可以查资料','越复杂越好，不用考虑能不能真的做出来'], en:['Try boldly, learn from error messages, and keep revising','It must be correct on the very first try, with no mistakes allowed','Only syntax taught in earlier chapters may be used — no looking things up','The more complex the better, regardless of whether it actually works'], ms:['Cuba dengan berani, belajar daripada mesej ralat, dan terus menyemak semula','Ia mesti betul pada percubaan pertama, tiada kesilapan dibenarkan','Hanya sintaks yang diajar dalam bab sebelumnya boleh digunakan — tiada rujukan luar','Lebih kompleks lebih baik, tanpa mengira sama ada ia benar-benar berfungsi'] },
         correct:0,
         explain:{
-          zh:'毕业项目重点在于综合运用所学、勇于尝试与除错（Debugging）——写程序本来就是「试错-修正」的过程，这也是全部 CodingMine 课程最想传达的编程心态。',
-          en:'The graduation project is about combining everything learned and daring to try and debug — writing programs is inherently a "try, fail, fix" process, and that’s the mindset every CodingMine chapter has been building toward.',
-          ms:'Projek bergraduat menekankan penggunaan gabungan semua yang dipelajari serta keberanian mencuba dan men-debug — menulis program pada dasarnya ialah proses "cuba, gagal, betulkan", dan itulah sikap yang cuba disampaikan oleh setiap bab CodingMine.',
+          zh:'好的软件设计从「了解用户需求」开始——先搞清楚要解决什么问题，才能设计出真正有用的产品。图标颜色、写代码和说明书都应该是之后的事。',
+          en:"Good software design starts with understanding user needs — you must know what problem you're solving before you can design something genuinely useful. Icon colours, code, and manuals all come later.",
+          ms:'Reka bentuk perisian yang baik bermula dengan memahami keperluan pengguna — anda perlu tahu masalah yang cuba diselesaikan sebelum boleh mereka bentuk sesuatu yang benar-benar berguna. Warna ikon, kod dan manual semuanya datang kemudian.',
         } },
     ] },
 ];
@@ -2485,22 +2403,54 @@ function updateCMBoard(){
   ctx.fillStyle = '#173226'; ctx.fillRect(pad,pad,W-pad*2,H-pad*2); // 黑板面
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 28px "Microsoft YaHei",sans-serif';
-  ctx.fillText('💻 ' + CODINGMINE.company[lang], pad+22, pad+10);
-  ctx.font = '18px "Microsoft YaHei",sans-serif';
-  let y = pad+52;
+  ctx.font = 'bold 26px "Microsoft YaHei",sans-serif';
+  ctx.fillText('💻 ' + CODINGMINE.company[lang], pad+22, pad+8);
+
+  const online = net.mode !== 'solo';
+  const midX = W/2;
+  if(online){
+    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(midX, pad+46); ctx.lineTo(midX, H-pad-8); ctx.stroke();
+  }
+
+  // 左栏：10 台主题的完成情况（每台只有 1 题，颜色跟实体电脑的屏幕颜色对应）
+  ctx.font = '17px "Microsoft YaHei",sans-serif';
+  let y = pad+48;
   CM_CHAPTERS.forEach((ch,i)=>{
     const {done,total} = cmChapterProgress(ch);
     const ok = done===total;
     ctx.fillStyle = ok ? '#8ef58e' : '#eaf5ee';
-    let title = ch.title[lang].replace(/^[^·]*·\s*/,'');   // 只保留章节名，省空间
-    if(title.length>34) title = title.slice(0,34)+'…';
-    ctx.fillText((ok?'✔':'▢') + ' ' + (i+1) + '. ' + title + '  (' + done + '/' + total + ')', pad+22, y);
-    y += 34;
+    let title = ch.tag[lang];
+    if(title.length>22) title = title.slice(0,22)+'…';
+    ctx.fillText((ok?'✔':'▢') + ' ' + (i+1) + '. ' + title, pad+22, y);
+    y += 29;
   });
-  ctx.font = 'bold 24px "Microsoft YaHei",sans-serif';
+  ctx.font = 'bold 21px "Microsoft YaHei",sans-serif';
   ctx.fillStyle = '#ffe28a';
-  ctx.fillText(t('cmScoreLine', { score:cmScore, total:cmTotalPoints() }), pad+22, y+8);
+  ctx.fillText(t('cmScoreLine', { score:cmScore, total:cmTotalPoints() }), pad+22, y+6);
+
+  // 右栏：多人排行榜——只要有玩家连线（房主或访客模式）就显示每个人的得分
+  if(online){
+    const rx = midX + 24;
+    ctx.font = 'bold 21px "Microsoft YaHei",sans-serif';
+    ctx.fillStyle = '#7fd6ff';
+    ctx.fillText(t('cmLeaderboard'), rx, pad+8);
+    const rows = [{ id:net.myId, name:myName(), score:cmScore, self:true }];
+    netNames.forEach((name,id)=>{
+      if(id===net.myId) return;
+      const v = remoteCM.get(id);
+      rows.push({ id, name, score: v?v.score:0, self:false });
+    });
+    rows.sort((a,b)=>b.score-a.score);
+    ctx.font = '17px "Microsoft YaHei",sans-serif';
+    let ry = pad+48;
+    rows.forEach((r,i)=>{
+      ctx.fillStyle = r.self ? '#ffe28a' : '#eaf5ee';
+      let nm = r.name; if(nm.length>12) nm = nm.slice(0,12)+'…';
+      ctx.fillText((i+1) + '. ' + nm + (r.self ? ' ('+t('cmYou')+')' : '') + '  ' + r.score + ' ' + t('cmPtsShort'), rx, ry);
+      ry += 29;
+    });
+  }
   cmBoardTexture.needsUpdate = true;
 }
 
@@ -2728,6 +2678,7 @@ function checkInfoProximity(){
 let net = { mode:'solo', peer:null, conns:new Map(), hostConn:null, myId:null, code:null };
 let netNames = new Map();          // peerId -> 玩家名
 const remotes = new Map();         // peerId -> 远程玩家形象
+const remoteCM = new Map();        // peerId -> { score, doneCount } 其他玩家的 CodingMine 进度（黑板用）
 let posTimer = null, hostRetries = 0;
 
 const PEER_OPTS = (()=>{           // 默认用 PeerJS 官方免费云；?peerhost= 可指向自建服务器
@@ -2766,7 +2717,9 @@ function leaveNet(){
   if(net.peer){ try{ net.peer.destroy(); }catch(e){} }
   for(const id of [...remotes.keys()]) dropRemote(id);
   netNames = new Map();
+  remoteCM.clear();
   net = { mode:'solo', peer:null, conns:new Map(), hostConn:null, myId:null, code:null };
+  updateCMBoard();
 }
 
 function broadcast(msg, exceptId){
@@ -2775,6 +2728,12 @@ function broadcast(msg, exceptId){
 function netSendSet(x,y,z,b){
   if(net.mode==='host') broadcast({t:'set',x,y,z,b});
   else if(net.mode==='guest' && net.hostConn && net.hostConn.open) net.hostConn.send({t:'set',x,y,z,b});
+}
+function netSendCMScore(){
+  if(net.mode==='host'){ broadcast({t:'cm', id:net.myId, score:cmScore, doneCount:cmDone.size}); }
+  else if(net.mode==='guest' && net.hostConn && net.hostConn.open){
+    net.hostConn.send({t:'cm', score:cmScore, doneCount:cmDone.size});
+  }
 }
 function applyNetSet(d){
   if(INFO_POINTS.some(p=>p.x===d.x&&p.y===d.y&&p.z===d.z)) return;
@@ -2808,16 +2767,18 @@ function hostRoom(){
   peer.on('connection', conn=>{
     conn.on('open', ()=>{
       net.conns.set(conn.peer, conn);
-      conn.send({t:'init', edits:[...edits], names:[...netNames], hostId:net.myId});
+      conn.send({t:'init', edits:[...edits], names:[...netNames], hostId:net.myId,
+        cmScores:[[net.myId,{score:cmScore,doneCount:cmDone.size}], ...remoteCM] });
     });
     conn.on('data', d=>onHostData(conn,d));
     const bye = ()=>{
       if(!net.conns.has(conn.peer)) return;
       net.conns.delete(conn.peer);
       const n = netNames.get(conn.peer)||t('playerDefault');
-      dropRemote(conn.peer); netNames.delete(conn.peer);
+      dropRemote(conn.peer); netNames.delete(conn.peer); remoteCM.delete(conn.peer);
       broadcast({t:'leave', id:conn.peer});
       toast(t('leaveToast', { name:n }));
+      updateCMBoard();
     };
     conn.on('close', bye); conn.on('error', bye);
   });
@@ -2839,6 +2800,11 @@ function onHostData(conn, d){
     broadcast(d, conn.peer);
   }else if(d.t==='set'){
     applyNetSet(d);
+    broadcast(d, conn.peer);
+  }else if(d.t==='cm'){
+    remoteCM.set(conn.peer, { score:d.score, doneCount:d.doneCount });
+    updateCMBoard();
+    d.id = conn.peer;
     broadcast(d, conn.peer);
   }
 }
@@ -2875,21 +2841,27 @@ function onGuestData(d){
   if(d.t==='init'){
     edits = new Map(d.edits);
     netNames = new Map(d.names);
+    remoteCM.clear();
+    (d.cmScores||[]).forEach(([id,v])=>{ if(id!==net.myId) remoteCM.set(id, v); });
     generate(); markAllDirty(); flushDirty(); buildCarMeshes();
     setMpStatus(t('mpJoined', { code:net.code }));
     startPosLoop();
     toast(t('joinedWorld', { name:netNames.get(d.hostId)||t('playerDefault') }));
+    updateCMBoard();
   }else if(d.t==='pos'){
     if(d.id!==net.myId) updateRemote(d.id, d);
   }else if(d.t==='set'){
     applyNetSet(d);
+  }else if(d.t==='cm'){
+    if(d.id!==net.myId){ remoteCM.set(d.id, { score:d.score, doneCount:d.doneCount }); updateCMBoard(); }
   }else if(d.t==='join'){
     netNames.set(d.id, d.name);
     toast(t('joinToast', { name:d.name }));
   }else if(d.t==='leave'){
     const n = netNames.get(d.id)||t('playerDefault');
-    dropRemote(d.id); netNames.delete(d.id);
+    dropRemote(d.id); netNames.delete(d.id); remoteCM.delete(d.id);
     toast(t('leaveToast', { name:n }));
+    updateCMBoard();
   }
 }
 
@@ -3304,7 +3276,7 @@ function answerCM(i){
     else if(bi===i) b.classList.add('picked-wrong');
   });
   if(correct && !cmDone.has(q.id)){
-    cmDone.add(q.id); cmScore += q.points; saveCM(); refreshQuests(); updateCMBoard();
+    cmDone.add(q.id); cmScore += q.points; saveCM(); refreshQuests(); updateCMBoard(); netSendCMScore();
     blip(880,0.12);
   }else{
     blip(220,0.1);
@@ -3524,6 +3496,7 @@ function applyLang(){
   if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // CodingMine 弹窗开着时也跟着切换语言
   updateCMBoard();
   refreshDiplomaKioskTags();
+  refreshCMTerminalTags();
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>
@@ -3732,9 +3705,10 @@ window.__test = {
   guessVoiceGender, pickVoice, ttsSanitize,
   COMPUTERS,
   codingMine: ()=>({ score:cmScore, total:cmTotalPoints(), done:[...cmDone], nearCM,
-    chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, ...cmChapterProgress(ch) })),
-    terminals:CM_TERMINALS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY})) }),
+    chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, tag:ch.tag, ...cmChapterProgress(ch) })),
+    terminals:CM_TERMINALS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY,color:s.color})) }),
   openCodingMine, openCMChapter, answerCM, closeCM,
+  remoteCM: ()=>[...remoteCM], netSendCMScore,
   diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,icon:k.icon})) }),
   openDiplomaKiosk,
   playTime: ()=>playTime, formatTime,
