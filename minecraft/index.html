@@ -387,6 +387,7 @@ zh: {
   k6:'互动 / 任务列表', v6:'<kbd>E</kbd> 阅读信息点 · <kbd>Q</kbd> 任务列表',
   lockTitle:'🔒 请输入密码', lockDesc:'输入正确的密码后才能开始游戏。',
   lockPlaceholder:'密码', lockBtn:'解锁', lockWrong:'❌ 密码错误，请重试',
+  lockNoCrypto:'❌ 此浏览器不支持安全校验（需要 Web Crypto API），请改用较新版本的 Chrome / Edge / Firefox / Safari',
   yourName:'你的名字：', btnStart:'▶ 进入园区', btnReset:'🔄 重置世界（清除我的改动）',
   mpTitle:'🌐 多人连线（同学一起逛园区）', btnHost:'创建多人房间', mpOr:'— 或 —',
   roomPh:'房间代码', btnJoin:'加入房间',
@@ -440,6 +441,7 @@ en: {
   k6:'Interact / Quests', v6:'<kbd>E</kbd> read info point · <kbd>Q</kbd> quest list',
   lockTitle:'🔒 Enter Password', lockDesc:'Enter the correct password to start the game.',
   lockPlaceholder:'Password', lockBtn:'Unlock', lockWrong:'❌ Wrong password, try again',
+  lockNoCrypto:'❌ This browser lacks the Web Crypto API needed to check the password — please use a recent Chrome / Edge / Firefox / Safari',
   yourName:'Your name: ', btnStart:'▶ Enter Campus', btnReset:'🔄 Reset World (clear my edits)',
   mpTitle:'🌐 Multiplayer (explore with friends)', btnHost:'Create Room', mpOr:'— or —',
   roomPh:'Room code', btnJoin:'Join Room',
@@ -493,6 +495,7 @@ ms: {
   k6:'Interaksi / Tugasan', v6:'<kbd>E</kbd> baca titik maklumat · <kbd>Q</kbd> senarai tugasan',
   lockTitle:'🔒 Masukkan Kata Laluan', lockDesc:'Masukkan kata laluan yang betul untuk mula bermain.',
   lockPlaceholder:'Kata laluan', lockBtn:'Buka Kunci', lockWrong:'❌ Kata laluan salah, cuba lagi',
+  lockNoCrypto:'❌ Pelayar ini tiada Web Crypto API untuk menyemak kata laluan — sila guna Chrome / Edge / Firefox / Safari versi terkini',
   yourName:'Nama anda: ', btnStart:'▶ Masuk Kampus', btnReset:'🔄 Set Semula Dunia (padam ubahan saya)',
   mpTitle:'🌐 Berbilang Pemain (jelajah bersama rakan)', btnHost:'Cipta Bilik', mpOr:'— atau —',
   roomPh:'Kod bilik', btnJoin:'Sertai Bilik',
@@ -3342,13 +3345,29 @@ document.getElementById('btn-join').addEventListener('click', ()=>{
 ================================================================ */
 const overlayEl=document.getElementById('overlay');
 
-/* ---- 密码锁屏：必须先输入正确密码，才会显示开始菜单 ---- */
-const LOCK_PASSWORD = 'V231591';
+/* ---- 密码锁屏：必须先输入正确密码，才会显示开始菜单 ----
+   密码本身不会以明文出现在源码里——这里只存了它的 SHA-256 哈希值，
+   解锁时把用户输入也算一次哈希，两个哈希值相等才算对。*/
+const LOCK_PASSWORD_HASH = '17751c25aa15abd80350f7668895896a1d9586ab1db449e9c8d5c20a8663b636';
+async function sha256Hex(text){
+  const buf = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 const lockscreenEl = document.getElementById('lockscreen');
 const lockInputEl = document.getElementById('lock-input');
 const lockErrorEl = document.getElementById('lock-error');
-function tryUnlock(){
-  if(lockInputEl.value === LOCK_PASSWORD){
+const lockBtnEl = document.getElementById('lock-btn');
+async function tryUnlock(){
+  if(!(window.crypto && window.crypto.subtle)){
+    lockErrorEl.textContent = t('lockNoCrypto');
+    lockErrorEl.classList.remove('hidden');
+    return;
+  }
+  lockBtnEl.disabled = true;
+  const hash = await sha256Hex(lockInputEl.value).catch(()=>null);
+  lockBtnEl.disabled = false;
+  if(hash === LOCK_PASSWORD_HASH){
     lockscreenEl.classList.add('hidden');
     lockErrorEl.classList.add('hidden');
     blip(880,0.12);
@@ -3360,7 +3379,7 @@ function tryUnlock(){
     blip(180,0.12);
   }
 }
-document.getElementById('lock-btn').addEventListener('click', tryUnlock);
+lockBtnEl.addEventListener('click', tryUnlock);
 lockInputEl.addEventListener('keydown', e=>{ if(e.code==='Enter') tryUnlock(); });
 
 document.getElementById('btn-start').addEventListener('click',()=>{
@@ -3694,7 +3713,7 @@ window.__test = {
   hostRoom, joinRoom, get,
   lockscreen: lockscreenEl,
   isLocked: ()=>!lockscreenEl.classList.contains('hidden'),
-  tryUnlock(pwd){ lockInputEl.value = pwd; tryUnlock(); },
+  tryUnlock(pwd){ lockInputEl.value = pwd; return tryUnlock(); },
   net: ()=>({ mode:net.mode, code:net.code, conns:net.conns.size }),
   remoteCount: ()=>remotes.size,
   remotePos(){ const r=[...remotes.values()][0]; return r? r.group.position.toArray() : null; },

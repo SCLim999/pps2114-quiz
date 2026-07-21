@@ -75,9 +75,10 @@ the staff canteen.
 
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).
-- **Password gate**: the page opens on a lock screen — enter `V231591` and click
-  "Unlock" (or press Enter) to reveal the start menu. This is re-checked on every
-  page load.
+- **Password gate**: the page opens on a lock screen and won't reveal the start
+  menu until the correct password is entered (ask the maintainer for it) — re-checked
+  on every page load. Only a SHA-256 hash of the password ships in the source, not
+  the plaintext.
 - Walk (WASD), fly (F), break/place blocks (mouse), and visit the **10 golden info
   blocks** to read architecture lessons about the building's design (including
   one at the computer lab's blackboard).
