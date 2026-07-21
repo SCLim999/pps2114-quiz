@@ -114,13 +114,15 @@ the staff canteen.
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
   (Artificial Intelligence). Scattered through the ground-floor pilotis of the
   ViTrox Education college building — well apart from each other and from Dr
-  Janaka Low — are 5 wooden mailbox-style kiosks — a post, a crate and a
-  coloured icon plaque, Minecraft-signpost style — each with a short blurb on
-  a different real ViTrox College diploma or degree: 💻 Computer Science, 📈
-  Business Studies, ⚙️ Diploma in Mechatronics Engineering, 🎓 Bachelor of
-  Mechatronics Engineering (Hons, with UCSI University), and ⚡ Electrical and
-  Electronic Engineering. Marketing officer Cindy wanders that floor to point
-  visitors to them.
+  Janaka Low (its Principal) — are 7 wooden mailbox-style kiosks — a post, a
+  crate and a coloured icon plaque, Minecraft-signpost style — each with a
+  short blurb on a different real ViTrox College diploma or degree: 💻
+  Computer Science, 📈 Business Studies, ⚙️ Diploma in Mechatronics
+  Engineering, 🎓 Bachelor of Mechatronics Engineering (Hons, with UCSI
+  University), ⚡ Electrical and Electronic Engineering, 🔌 Bachelor of
+  Electronic Engineering (Hons, with Universiti Sains Malaysia), and 🧠
+  Bachelor of Computer Science (Intelligent Computing) (Hons, also with USM).
+  Marketing officer Cindy wanders that floor to point visitors to them.
 - **HUD minimap and play timer**: a small top-down minimap (top-left) shows
   the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for

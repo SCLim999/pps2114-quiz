@@ -95,7 +95,7 @@ https://sclim999.github.io/pps2114-quiz/minecraft/
 | ⑥ | 工业 × 人文校园 | VITROX 大楼内部一层（从面向庭院的开口进入） |
 | ⑦ | Campus 3.0 与鱼池庭院 | 沿东侧马路走到新园区，鱼池木桥南端 |
 | ⑧ | 启发 ViTrox 的相机 | ViTrox Gallery 走廊中段的金色展台（玻璃罩里的相机） |
-| ⑨ | ViTrox Education 品牌重塑 | Campus 3.0 东侧的白色飘带大楼入口（讲师 Dr Janaka Low 所在处） |
+| ⑨ | ViTrox Education 品牌重塑 | Campus 3.0 东侧的白色飘带大楼入口（校长 Dr Janaka Low 所在处） |
 | ⑩ | 电脑室 · CodingMine 编程课堂 | VITROX 招牌大楼四楼电脑室，两室分隔墙的大黑板旁 |
 
 **🔊 文字转语音（Text-to-Speech）**：每个知识点和 NPC 对话弹窗右下角都有一个朗读按钮，点一下就用浏览器内建的语音朗读当前显示的文字（跟随所选语言：中文/English/Bahasa Melayu）。也可以在开始菜单勾选「自动朗读讲解内容」，之后每次打开新的知识点或对话都会自动开始朗读——适合朗读能力较弱的学生，或当作背景讲解使用。此功能不需要联网、不需要账号，由浏览器自带的语音引擎驱动，语音音色因浏览器/系统而异；如果浏览器不支持，朗读按钮和开关会自动隐藏。
@@ -154,7 +154,7 @@ VITROX 招牌大楼**四楼**东半层有**两间电脑室**，共约 20 台电�
 | **Ms Khor JY** | 移动应用开发 · Flutter（Mobile App Dev） |
 | **Mr Eng YK** | 人工智能（Artificial Intelligence） |
 
-ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、也不挨着 Dr Janaka Low，五台之间也彼此拉开距离，分散在大楼各处）还有 **5 台木箱造型的站立式信息机**——木柱 + 木箱 + 彩色图标牌，样子像 Minecraft 里常见的邮箱/告示牌，各自介绍 ViTrox College 一个不同的真实文凭/学士课程，内容都写得简短，走近按 `E` 即可阅读：
+ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、也不挨着 Dr Janaka Low，彼此也拉开距离，分散在大楼各处）还有 **7 台木箱造型的站立式信息机**——木柱 + 木箱 + 彩色图标牌，样子像 Minecraft 里常见的邮箱/告示牌，各自介绍 ViTrox College 一个不同的真实文凭/学士课程，内容都写得简短，走近按 `E` 即可阅读：
 
 | 图标 | 课程 |
 |---|---|
@@ -163,6 +163,8 @@ ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、
 | ⚙️ 红色 | Diploma in Mechatronics Engineering |
 | 🎓 紫色 | Bachelor of Mechatronics Engineering (Hons) — 与 UCSI University 合作 |
 | ⚡ 黄色 | Diploma in Electrical and Electronic Engineering |
+| 🔌 青色 | Bachelor of Electronic Engineering (Hons) — 与 Universiti Sains Malaysia (USM) 合作 |
+| 🧠 粉色 | Bachelor of Computer Science (Intelligent Computing) (Hons) — 与 USM 合作 |
 
 市场专员 **Cindy** 就在这层楼附近走动（不是固定站着），负责介绍这几台信息机；走近她按 `E` 可以交谈。
 

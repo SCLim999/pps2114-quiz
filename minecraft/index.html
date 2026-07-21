@@ -2123,6 +2123,20 @@ const DIPLOMA_KIOSKS = [
       zh:'Diploma in Electrical and Electronic Engineering 专注电力的实际应用：电气工程涉及电力传输、机器控制与高压系统的设计测试；电子工程则专注低压电子电路、器件与通讯系统的设计制造。',
       en:'Diploma in Electrical and Electronic Engineering covers the practical side of electricity — from designing and testing circuitry, machine control and high-power transmission systems (Electrical) to low-voltage electronic circuits, devices and communication systems (Electronic).',
       ms:'Diploma in Electrical and Electronic Engineering menumpu kepada aplikasi praktikal elektrik — Kejuruteraan Elektrik merangkumi reka bentuk litar penghantaran, kawalan mesin dan sistem kuasa tinggi; Kejuruteraan Elektronik pula menumpu kepada litar elektronik voltan rendah, peranti dan sistem komunikasi.' } },
+  { id:'dk6', x:166, z:-8, floorY:4, icon:'🔌', iconBg:'#16a085',
+    tag:{ zh:'电子工程学士(USM)', en:'B.Eng Electronic (USM)', ms:'B.Eng Elektronik (USM)' },
+    title:{ zh:'🔌 Bachelor of Electronic Engineering (Hons) — USM 合作项目', en:'🔌 Bachelor of Electronic Engineering (Hons) — USM Collaboration', ms:'🔌 Bachelor of Electronic Engineering (Hons) — Kerjasama USM' },
+    text:{
+      zh:'Bachelor of Electronic Engineering（荣誉学位），与马来西亚理科大学（USM）合作开办：这项策略合作旨在培养马来西亚高科技产业所需的工程人才——扎实的电子与电路设计学术基础，结合 ViTrox 真实机器视觉与半导体制造环境的实践经验。',
+      en:"Bachelor of Electronic Engineering (Hons), offered in collaboration with Universiti Sains Malaysia (USM): a strategic partnership to develop the engineering talent Malaysia's high-tech industry needs — strong academic foundations in electronics and circuit design, combined with hands-on exposure to ViTrox's real machine-vision and semiconductor manufacturing environment.",
+      ms:'Bachelor of Electronic Engineering (Kepujian), ditawarkan bekerjasama dengan Universiti Sains Malaysia (USM): kerjasama strategik untuk melahirkan jurutera bagi industri berteknologi tinggi Malaysia — menggabungkan asas akademik yang kukuh dalam elektronik dan reka bentuk litar dengan pendedahan praktikal kepada persekitaran pembuatan penglihatan mesin dan semikonduktor sebenar ViTrox.' } },
+  { id:'dk7', x:176, z:-6, floorY:4, icon:'🧠', iconBg:'#e84393',
+    tag:{ zh:'智能计算学士(USM)', en:'B.CS Intelligent Computing (USM)', ms:'B.CS Pengkomputeran Pintar (USM)' },
+    title:{ zh:'🧠 Bachelor of Computer Science (Intelligent Computing) (Hons) — USM 合作项目', en:'🧠 Bachelor of Computer Science (Intelligent Computing) (Hons) — USM Collaboration', ms:'🧠 Bachelor of Computer Science (Intelligent Computing) (Hons) — Kerjasama USM' },
+    text:{
+      zh:'Bachelor of Computer Science (Intelligent Computing)（荣誉学位），与马来西亚理科大学（USM）合作开办：这是 USM 与 ViTrox 培养大马高科技人才策略合作的一部分，专注人工智能、机器学习与智能系统，并直接接触 ViTrox 智慧制造环境里的真实应用。',
+      en:"Bachelor of Computer Science (Intelligent Computing) with Honours, offered in collaboration with Universiti Sains Malaysia (USM): part of a strategic USM-ViTrox partnership to develop Malaysia's high-tech talent, focusing on AI, machine learning and intelligent systems, with direct exposure to real-world applications inside ViTrox's smart manufacturing environment.",
+      ms:'Bachelor of Computer Science (Intelligent Computing) (Kepujian), ditawarkan bekerjasama dengan Universiti Sains Malaysia (USM): sebahagian daripada kerjasama strategik USM-ViTrox untuk membangunkan bakat berteknologi tinggi Malaysia, memberi tumpuan kepada AI, pembelajaran mesin dan sistem pintar, dengan pendedahan langsung kepada aplikasi sebenar dalam persekitaran pembuatan pintar ViTrox.' } },
 ];
 const CM_TERMINALS = [                       // 全部 10 台电脑都集中在电脑室 1（Ts Dr Lim SC 所在这一区），每台颜色不同、对应一个 IT 主题
   { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0, color:0x3d8bff, facing:1 },
@@ -3121,11 +3135,11 @@ const NPCS = [
       en:'I am an architect from the design team. Campus 3.0 continues the language of 2.0: white slabs, slender vertical windows, rooftops full of solar panels. This pond is not just pretty — the water cools the court, and the fish and lilies help engineers rest their eyes and minds.',
       ms:'Saya arkitek daripada pasukan reka bentuk. Campus 3.0 meneruskan bahasa 2.0: blok putih, tingkap menegak yang ramping, bumbung penuh panel solar. Kolam ini bukan sekadar cantik — airnya menyejukkan laman, dan ikan serta teratai membantu jurutera merehatkan mata dan minda.' } },
   { name:'Dr Janaka Low', color:0x1f3a5f, tie:0x8a1f2b, expr:'smile', range:3, x:148, y:4, z:0, baseYaw:Math.PI/2,
-    role:{ zh:'讲师 · ViTrox Education', en:'Lecturer · ViTrox Education', ms:'Pensyarah · ViTrox Education' },
+    role:{ zh:'校长 · ViTrox Education', en:'Principal · ViTrox Education', ms:'Pengetua · ViTrox Education' },
     dialog:{
-      zh:'欢迎来到 ViTrox Education！我在这里教书。我们最近才完成品牌重塑——ViTrox College、ViTrox TVET 和 ViTrox Corporate Academy 现在都统一用「ViTrox」的签名式样，代表我们对教育与人才培养的专注使命，也让学生和企业一眼就能认出我们和母公司是同一个家族。欢迎进来看看这栋弯曲的玻璃飘带大楼！',
-      en:"Welcome to ViTrox Education! I teach here. We just completed a rebrand — ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share one unified 'ViTrox' signature, representing our dedicated mission to education and talent development, so students and partners instantly recognise us as part of the same family as our parent company. Come take a look at this curving glass-ribbon building!",
-      ms:'Selamat datang ke ViTrox Education! Saya mengajar di sini. Kami baru selesai menjenamakan semula — ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus kami terhadap pendidikan dan pembangunan bakat, supaya pelajar dan rakan kongsi terus mengenali kami sebagai sebahagian keluarga yang sama dengan syarikat induk. Jemput masuk melihat bangunan reben kaca yang melengkung ini!' } },
+      zh:'欢迎来到 ViTrox Education！我是这里的校长。我们最近才完成品牌重塑——ViTrox College、ViTrox TVET 和 ViTrox Corporate Academy 现在都统一用「ViTrox」的签名式样，代表我们对教育与人才培养的专注使命，也让学生和企业一眼就能认出我们和母公司是同一个家族。欢迎进来看看这栋弯曲的玻璃飘带大楼！',
+      en:"Welcome to ViTrox Education! I'm the Principal here. We just completed a rebrand — ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share one unified 'ViTrox' signature, representing our dedicated mission to education and talent development, so students and partners instantly recognise us as part of the same family as our parent company. Come take a look at this curving glass-ribbon building!",
+      ms:'Selamat datang ke ViTrox Education! Saya Pengetua di sini. Kami baru selesai menjenamakan semula — ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus kami terhadap pendidikan dan pembangunan bakat, supaya pelajar dan rakan kongsi terus mengenali kami sebagai sebahagian keluarga yang sama dengan syarikat induk. Jemput masuk melihat bangunan reben kaca yang melengkung ini!' } },
   { name:'Cindy', color:0xd9822b, expr:'happy', style:'f', range:20, x:180, y:4, z:-5, baseYaw:Math.PI/2,
     role:{ zh:'市场专员 · ViTrox College', en:'Marketing Officer · ViTrox College', ms:'Pegawai Pemasaran · ViTrox College' },
     dialog:{
