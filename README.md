@@ -104,12 +104,13 @@ the staff canteen.
   dashboard. The two computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
-  (Artificial Intelligence). Over on the ViTrox Education walkway (not far from
-  Dr Janaka Low, but not inside the computer rooms) are 4 wooden mailbox-style
-  kiosks — a post, a crate and a coloured icon plaque, Minecraft-signpost style
-  — each with a short blurb on a different real ViTrox College diploma: 💻
-  Computer Science, 📈 Business Studies, ⚙️ Mechatronics Engineering, and ⚡
-  Electrical and Electronic Engineering.
+  (Artificial Intelligence). Scattered through the ground-floor pilotis of the
+  ViTrox Education college building — well apart from each other and from Dr
+  Janaka Low — are 4 wooden mailbox-style kiosks — a post, a crate and a
+  coloured icon plaque, Minecraft-signpost style — each with a short blurb on
+  a different real ViTrox College diploma: 💻 Computer Science, 📈 Business
+  Studies, ⚙️ Mechatronics Engineering, and ⚡ Electrical and Electronic
+  Engineering.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
