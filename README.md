@@ -102,7 +102,7 @@ the staff canteen.
   Networking & Internet, Operating System, HTML, and Software Design. Questions
   are short and fun, aimed at primary/secondary-school level. Walk up to a
   station and press E to answer; correct answers earn points shown live in the
-  HUD (100 points total), saved to `localStorage`. A big blackboard mounted on
+  HUD (1 point per question, 10 points total), saved to `localStorage`. A big blackboard mounted on
   the wall between the two rooms (visible from both sides) shows live progress
   per topic and total score — and if a multiplayer room is active, a second
   column shows a live leaderboard of every connected player's score. The two
