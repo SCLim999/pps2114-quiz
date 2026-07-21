@@ -111,6 +111,12 @@ the staff canteen.
   a different real ViTrox College diploma: 💻 Computer Science, 📈 Business
   Studies, ⚙️ Mechatronics Engineering, and ⚡ Electrical and Electronic
   Engineering.
+- **HUD minimap and play timer**: a small top-down minimap (top-left) shows
+  the central courtyard as a reference circle, gold/green dots for
+  unvisited/visited info points, blue dots for NPCs, and a white arrow for
+  the player's position and facing — so it's always obvious which direction
+  to walk. A play timer next to the explore/CodingMine chips counts actual
+  play time (paused while a menu or dialogue is open).
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 

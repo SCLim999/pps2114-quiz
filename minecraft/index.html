@@ -54,6 +54,12 @@
     background:rgba(0,0,0,.4); padding:4px 10px; border-radius:6px; z-index:5;
   }
 
+  #minimap {
+    position:fixed; top:38px; left:10px; z-index:5;
+    background:rgba(15,22,34,.72); border:1px solid rgba(255,255,255,.28);
+    border-radius:8px; display:block;
+  }
+
   #prompt {
     position:fixed; left:50%; bottom:90px; transform:translateX(-50%);
     background:rgba(20,40,80,.8); color:#fff; padding:8px 20px; border-radius:8px;
@@ -226,7 +232,8 @@
 
 <div id="crosshair"></div>
 <div id="pos"></div>
-<div id="chip"><span id="chip-main"></span><span id="chip-cm"></span><span id="chip-mp"></span></div>
+<canvas id="minimap" width="180" height="72"></canvas>
+<div id="chip"><span id="chip-main"></span><span id="chip-cm"></span><span id="chip-timer"></span><span id="chip-mp"></span></div>
 <div id="prompt"><kbd>E</kbd><span id="prompt-text"></span></div>
 <div id="toast"></div>
 <div id="quests"><h3 id="quests-title"></h3><ul id="quest-list"></ul></div>
@@ -3445,11 +3452,56 @@ respawn();
 const posEl=document.getElementById('pos');
 const clock=new THREE.Clock();
 let elapsed=0;
+
+/* ---- 计时器：只在真正操控角色（未开菜单/对话）时累计，格式 mm:ss / h:mm:ss ---- */
+let playTime=0;
+const chipTimerEl=document.getElementById('chip-timer');
+function formatTime(s){
+  s=Math.floor(s);
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  const mm=String(m).padStart(2,'0'), ss=String(sec).padStart(2,'0');
+  return h>0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+/* ---- 小地图：按世界边界固定缩放的俯视图，标出金色信息点、NPC 和玩家朝向 ---- */
+const mmCanvas=document.getElementById('minimap');
+const mmCtx=mmCanvas.getContext('2d');
+const MM_SX = mmCanvas.width  / (WORLD.maxX-WORLD.minX);
+const MM_SZ = mmCanvas.height / (WORLD.maxZ-WORLD.minZ);
+const mmX = x => (x-WORLD.minX)*MM_SX;
+const mmZ = z => (z-WORLD.minZ)*MM_SZ;
+function drawMinimap(){
+  const W=mmCanvas.width, H=mmCanvas.height;
+  mmCtx.clearRect(0,0,W,H);
+  mmCtx.fillStyle='rgba(15,22,34,.55)'; mmCtx.fillRect(0,0,W,H);
+  mmCtx.strokeStyle='rgba(255,255,255,.3)'; mmCtx.lineWidth=1;
+  mmCtx.beginPath();                                        // 中央圆形庭院，作为方位参照
+  mmCtx.ellipse(mmX(0),mmZ(0),23.5*MM_SX,23.5*MM_SZ,0,0,Math.PI*2);
+  mmCtx.stroke();
+  npcObjs.forEach(o=>{                                      // NPC：浅蓝小点
+    mmCtx.fillStyle='rgba(120,190,255,.85)';
+    mmCtx.beginPath(); mmCtx.arc(mmX(o.group.position.x),mmZ(o.group.position.z),1.3,0,Math.PI*2); mmCtx.fill();
+  });
+  INFO_POINTS.forEach((p,i)=>{                               // 探索知识点：未探索金色/已探索绿色
+    mmCtx.fillStyle = visited.has(i) ? 'rgba(140,255,140,.95)' : '#ffd75e';
+    mmCtx.beginPath(); mmCtx.arc(mmX(p.x),mmZ(p.z),2.1,0,Math.PI*2); mmCtx.fill();
+  });
+  const px=mmX(player.pos.x), pz=mmZ(player.pos.z);          // 玩家：白色朝向箭头
+  const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);
+  mmCtx.save();
+  mmCtx.translate(px,pz);
+  mmCtx.rotate(Math.atan2(fwdZ,fwdX));
+  mmCtx.fillStyle='#fff';
+  mmCtx.beginPath(); mmCtx.moveTo(4,0); mmCtx.lineTo(-3,2.6); mmCtx.lineTo(-3,-2.6); mmCtx.closePath(); mmCtx.fill();
+  mmCtx.restore();
+}
+
 function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
   elapsed+=dt;
-  if(playing() && !modalOpen) physics(dt);
+  if(playing() && !modalOpen){ physics(dt); playTime+=dt; }
+  chipTimerEl.textContent = ' · ⏱ ' + formatTime(playTime);
   checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
@@ -3457,6 +3509,7 @@ function animate(){
     c.position.x += dt*1.4;
     if(c.position.x>165) c.position.x=-165;
   }
+  drawMinimap();
   const chipMp=document.getElementById('chip-mp');
   chipMp.textContent = net.mode==='solo' ? '' : t('online', { c:remotes.size+1, code:net.code });
   markers.forEach((m,i)=>{
@@ -3583,6 +3636,8 @@ window.__test = {
   openCodingMine, openCMChapter, answerCM, closeCM,
   diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,icon:k.icon})) }),
   openDiplomaKiosk,
+  playTime: ()=>playTime, formatTime,
+  minimap: ()=>({ canvas:mmCanvas, sx:MM_SX, sz:MM_SZ }),
 };
 </script>
 </body>
