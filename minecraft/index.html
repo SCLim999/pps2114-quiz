@@ -560,7 +560,7 @@ function blockName(b){
 const B = { AIR:0, GRASS:1, DIRT:2, STONE:3, WHITE:4, GLASS:5, PLANK:6,
             LOG:7, LEAF:8, WATER:9, TILE:10, BLUE:11, INFO:12, PATH:13, GRAY:14,
             SOLAR:15, STEEL:16, ASPHALT:17, COURT_G:18, COURT_R:19,
-            RED:20, BLACK:21, YELLOW:22 };
+            RED:20, BLACK:21, YELLOW:22, BLOSSOM:23 };
 
 const TRANSPARENT = { [B.GLASS]:true, [B.WATER]:true };
 const NONSOLID    = { [B.AIR]:true, [B.WATER]:true };
@@ -569,7 +569,7 @@ const NONSOLID    = { [B.AIR]:true, [B.WATER]:true };
 const T = { GRASS_TOP:0, GRASS_SIDE:1, DIRT:2, STONE:3, WHITE:4, GLASS:5, PLANK:6,
             LOG_SIDE:7, LOG_TOP:8, LEAF:9, WATER:10, TILE:11, BLUE:12, INFO:13,
             PATH:14, GRAY:15, SOLAR:16, STEEL:17, ASPHALT:18, COURT_G:19,
-            COURT_R:20, RED:21, BLACK:22, YELLOW:23 };
+            COURT_R:20, RED:21, BLACK:22, YELLOW:23, BLOSSOM:24 };
 
 const BLOCK_DEF = {
   [B.GRASS]: { name:'草方块',   top:T.GRASS_TOP, side:T.GRASS_SIDE, bottom:T.DIRT },
@@ -594,9 +594,10 @@ const BLOCK_DEF = {
   [B.RED]:   { name:'红色',     top:T.RED,   side:T.RED,   bottom:T.RED },
   [B.BLACK]: { name:'黑色',     top:T.BLACK, side:T.BLACK, bottom:T.BLACK },
   [B.YELLOW]:{ name:'黄色',     top:T.YELLOW, side:T.YELLOW, bottom:T.YELLOW },
+  [B.BLOSSOM]:{ name:'樱花',    top:T.BLOSSOM, side:T.BLOSSOM, bottom:T.BLOSSOM },
 };
 
-const ATLAS_COLS = 8, ATLAS_ROWS = 3, TILE_PX = 16;
+const ATLAS_COLS = 8, ATLAS_ROWS = 4, TILE_PX = 16;
 const atlas = document.createElement('canvas');
 atlas.width = ATLAS_COLS*TILE_PX; atlas.height = ATLAS_ROWS*TILE_PX;
 const actx = atlas.getContext('2d');
@@ -719,6 +720,17 @@ function noisy(ox,oy,r,g,b,v,rand,alpha){
   paintTile(T.RED,   (ox,oy)=>{ noisy(ox,oy,190,42,42,10,rand); actx.fillStyle='rgba(255,255,255,.3)'; actx.fillRect(ox,oy,16,2); });
   paintTile(T.BLACK, (ox,oy)=>noisy(ox,oy,28,28,33,5,rand));
   paintTile(T.YELLOW,(ox,oy)=>{ noisy(ox,oy,233,188,44,10,rand); actx.fillStyle='rgba(255,255,255,.3)'; actx.fillRect(ox,oy,16,2); });
+  paintTile(T.BLOSSOM,(ox,oy)=>{
+    noisy(ox,oy,252,193,213,12,rand);
+    for(let i=0;i<10;i++){
+      actx.fillStyle='rgba(219,98,140,.7)';
+      actx.fillRect(ox+Math.floor(rand()*16),oy+Math.floor(rand()*16),1,1);
+    }
+    for(let i=0;i<6;i++){
+      actx.fillStyle='rgba(255,255,255,.8)';
+      actx.fillRect(ox+Math.floor(rand()*16),oy+Math.floor(rand()*16),1,1);
+    }
+  });
 }
 
 /* ================================================================
@@ -765,7 +777,7 @@ const FONT5 = {
 const RAMP_A0 = 110, RAMP_A1 = 315;    // 坡道角度范围（南入口在 90°）
 const BRIDGE_A = 312;                  // 坡道-屋顶连桥角度（此处坡道已升至屋面高度）
 
-function placeTree(x,z,rand){
+function placeTree(x,z,rand,leafBlock=B.LEAF){
   const h = 4 + Math.floor(rand()*2);
   for(let y=4;y<4+h;y++) set(x,y,z,B.LOG);
   const top = 3+h;
@@ -776,9 +788,42 @@ function placeTree(x,z,rand){
     if(dx===0&&dz===0&&dy<=0) continue;
     if(rr===4 && rand()<0.5) continue;
     const yy = top+dy;
-    if(get(x+dx,yy,z+dz)===B.AIR) set(x+dx,yy,z+dz,B.LEAF);
+    if(get(x+dx,yy,z+dz)===B.AIR) set(x+dx,yy,z+dz,leafBlock);
   }
-  set(x,top+1,z,B.LEAF);
+  set(x,top+1,z,leafBlock);
+}
+
+function placeSakuraTree(x,z,rand){
+  placeTree(x,z,rand,B.BLOSSOM);
+  // 树荫下的落樱地毯
+  for(let dx=-2;dx<=2;dx++) for(let dz=-2;dz<=2;dz++){
+    if(Math.abs(dx)+Math.abs(dz)>3) continue;
+    if(dx===0&&dz===0) continue;
+    if(get(x+dx,3,z+dz)===B.GRASS && rand()<0.35) set(x+dx,3,z+dz,B.BLOSSOM);
+  }
+}
+
+function buildSakuraGarden(cx,cz,rand){
+  const R=10;
+  for(let x=cx-R-1;x<=cx+R+1;x++) for(let z=cz-R-1;z<=cz+R+1;z++){
+    if(!inBounds(x,3,z) || get(x,3,z)!==B.GRASS) continue;
+    const r=Math.hypot(x-cx,z-cz);
+    if(r<=R+0.6 && (r>=R-0.6 || Math.abs(x-cx)<=1 || Math.abs(z-cz)<=1)) set(x,3,z,B.PATH);
+  }
+  // 中央石灯
+  for(let y=4;y<=6;y++) set(cx,y,cz,B.STONE);
+  set(cx,7,cz,B.YELLOW);
+  // 环形樱花树
+  const N=8;
+  for(let k=0;k<N;k++){
+    const a=k*(360/N)+15;
+    const tx=Math.round(cx+ (R-2)*cosd(a)), tz=Math.round(cz+ (R-2)*sind(a));
+    if(get(tx,3,tz)===B.GRASS) placeSakuraTree(tx,tz,rand);
+  }
+  // 石凳（东西南北四方）
+  for(const [bx,bz] of [[cx-4,cz],[cx+4,cz],[cx,cz-4],[cx,cz+4]]){
+    if(get(bx,3,bz)===B.PATH || get(bx,3,bz)===B.GRASS) set(bx,4,bz,B.PLANK);
+  }
 }
 
 function placeComputer(x,z,facing,floorY=4,kind=null){
@@ -1305,6 +1350,9 @@ function generate(){
     }
     // 门前绿化
     for(const [tx,tz] of [[X0-8,-14],[X0-8,0],[X1+2,-10],[X1+2,4]]) placeTree(tx,tz,rand);
+    // 樱花花园（大楼南侧，隔一段草坪）+ 连接步道
+    for(let x=175;x<=179;x++) for(let z=10;z<=15;z++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
+    buildSakuraGarden(177,25,rand);
   }
 
   /* ---- 6.8 西侧大型停车场（卫星图中的大片车位）---- */
@@ -1338,6 +1386,7 @@ function generate(){
     if(x>-40&&x<-6&&z>-54&&z<-22) continue;     // 实验楼
     if(x>78&&z>22&&z<46) continue;              // Campus 3.0 绿篱区
     if(x>140&&z>-25&&z<15) continue;            // ViTrox Education 飘带大楼场地
+    if(x>163&&x<191&&z>13&&z<37) continue;      // 樱花花园
     if(Math.abs(x)<7&&z>20) continue;           // 主入口步道
     if(get(x,3,z)!==B.GRASS) continue;
     placeTree(x,z,rand); planted++;

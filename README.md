@@ -122,7 +122,11 @@ the staff canteen.
   with UCSI University, 🔌 Electronic Engineering Hons and 🤖 Computer Science
   (Intelligent Computing) Hons — both marked *Coming Soon* — with Universiti
   Sains Malaysia). Marketing officer Cindy wanders that floor to point
-  visitors to them.
+  visitors to them. Just south of the building, across a stretch of lawn, is
+  a small **sakura garden**: a cross-shaped stone path around a central
+  lantern, four benches, and a ring of 8 pink cherry-blossom trees with
+  fallen-petal tiles scattered underneath — pure scenery, free to wander
+  through.
 - **HUD minimap and play timer**: a small top-down minimap (top-left) shows
   the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for
