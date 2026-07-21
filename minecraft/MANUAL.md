@@ -154,17 +154,17 @@ VITROX 招牌大楼**四楼**东半层有**两间电脑室**，共约 20 台电�
 | **Ms Khor JY** | 移动应用开发 · Flutter（Mobile App Dev） |
 | **Mr Eng YK** | 人工智能（Artificial Intelligence） |
 
-ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、也不挨着 Dr Janaka Low，彼此也拉开距离，分散在大楼各处）还有 **7 台木箱造型的站立式信息机**——木柱 + 木箱 + 彩色图标牌，样子像 Minecraft 里常见的邮箱/告示牌，各自介绍 ViTrox College 一个不同的真实文凭/学士课程，内容都写得简短，走近按 `E` 即可阅读：
+ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、也不挨着 Dr Janaka Low，彼此也拉开距离，分散在大楼各处）还有 **7 台木箱造型的站立式信息机**——木柱 + 木箱 + 彩色图标牌，样子像 Minecraft 里常见的邮箱/告示牌，各自介绍 ViTrox College 一个不同的真实文凭/学士课程，内容都写得简短，走近按 `E` 即可阅读。7 台信息机**按课程类型分成两组**——前 4 台是文凭（Diploma）课程，后 3 台是学士（Bachelor）课程，沿着走道依序排列：
 
-| 图标 | 课程 |
-|---|---|
-| 💻 蓝色 | Diploma in Computer Science |
-| 📈 绿色 | Diploma in Business Studies |
-| ⚙️ 红色 | Diploma in Mechatronics Engineering |
-| 🎓 紫色 | Bachelor of Mechatronics Engineering (Hons) — 与 UCSI University 合作 |
-| ⚡ 黄色 | Diploma in Electrical and Electronic Engineering |
-| 🔌 青色 | Bachelor of Electronic Engineering (Hons) — 与 Universiti Sains Malaysia (USM) 合作 |
-| 🧠 粉色 | Bachelor of Computer Science (Intelligent Computing) (Hons) — 与 USM 合作 |
+| 分组 | 图标 | 课程 |
+|---|---|---|
+| 文凭 | 💻 蓝色 | Diploma in Computer Science |
+| 文凭 | 📈 绿色 | Diploma in Business Studies |
+| 文凭 | ⚙️ 红色 | Diploma in Mechatronics Engineering |
+| 文凭 | ⚡ 黄色 | Diploma in Electrical and Electronic Engineering |
+| 学士 | 🎓 紫色 | Bachelor of Mechatronics Engineering (Hons) — 与 UCSI University 合作 |
+| 学士 | 🔌 青色 | Bachelor of Electronic Engineering (Hons) — 与 Universiti Sains Malaysia (USM) 合作**（即将来临）** |
+| 学士 | 🧠 粉色 | Bachelor of Computer Science (Intelligent Computing) (Hons) — 与 USM 合作**（即将来临）** |
 
 市场专员 **Cindy** 就在这层楼附近走动（不是固定站着），负责介绍这几台信息机；走近她按 `E` 可以交谈。
 
