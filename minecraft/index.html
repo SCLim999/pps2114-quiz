@@ -2525,10 +2525,15 @@ function pickVoice(bcp47, genderPref){
   }
   return candidates[0];
 }
+// 朗读专用：把 "ViTrox" 改写成 "Vytrox" 再交给语音引擎——
+// 原拼法里的大写 "Vi" 常被部分 TTS 引擎当成罗马数字 "VI"（six）朗读，实际应读作 "Vy-Trox"
+function ttsSanitize(text){
+  return text.replace(/ViTrox/gi, 'Vytrox');
+}
 function speakText(text, genderPref){
   if(!ttsSupported || !text) return;
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
+  const u = new SpeechSynthesisUtterance(ttsSanitize(text));
   u.lang = TTS_LANG[lang] || 'en-US';
   const v = pickVoice(u.lang, genderPref);
   if(v) u.voice = v;
@@ -3636,7 +3641,7 @@ window.__test = {
   },
   openInfo, openNpc, closeInfo,
   tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
-  guessVoiceGender, pickVoice,
+  guessVoiceGender, pickVoice, ttsSanitize,
   COMPUTERS,
   codingMine: ()=>({ score:cmScore, total:cmTotalPoints(), done:[...cmDone], nearCM,
     chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, ...cmChapterProgress(ch) })),
