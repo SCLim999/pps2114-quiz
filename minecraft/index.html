@@ -143,6 +143,17 @@
   .lang-btn.active { background:#2b6fb3; color:#fff; border-color:#7fc3ff; }
   .lang-btn:hover { border-color:#7fc3ff; }
 
+  /* ---------- 密码锁屏 ---------- */
+  #lockscreen { z-index:30; }
+  #lock-panel { border-color:#c9302c; text-align:center; max-width:380px; }
+  #lock-panel h1 { font-size:22px; }
+  #lock-panel .mp-line { justify-content:center; }
+  #lock-input {
+    padding:10px 12px; font-size:16px; border-radius:6px; border:1px solid #4a7ab5;
+    background:#0d1b30; color:#fff; width:160px; letter-spacing:2px;
+  }
+  #lock-error { color:#ff9b9b; font-size:13px; }
+
   /* ---------- Text-to-speech ---------- */
   .modal-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .tts-btn {
@@ -253,6 +264,19 @@
   <button id="tb-menu">☰</button>
 </div>
 
+<!-- 密码锁屏：必须先输入正确密码才能看到/开始游戏 -->
+<div class="overlay" id="lockscreen">
+  <div class="panel" id="lock-panel">
+    <h1 id="lock-title"></h1>
+    <p id="lock-desc"></p>
+    <div class="mp-line">
+      <input type="password" id="lock-input" maxlength="24" autocomplete="off">
+      <button class="btn blue" id="lock-btn"></button>
+    </div>
+    <p id="lock-error" class="hidden"></p>
+  </div>
+</div>
+
 <!-- 开始 / 暂停 界面 -->
 <div class="overlay" id="overlay">
   <div class="panel">
@@ -361,6 +385,8 @@ zh: {
   k4:'选择方块', v4:'数字键 <kbd>1</kbd>–<kbd>9</kbd> 或滚轮',
   k5:'飞行模式', v5:'<kbd>F</kbd> 切换（空格上升，<kbd>Shift</kbd> 下降）',
   k6:'互动 / 任务列表', v6:'<kbd>E</kbd> 阅读信息点 · <kbd>Q</kbd> 任务列表',
+  lockTitle:'🔒 请输入密码', lockDesc:'输入正确的密码后才能开始游戏。',
+  lockPlaceholder:'密码', lockBtn:'解锁', lockWrong:'❌ 密码错误，请重试',
   yourName:'你的名字：', btnStart:'▶ 进入园区', btnReset:'🔄 重置世界（清除我的改动）',
   mpTitle:'🌐 多人连线（同学一起逛园区）', btnHost:'创建多人房间', mpOr:'— 或 —',
   roomPh:'房间代码', btnJoin:'加入房间',
@@ -412,6 +438,8 @@ en: {
   k4:'Select block', v4:'Keys <kbd>1</kbd>–<kbd>9</kbd> or scroll wheel',
   k5:'Fly mode', v5:'<kbd>F</kbd> to toggle (Space up, <kbd>Shift</kbd> down)',
   k6:'Interact / Quests', v6:'<kbd>E</kbd> read info point · <kbd>Q</kbd> quest list',
+  lockTitle:'🔒 Enter Password', lockDesc:'Enter the correct password to start the game.',
+  lockPlaceholder:'Password', lockBtn:'Unlock', lockWrong:'❌ Wrong password, try again',
   yourName:'Your name: ', btnStart:'▶ Enter Campus', btnReset:'🔄 Reset World (clear my edits)',
   mpTitle:'🌐 Multiplayer (explore with friends)', btnHost:'Create Room', mpOr:'— or —',
   roomPh:'Room code', btnJoin:'Join Room',
@@ -463,6 +491,8 @@ ms: {
   k4:'Pilih blok', v4:'Kekunci <kbd>1</kbd>–<kbd>9</kbd> atau roda tetikus',
   k5:'Mod terbang', v5:'<kbd>F</kbd> untuk tukar (Space naik, <kbd>Shift</kbd> turun)',
   k6:'Interaksi / Tugasan', v6:'<kbd>E</kbd> baca titik maklumat · <kbd>Q</kbd> senarai tugasan',
+  lockTitle:'🔒 Masukkan Kata Laluan', lockDesc:'Masukkan kata laluan yang betul untuk mula bermain.',
+  lockPlaceholder:'Kata laluan', lockBtn:'Buka Kunci', lockWrong:'❌ Kata laluan salah, cuba lagi',
   yourName:'Nama anda: ', btnStart:'▶ Masuk Kampus', btnReset:'🔄 Set Semula Dunia (padam ubahan saya)',
   mpTitle:'🌐 Berbilang Pemain (jelajah bersama rakan)', btnHost:'Cipta Bilik', mpOr:'— atau —',
   roomPh:'Kod bilik', btnJoin:'Sertai Bilik',
@@ -3311,6 +3341,28 @@ document.getElementById('btn-join').addEventListener('click', ()=>{
    输入
 ================================================================ */
 const overlayEl=document.getElementById('overlay');
+
+/* ---- 密码锁屏：必须先输入正确密码，才会显示开始菜单 ---- */
+const LOCK_PASSWORD = 'V231591';
+const lockscreenEl = document.getElementById('lockscreen');
+const lockInputEl = document.getElementById('lock-input');
+const lockErrorEl = document.getElementById('lock-error');
+function tryUnlock(){
+  if(lockInputEl.value === LOCK_PASSWORD){
+    lockscreenEl.classList.add('hidden');
+    lockErrorEl.classList.add('hidden');
+    blip(880,0.12);
+  }else{
+    lockErrorEl.textContent = t('lockWrong');
+    lockErrorEl.classList.remove('hidden');
+    lockInputEl.value = '';
+    lockInputEl.focus();
+    blip(180,0.12);
+  }
+}
+document.getElementById('lock-btn').addEventListener('click', tryUnlock);
+lockInputEl.addEventListener('keydown', e=>{ if(e.code==='Enter') tryUnlock(); });
+
 document.getElementById('btn-start').addEventListener('click',()=>{
   if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     touchPlay = true;
@@ -3430,6 +3482,8 @@ function applyLang(){
   document.title = t('docTitle');
   document.documentElement.lang = lang;
   const put=(id,html)=>{ document.getElementById(id).innerHTML=html; };
+  put('lock-title', t('lockTitle')); put('lock-desc', t('lockDesc')); put('lock-btn', t('lockBtn'));
+  lockInputEl.placeholder = t('lockPlaceholder');
   put('ov-h1', t('h1')); put('ov-sub', t('sub')); put('ov-desc', t('desc'));
   let rows='';
   for(let i=1;i<=6;i++) rows += `<tr><td>${t('k'+i)}</td><td>${t('v'+i)}</td></tr>`;
@@ -3638,6 +3692,9 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
 window.__test = {
   player, camera, overlay: overlayEl,
   hostRoom, joinRoom, get,
+  lockscreen: lockscreenEl,
+  isLocked: ()=>!lockscreenEl.classList.contains('hidden'),
+  tryUnlock(pwd){ lockInputEl.value = pwd; tryUnlock(); },
   net: ()=>({ mode:net.mode, code:net.code, conns:net.conns.size }),
   remoteCount: ()=>remotes.size,
   remotePos(){ const r=[...remotes.values()][0]; return r? r.group.position.toArray() : null; },
