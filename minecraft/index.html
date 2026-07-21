@@ -886,6 +886,8 @@ function generate(){
     set(x,0,z,B.STONE); set(x,1,z,B.DIRT); set(x,2,z,B.DIRT); set(x,3,z,B.GRASS);
   }
 
+  const RING_ENTRANCES = [0,90,180,270];   // 东(0)南(90)西(180)北(270) 四面入口角度
+
   /* ---- 2. 中央圆形庭院（放射状铺装 + 花园 + 水池）---- */
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const r = Math.hypot(x+0.5,z+0.5);
@@ -898,7 +900,7 @@ function generate(){
   }
   for(let k=0;k<12;k++){                        // 草坪边缘的低矮灌木
     const ba=k*30+15;
-    if(Math.abs(angDiff(ba,90))<20) continue;
+    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(ba,ea))<20)) continue;
     set(Math.round(11.5*cosd(ba)),4,Math.round(11.5*sind(ba)),B.LEAF);
   }
 
@@ -908,7 +910,7 @@ function generate(){
     const r = Math.hypot(cx,cz);
     if(r<17||r>23.5) continue;
     const a = (Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    const entrance = Math.abs(angDiff(a,90))<12;      // 南面无门入口
+    const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);  // 东南西北四面无门入口
     set(x,3,z,B.TILE);
     // 楼板（两层：中间楼板 y7，屋面板 y11）
     for(const fy of [7,11]){
@@ -938,7 +940,7 @@ function generate(){
   // 环形楼内部结构柱（放射状排布）
   for(let k=0;k<18;k++){
     const a=k*20;
-    if(Math.abs(angDiff(a,90))<15) continue;
+    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<15)) continue;
     const px=Math.round(20.25*cosd(a)), pz=Math.round(20.25*sind(a));
     for(let y=4;y<11;y++) set(px,y,pz,B.WHITE);
   }
@@ -951,7 +953,7 @@ function generate(){
     const r=Math.hypot(cx,cz);
     if(r<18||r>23) continue;
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    if(Math.abs(angDiff(a,90))<14) continue;             // 入口上空留出缺口
+    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<14)) continue;  // 入口上空留出缺口
     const seg=Math.floor(a/12);
     const h=15+(seg%2);                                   // 分段高低交错，模拟倾斜板列
     set(x,h,z,B.SOLAR);
@@ -959,7 +961,7 @@ function generate(){
   }
   for(let k=0;k<30;k++){                                  // 白色圆柱支撑
     const a=k*12+6;
-    if(Math.abs(angDiff(a,90))<16) continue;
+    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<16)) continue;
     const h=15+(Math.floor(a/12)%2);
     for(const rr of [18.8,22.2]){
       const px=Math.floor(rr*cosd(a)), pz=Math.floor(rr*sind(a));
