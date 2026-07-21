@@ -2037,8 +2037,9 @@ function toast(msg){
 const CODINGMINE = {
   company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
 };
-/* ViTrox Education 学院大楼底层（架空柱廊广场）里的 4 台木箱造型站立信息机（仿 Minecraft mailbox 设计：
-   木柱 + 木箱 + 图标牌），散布在建筑内部、彼此拉开距离，也远离 Dr Janaka Low；每台介绍一个不同的真实文凭课程 */
+/* ViTrox Education 学院大楼底层（架空柱廊广场）里的 5 台木箱造型站立信息机（仿 Minecraft mailbox 设计：
+   木柱 + 木箱 + 图标牌），散布在建筑内部、彼此拉开距离，也远离 Dr Janaka Low；每台介绍一个不同的真实文凭/学士课程。
+   Cindy（市场专员）就在这层楼附近走动，介绍这几台信息机 */
 const DIPLOMA_KIOSKS = [
   { id:'dk1', x:161, z:-10, floorY:4, icon:'💻', iconBg:'#2f6fe0',
     tag:{ zh:'计算机科学', en:'Computer Science', ms:'Sains Komputer' },
@@ -2047,20 +2048,27 @@ const DIPLOMA_KIOSKS = [
       zh:'Diploma in Computer Science：为期2年、贴近产业需求的课程，涵盖编程（C++/Python/Java）、数据库、离散数学与系统分析设计，培养计算机科学人才。',
       en:'Diploma in Computer Science is a comprehensive, industry-focused 2-year programme covering programming (C++/Python/Java), databases, discrete maths and systems analysis & design — preparing graduates for a career in computer science.',
       ms:'Diploma in Computer Science: program 2 tahun yang berfokuskan industri, merangkumi pengaturcaraan (C++/Python/Java), pangkalan data, matematik diskret dan analisis sistem — melahirkan bakat sains komputer.' } },
-  { id:'dk2', x:174, z:-6, floorY:4, icon:'📈', iconBg:'#2f9e58',
+  { id:'dk2', x:171, z:-7, floorY:4, icon:'📈', iconBg:'#2f9e58',
     tag:{ zh:'商业研究', en:'Business Studies', ms:'Pengajian Perniagaan' },
     title:{ zh:'📈 Diploma in Business Studies', en:'📈 Diploma in Business Studies', ms:'📈 Diploma in Business Studies' },
     text:{
       zh:'Diploma in Business Studies 打好商业基础——涵盖财务、市场、管理、经济与创业课程，培养解决问题与决策能力，为初级职场或深造做准备。',
       en:'Diploma in Business Studies gives students a solid foundation across finance, marketing, management, economics and entrepreneurship — building the problem-solving and decision-making skills needed for entry-level roles or further study.',
       ms:'Diploma in Business Studies membina asas perniagaan — merangkumi kewangan, pemasaran, pengurusan, ekonomi dan keusahawanan, membina kemahiran menyelesaikan masalah dan membuat keputusan untuk kerjaya atau pengajian lanjutan.' } },
-  { id:'dk3', x:187, z:-3, floorY:4, icon:'⚙️', iconBg:'#c0392b',
+  { id:'dk3', x:181, z:-4, floorY:4, icon:'⚙️', iconBg:'#c0392b',
     tag:{ zh:'机电工程', en:'Mechatronics', ms:'Mekatronik' },
     title:{ zh:'⚙️ Diploma in Mechatronics Engineering', en:'⚙️ Diploma in Mechatronics Engineering', ms:'⚙️ Diploma in Mechatronics Engineering' },
     text:{
       zh:'Diploma in Mechatronics Engineering 融合机械、电子与计算机技术，打造智能自动化系统——涵盖机械、电子、编程、自动化与机器人，培养智慧制造与工业4.0人才。',
       en:'Diploma in Mechatronics Engineering blends mechanical, electronic and computing skills to build automated, intelligent systems — covering mechanics, electronics, programming, automation and robotics for careers in smart manufacturing and Industry 4.0.',
       ms:'Diploma in Mechatronics Engineering menggabungkan kejuruteraan mekanikal, elektronik dan pengkomputeran untuk membina sistem automasi pintar — merangkumi mekanik, elektronik, pengaturcaraan, automasi dan robotik untuk kerjaya dalam pembuatan pintar dan Industri 4.0.' } },
+  { id:'dk5', x:191, z:-2, floorY:4, icon:'🎓', iconBg:'#8e44ad',
+    tag:{ zh:'机电工程学士(UCSI)', en:'B.Eng Mechatronics (UCSI)', ms:'B.Eng Mekatronik (UCSI)' },
+    title:{ zh:'🎓 Bachelor of Mechatronics Engineering (Hons) — UCSI University', en:'🎓 Bachelor of Mechatronics Engineering (Hons) — UCSI University', ms:'🎓 Bachelor of Mechatronics Engineering (Hons) — UCSI University' },
+    text:{
+      zh:'Bachelor of Mechatronics Engineering（荣誉学位），与 UCSI University 合作开办：「做中学」教学法，融合机械系统、电子与智能控制——涵盖机器人、控制系统与信号处理，选修课程贴近 ViTrox 的机器视觉、机器学习与人工智能技术。获国际工程教育认证，认可范围横跨25个成员国。',
+      en:'Bachelor of Mechatronics Engineering (Hons), in collaboration with UCSI University: a "Learning by Doing" programme blending mechanical systems, electronics and intelligent control — covering robotics, control systems and signal processing, with electives in Vision & Imaging, Machine Learning and AI aligned with ViTrox\'s own technology. Internationally recognised across 25 member countries.',
+      ms:'Bachelor of Mechatronics Engineering (Kepujian), bekerjasama dengan UCSI University: pendekatan "Learning by Doing" yang menggabungkan sistem mekanikal, elektronik dan kawalan pintar — merangkumi robotik, sistem kawalan dan pemprosesan isyarat, dengan elektif dalam Vision & Imaging, Pembelajaran Mesin dan AI yang selari dengan teknologi ViTrox sendiri. Diiktiraf di peringkat antarabangsa merentasi 25 negara ahli.' } },
   { id:'dk4', x:199, z:-1, floorY:4, icon:'⚡', iconBg:'#d4a017',
     tag:{ zh:'电机工程', en:'Elec. & Electronic Eng.', ms:'Kej. Elektrik & Elektronik' },
     title:{ zh:'⚡ Diploma in Electrical and Electronic Engineering', en:'⚡ Diploma in Electrical and Electronic Engineering', ms:'⚡ Diploma in Electrical and Electronic Engineering' },
@@ -3085,12 +3093,12 @@ const NPCS = [
       zh:'欢迎来到 ViTrox Education！我在这里教书。我们最近才完成品牌重塑——ViTrox College、ViTrox TVET 和 ViTrox Corporate Academy 现在都统一用「ViTrox」的签名式样，代表我们对教育与人才培养的专注使命，也让学生和企业一眼就能认出我们和母公司是同一个家族。欢迎进来看看这栋弯曲的玻璃飘带大楼！',
       en:"Welcome to ViTrox Education! I teach here. We just completed a rebrand — ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share one unified 'ViTrox' signature, representing our dedicated mission to education and talent development, so students and partners instantly recognise us as part of the same family as our parent company. Come take a look at this curving glass-ribbon building!",
       ms:'Selamat datang ke ViTrox Education! Saya mengajar di sini. Kami baru selesai menjenamakan semula — ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus kami terhadap pendidikan dan pembangunan bakat, supaya pelajar dan rakan kongsi terus mengenali kami sebagai sebahagian keluarga yang sama dengan syarikat induk. Jemput masuk melihat bangunan reben kaca yang melengkung ini!' } },
-  { name:'Ms Aisyah', color:0xd9822b, expr:'happy', style:'f', range:3, x:145, y:4, z:2, baseYaw:Math.PI/2,
+  { name:'Cindy', color:0xd9822b, expr:'happy', style:'f', range:20, x:180, y:4, z:-5, baseYaw:Math.PI/2,
     role:{ zh:'市场专员 · ViTrox College', en:'Marketing Officer · ViTrox College', ms:'Pegawai Pemasaran · ViTrox College' },
     dialog:{
-      zh:'嗨，我是 Aisyah，负责 ViTrox College 的招生与市场推广。如果你对科技行业感兴趣，欢迎了解我们的 ViTrox Diploma Programme——课程紧密结合 ViTrox 真实的研发与生产环境，让学生一边上课一边接触业界的实际项目，毕业后能直接衔接就业或升学。想看完整的课程介绍和入学资讯，可以到 college.vitrox.edu.my/diploma 查询！',
-      en:"Hi, I'm Aisyah, and I handle student recruitment and marketing for ViTrox College. If you're interested in the tech industry, take a look at our ViTrox Diploma Programme — the curriculum is closely tied to ViTrox's real R&D and production environment, so students get hands-on exposure to actual industry projects while they study, with a clear path into employment or further studies after graduating. For the full programme details and admission info, check out college.vitrox.edu.my/diploma!",
-      ms:'Hai, saya Aisyah, dan saya mengendalikan pengambilan pelajar dan pemasaran untuk ViTrox College. Jika anda berminat dengan industri teknologi, lihatlah Program Diploma ViTrox kami — kurikulumnya berkait rapat dengan persekitaran R&D dan pengeluaran sebenar ViTrox, jadi pelajar mendapat pendedahan langsung kepada projek industri sebenar semasa belajar, dengan laluan jelas ke arah pekerjaan atau pengajian lanjutan selepas bergraduat. Untuk maklumat penuh program dan kemasukan, layari college.vitrox.edu.my/diploma!' } },
+      zh:'嗨，我是 Cindy，负责 ViTrox College 的招生与市场推广。如果你对科技行业感兴趣，欢迎了解我们的 ViTrox Diploma Programme——课程紧密结合 ViTrox 真实的研发与生产环境，让学生一边上课一边接触业界的实际项目，毕业后能直接衔接就业或升学。这层楼摆的几台信息机就是各个文凭/学士课程的介绍，欢迎逐一去看看！',
+      en:"Hi, I'm Cindy, and I handle student recruitment and marketing for ViTrox College. If you're interested in the tech industry, take a look at our ViTrox Diploma Programme — the curriculum is closely tied to ViTrox's real R&D and production environment, so students get hands-on exposure to actual industry projects while they study, with a clear path into employment or further studies after graduating. The kiosks scattered around this floor each introduce a different diploma or degree programme — feel free to check them all out!",
+      ms:'Hai, saya Cindy, dan saya mengendalikan pengambilan pelajar dan pemasaran untuk ViTrox College. Jika anda berminat dengan industri teknologi, lihatlah Program Diploma ViTrox kami — kurikulumnya berkait rapat dengan persekitaran R&D dan pengeluaran sebenar ViTrox, jadi pelajar mendapat pendedahan langsung kepada projek industri sebenar semasa belajar, dengan laluan jelas ke arah pekerjaan atau pengajian lanjutan selepas bergraduat. Mesin maklumat yang tersebar di tingkat ini masing-masing memperkenalkan satu program diploma atau ijazah — jemput lihat semuanya!' } },
   /* —— Computing School 核心人物兼讲师：常驻 VITROX 招牌大楼四楼电脑室 —— */
   { name:'Ts Dr Lim SC', color:0x2c3e50, tie:0x1b9aaa, expr:'smile', range:2, x:44, y:16, z:-8, baseYaw:0,
     role:{ zh:'Programme Leader · 软件工程', en:'Programme Leader, Computing School · Software Engineering', ms:'Programme Leader, Computing School · Kejuruteraan Perisian' },
