@@ -164,7 +164,7 @@ ViTrox Education 学院大楼底层的架空柱廊广场里（不在电脑室、
 | 文凭 | ⚡ 黄色 | Diploma in Electrical and Electronic Engineering |
 | 学士 | 🎓 紫色 | Bachelor of Mechatronics Engineering (Hons) — 与 UCSI University 合作 |
 | 学士 | 🔌 青色 | Bachelor of Electronic Engineering (Hons) — 与 Universiti Sains Malaysia (USM) 合作**（即将来临）** |
-| 学士 | 🧠 粉色 | Bachelor of Computer Science (Intelligent Computing) (Hons) — 与 USM 合作**（即将来临）** |
+| 学士 | 🤖 粉色 | Bachelor of Computer Science (Intelligent Computing) (Hons) — 与 USM 合作**（即将来临）** |
 
 市场专员 **Cindy** 就在这层楼附近走动（不是固定站着），负责介绍这几台信息机；走近她按 `E` 可以交谈。
 

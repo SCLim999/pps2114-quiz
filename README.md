@@ -119,7 +119,7 @@ the staff canteen.
   qualification type along the walkway: 4 diplomas first (💻 Computer Science,
   📈 Business Studies, ⚙️ Mechatronics Engineering, ⚡ Electrical and Electronic
   Engineering), then 3 bachelor's degrees (🎓 Mechatronics Engineering Hons
-  with UCSI University, 🔌 Electronic Engineering Hons and 🧠 Computer Science
+  with UCSI University, 🔌 Electronic Engineering Hons and 🤖 Computer Science
   (Intelligent Computing) Hons — both marked *Coming Soon* — with Universiti
   Sains Malaysia). Marketing officer Cindy wanders that floor to point
   visitors to them.
