@@ -1067,9 +1067,9 @@ function generate(){
     for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
     for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    // 两间电脑室第一排（z=-13 / z=3）共 10 台电脑，每台颜色不同，逐一对应 CodingMine 第一~十台主题
-    CM_TERMINALS.forEach(term => placeComputer(term.x, term.z, 1, term.floorY, term.color));
-    for(const x of COLS){ placeComputer(x,-3,-1,16); placeComputer(x,13,-1,16); }       // 第二排：纯装饰座位，屏幕用默认色
+    // 电脑室 1（南侧，z=-13/-3 两排，Ts Dr Lim SC 所在这一区）集中放置全部 10 台 CodingMine 电脑
+    CM_TERMINALS.forEach(term => placeComputer(term.x, term.z, term.facing, term.floorY, term.color));
+    for(const x of COLS){ placeComputer(x,3,1,16); placeComputer(x,13,-1,16); }         // 电脑室 2：两排纯装饰座位，屏幕用默认色
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -2124,17 +2124,17 @@ const DIPLOMA_KIOSKS = [
       en:'Diploma in Electrical and Electronic Engineering covers the practical side of electricity — from designing and testing circuitry, machine control and high-power transmission systems (Electrical) to low-voltage electronic circuits, devices and communication systems (Electronic).',
       ms:'Diploma in Electrical and Electronic Engineering menumpu kepada aplikasi praktikal elektrik — Kejuruteraan Elektrik merangkumi reka bentuk litar penghantaran, kawalan mesin dan sistem kuasa tinggi; Kejuruteraan Elektronik pula menumpu kepada litar elektronik voltan rendah, peranti dan sistem komunikasi.' } },
 ];
-const CM_TERMINALS = [                       // 两间电脑室共 10 台电脑，每台颜色不同、固定对应一个 IT 主题，每题只有 1 道选择题
-  { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0, color:0x3d8bff },
-  { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1, color:0xff7f0e },
-  { id:'t3',  x:46, z:-13, floorY:16, chapterIdx:2, color:0x2ecc71 },
-  { id:'t4',  x:49, z:-13, floorY:16, chapterIdx:3, color:0xe74c3c },
-  { id:'t5',  x:52, z:-13, floorY:16, chapterIdx:4, color:0x9b59d0 },
-  { id:'t6',  x:41, z:3,   floorY:16, chapterIdx:5, color:0xff5fa2 },
-  { id:'t7',  x:43, z:3,   floorY:16, chapterIdx:6, color:0x17c9c9 },
-  { id:'t8',  x:46, z:3,   floorY:16, chapterIdx:7, color:0xf5d020 },
-  { id:'t9',  x:49, z:3,   floorY:16, chapterIdx:8, color:0xff3860 },
-  { id:'t10', x:52, z:3,   floorY:16, chapterIdx:9, color:0x6c5ce7 },
+const CM_TERMINALS = [                       // 全部 10 台电脑都集中在电脑室 1（Ts Dr Lim SC 所在这一区），每台颜色不同、对应一个 IT 主题
+  { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0, color:0x3d8bff, facing:1 },
+  { id:'t2',  x:43, z:-13, floorY:16, chapterIdx:1, color:0xff7f0e, facing:1 },
+  { id:'t3',  x:46, z:-13, floorY:16, chapterIdx:2, color:0x2ecc71, facing:1 },
+  { id:'t4',  x:49, z:-13, floorY:16, chapterIdx:3, color:0xe74c3c, facing:1 },
+  { id:'t5',  x:52, z:-13, floorY:16, chapterIdx:4, color:0x9b59d0, facing:1 },
+  { id:'t6',  x:41, z:-3,  floorY:16, chapterIdx:5, color:0xff5fa2, facing:-1 },
+  { id:'t7',  x:43, z:-3,  floorY:16, chapterIdx:6, color:0x17c9c9, facing:-1 },
+  { id:'t8',  x:46, z:-3,  floorY:16, chapterIdx:7, color:0xf5d020, facing:-1 },
+  { id:'t9',  x:49, z:-3,  floorY:16, chapterIdx:8, color:0xff3860, facing:-1 },
+  { id:'t10', x:52, z:-3,  floorY:16, chapterIdx:9, color:0x6c5ce7, facing:-1 },
 ];
 const CM_CHAPTERS = [
   { id:'ch1', tag:{ zh:'电脑入门', en:'Intro to Computing', ms:'Asas Komputer' },

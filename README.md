@@ -95,14 +95,17 @@ the staff canteen.
   character's look (male guards/engineers/founders/Dr Janaka Low vs. female Siti/
   Mei Ling/Priya); a 👨/👩 picker in the start menu sets the narrator voice used
   for the architecture lessons themselves.
-- **CodingMine IT quiz stations**: 10 computers (one per room's front row),
-  each with a *different screen colour* and a *single* multiple-choice question
-  on a different computing topic — Introduction to Computing, C++ Programming,
-  Database, Information Technology, Data Science, Artificial Intelligence,
-  Networking & Internet, Operating System, HTML, and Software Design. Questions
-  are short and fun, aimed at primary/secondary-school level. Walk up to a
-  station and press E to answer; correct answers earn points shown live in the
-  HUD (1 point per question, 10 points total), saved to `localStorage`. A big blackboard mounted on
+- **CodingMine IT quiz stations**: all 10 computers are in the first computer
+  room — the one Ts Dr Lim SC is stationed in — 5 per row, facing each other
+  across the aisle he stands in. Each has a *different screen colour* and a
+  *single* multiple-choice question on a different computing topic —
+  Introduction to Computing, C++ Programming, Database, Information Technology,
+  Data Science, Artificial Intelligence, Networking & Internet, Operating
+  System, HTML, and Software Design. Questions are short and fun, aimed at
+  primary/secondary-school level. Walk up to a station and press E to answer;
+  correct answers earn points shown live in the HUD (1 point per question, 10
+  points total), saved to `localStorage`. The second computer room is now just
+  décor — two rows of plain computers with no quiz. A big blackboard mounted on
   the wall between the two rooms (visible from both sides) shows live progress
   per topic and total score — and if a multiplayer room is active, a second
   column shows a live leaderboard of every connected player's score. The two
