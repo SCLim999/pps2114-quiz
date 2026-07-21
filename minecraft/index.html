@@ -744,11 +744,6 @@ function placeComputer(x,z,facing,floorY=4,kind=null){
   set(x,floorY,z+facing,B.PLANK);          // 椅子（在过道一侧）
   COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, kind });
 }
-function placeKiosk(x,z,floorY,kind){
-  // 站立式信息机：只有底座，没有座椅——跟教室里坐着用的电脑区分开
-  set(x,floorY,z,B.WHITE);
-  COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing:1, kind });
-}
 
 function buildBox(x0,x1,z0,z1,storeys,openings){
   const yTop = 3 + storeys*4;   // 屋面板所在层
@@ -1259,8 +1254,6 @@ function generate(){
     }
     // 连接步道（从 Campus 3.0 东端接过来）
     for(let x=142;x<=X0-1;x++) for(let z=-2;z<=2;z++) set(x,3,z,B.PATH);
-    // 步道上的 3 台文凭信息机（站立式，蓝=课程介绍/橙=课程结构/紫=入学资格）
-    for(const [x,kind] of [[142,'intro'],[145,'structure'],[148,'admission']]) placeKiosk(x,-2,4,kind);
     // 建筑周边草坪广场铺装（避免草地凸出遮挡底层柱廊）
     for(let x=X0-2;x<=X1+2;x++){
       const u=clamp((x-X0)/L,0,1), c=cz(u), h=half(u);
@@ -1660,6 +1653,69 @@ function galleryLabel(text){
   }
 }
 
+/* ---- ViTrox College 文凭信息机：木柱 + 木箱 + 图标牌，仿 Minecraft 邮箱造型的站立式告示牌 ---- */
+const KIOSK_MAT = {
+  post:      new THREE.MeshBasicMaterial({color:0x6b4423}),
+  crate:     new THREE.MeshBasicMaterial({color:0xb98a52}),
+  crateTrim: new THREE.MeshBasicMaterial({color:0x8a6238}),
+  base:      new THREE.MeshBasicMaterial({color:0x9a9a9a}),
+};
+const kioskIconCache = {};
+function kioskIconTexture(emoji, bg){
+  const key = emoji+'|'+bg;
+  if(kioskIconCache[key]) return kioskIconCache[key];
+  const c=document.createElement('canvas'); c.width=160; c.height=160;
+  const g=c.getContext('2d');
+  g.fillStyle=bg; g.fillRect(0,0,160,160);
+  g.strokeStyle='rgba(40,20,5,.55)'; g.lineWidth=10; g.strokeRect(5,5,150,150);
+  g.font='92px sans-serif'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(emoji,80,88);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  return kioskIconCache[key]=t;
+}
+function kioskTagTexture(text){
+  const c=document.createElement('canvas'); c.width=384; c.height=72;
+  const g=c.getContext('2d');
+  g.fillStyle='rgba(0,0,0,.55)'; g.fillRect(0,0,384,72);
+  g.fillStyle='#fff';
+  g.font='bold 26px "Microsoft YaHei",sans-serif';
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(text,192,38);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+function buildDiplomaKiosks(){
+  const grp = new THREE.Group(); scene.add(grp);
+  DIPLOMA_KIOSKS.forEach(k=>{
+    const x=k.x+0.5, z=k.z+0.5, y=k.floorY;
+    const base=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.08,0.9), KIOSK_MAT.base);
+    base.position.set(x,y+0.04,z);
+    const post=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.85,0.16), KIOSK_MAT.post);
+    post.position.set(x,y+0.08+0.425,z);
+    const crate=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.62,0.62), KIOSK_MAT.crate);
+    crate.position.set(x,y+0.08+0.85+0.31,z);
+    const trimTop=new THREE.Mesh(new THREE.BoxGeometry(0.66,0.06,0.66), KIOSK_MAT.crateTrim);
+    trimTop.position.set(x,y+0.08+0.85+0.65,z);
+    const trimBot=new THREE.Mesh(new THREE.BoxGeometry(0.66,0.06,0.66), KIOSK_MAT.crateTrim);
+    trimBot.position.set(x,y+0.08+0.82,z);
+    const icon=new THREE.Mesh(new THREE.PlaneGeometry(0.46,0.46),
+      new THREE.MeshBasicMaterial({map:kioskIconTexture(k.icon,k.iconBg)}));
+    icon.position.set(x,y+0.08+0.85+0.31,z+0.32);
+    const tag=new THREE.Sprite(new THREE.SpriteMaterial({ map:kioskTagTexture(k.tag[lang]), depthTest:false }));
+    tag.scale.set(1.8,0.34,1);
+    tag.position.set(x,y+0.08+0.85+0.62+0.5,z);
+    k._tag = tag;
+    grp.add(base,post,crate,trimTop,trimBot,icon,tag);
+  });
+}
+function refreshDiplomaKioskTags(){
+  DIPLOMA_KIOSKS.forEach(k=>{
+    if(!k._tag) return;
+    k._tag.material.map = kioskTagTexture(k.tag[lang]);
+    k._tag.material.needsUpdate = true;
+  });
+}
+
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
 const carGroup = new THREE.Group(); scene.add(carGroup);
 const CAR_GEO = {
@@ -1727,13 +1783,10 @@ const COMP_MAT = {
   bezel: new THREE.MeshBasicMaterial({color:0x25272b}),
   screen:new THREE.MeshBasicMaterial({color:0x8ecbe8}),
   screenCM:new THREE.MeshBasicMaterial({color:0x2ee6a8}),        // CodingMine 工作站：绿色终端屏幕，一眼可辨
-  screenIntro:new THREE.MeshBasicMaterial({color:0x3d8bff}),     // 文凭「课程介绍」信息机：蓝屏
-  screenStructure:new THREE.MeshBasicMaterial({color:0xf5a623}), // 文凭「课程结构」信息机：橙屏
-  screenAdmission:new THREE.MeshBasicMaterial({color:0xb066ff}), // 文凭「入学资格」信息机：紫屏
   keyboard:new THREE.MeshBasicMaterial({color:0xd8dadd}),
   led:   new THREE.MeshBasicMaterial({color:0x2fa7ff}),
 };
-const COMP_SCREEN_BY_KIND = { cm:'screenCM', intro:'screenIntro', structure:'screenStructure', admission:'screenAdmission' };
+const COMP_SCREEN_BY_KIND = { cm:'screenCM' };
 function buildCarMeshes(){
   carGroup.clear();
   const buckets = new Map();   // 按 几何体+材质 分桶 → InstancedMesh，全场仅 ~25 次绘制
@@ -1977,27 +2030,37 @@ function toast(msg){
 const CODINGMINE = {
   company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
 };
-/* ViTrox Education 步道上的 3 台站立式文凭信息机——蓝屏「课程介绍」/橙屏「课程结构」/紫屏「入学资格」，
-   都是 Diploma in Computer Science 的真实招生内容（college.vitrox.edu.my/diploma 第 4 页），内容力求简短 */
+/* ViTrox Education 步道旁的 4 台木箱造型站立信息机（仿 Minecraft mailbox 设计：木柱 + 木箱 + 图标牌），
+   离 Dr Janaka Low 不远但不挨着，每台介绍 ViTrox College 一个不同的真实文凭课程，内容力求简短 */
 const DIPLOMA_KIOSKS = [
-  { id:'dk1', x:142, z:-2, floorY:4, kind:'intro',
-    title:{ zh:'💻 课程介绍 · Diploma in Computer Science', en:'💻 Course Introduction · Diploma in Computer Science', ms:'💻 Pengenalan Kursus · Diploma in Computer Science' },
+  { id:'dk1', x:142, z:-4, floorY:4, icon:'💻', iconBg:'#2f6fe0',
+    tag:{ zh:'计算机科学', en:'Computer Science', ms:'Sains Komputer' },
+    title:{ zh:'💻 Diploma in Computer Science', en:'💻 Diploma in Computer Science', ms:'💻 Diploma in Computer Science' },
     text:{
-      zh:'Diploma in Computer Science：为期2年（含实习），学费 RM24,000，每年1、6、10月开课；由 MBOT 与 MQA 认证（N/0613/4/0032）。核心课程涵盖编程、数据库、离散数学与系统分析设计。',
-      en:'Diploma in Computer Science: a 2-year programme (incl. internship), RM24,000, with January/June/October intakes. Accredited by MBOT and MQA (N/0613/4/0032). Covers programming, databases, discrete maths and systems analysis.',
-      ms:'Diploma in Computer Science: program 2 tahun (termasuk latihan industri), RM24,000, pengambilan Januari/Jun/Oktober. Diiktiraf oleh MBOT dan MQA (N/0613/4/0032). Merangkumi pengaturcaraan, pangkalan data, matematik diskret dan analisis sistem.' } },
-  { id:'dk2', x:145, z:-2, floorY:4, kind:'structure',
-    title:{ zh:'🗂️ 课程结构 · Diploma in Computer Science', en:'🗂️ Programme Structure · Diploma in Computer Science', ms:'🗂️ Struktur Program · Diploma in Computer Science' },
+      zh:'Diploma in Computer Science：为期2年、贴近产业需求的课程，涵盖编程（C++/Python/Java）、数据库、离散数学与系统分析设计，培养计算机科学人才。',
+      en:'Diploma in Computer Science is a comprehensive, industry-focused 2-year programme covering programming (C++/Python/Java), databases, discrete maths and systems analysis & design — preparing graduates for a career in computer science.',
+      ms:'Diploma in Computer Science: program 2 tahun yang berfokuskan industri, merangkumi pengaturcaraan (C++/Python/Java), pangkalan data, matematik diskret dan analisis sistem — melahirkan bakat sains komputer.' } },
+  { id:'dk2', x:144, z:-4, floorY:4, icon:'📈', iconBg:'#2f9e58',
+    tag:{ zh:'商业研究', en:'Business Studies', ms:'Pengajian Perniagaan' },
+    title:{ zh:'📈 Diploma in Business Studies', en:'📈 Diploma in Business Studies', ms:'📈 Diploma in Business Studies' },
     text:{
-      zh:'第一年：编程与解题、数据库、离散数学、系统分析设计、数据结构等基础课。第二年：软件工程、操作系统、人工智能基础，加3个月实习与毕业专题。选修：云计算/移动应用/网页/数据科学。',
-      en:'Year 1: programming, databases, discrete maths, systems analysis, data structures. Year 2: software engineering, operating systems, AI fundamentals, plus a 3-month internship and Final Year Project. Electives: cloud, mobile, web or data science.',
-      ms:'Tahun 1: pengaturcaraan, pangkalan data, matematik diskret, analisis sistem, struktur data. Tahun 2: kejuruteraan perisian, sistem operasi, asas AI, ditambah 3 bulan latihan industri dan Projek Tahun Akhir. Elektif: awan, mudah alih, web atau sains data.' } },
-  { id:'dk3', x:148, z:-2, floorY:4, kind:'admission',
-    title:{ zh:'📋 入学资格 · Diploma in Computer Science', en:'📋 Entry Requirements · Diploma in Computer Science', ms:'📋 Syarat Kemasukan · Diploma in Computer Science' },
+      zh:'Diploma in Business Studies 打好商业基础——涵盖财务、市场、管理、经济与创业课程，培养解决问题与决策能力，为初级职场或深造做准备。',
+      en:'Diploma in Business Studies gives students a solid foundation across finance, marketing, management, economics and entrepreneurship — building the problem-solving and decision-making skills needed for entry-level roles or further study.',
+      ms:'Diploma in Business Studies membina asas perniagaan — merangkumi kewangan, pemasaran, pengurusan, ekonomi dan keusahawanan, membina kemahiran menyelesaikan masalah dan membuat keputusan untuk kerjaya atau pengajian lanjutan.' } },
+  { id:'dk3', x:146, z:-4, floorY:4, icon:'⚙️', iconBg:'#c0392b',
+    tag:{ zh:'机电工程', en:'Mechatronics', ms:'Mekatronik' },
+    title:{ zh:'⚙️ Diploma in Mechatronics Engineering', en:'⚙️ Diploma in Mechatronics Engineering', ms:'⚙️ Diploma in Mechatronics Engineering' },
     text:{
-      zh:'SPM：3学分含数学；O-Level/IGCSE：3科C级含数学；STPM：任一科C级加数学学分；UEC：3科B级含数学；证书课程：CGPA 2.00+含数学学分。各途径均须英文及格。',
-      en:'SPM: 3 credits incl. Maths. O-Level/IGCSE: 3 subjects at Grade C incl. Maths. STPM: Grade C in any subject + a Maths credit. UEC: 3 subjects at Grade B incl. Maths. Certificate: CGPA 2.00+ with a Maths credit. An English pass is required for every route.',
-      ms:'SPM: 3 kredit termasuk Matematik. O-Level/IGCSE: 3 subjek Gred C termasuk Matematik. STPM: Gred C dalam mana-mana subjek + kredit Matematik. UEC: 3 subjek Gred B termasuk Matematik. Sijil: CGPA 2.00+ dengan kredit Matematik. Lulus Bahasa Inggeris diperlukan untuk setiap laluan.' } },
+      zh:'Diploma in Mechatronics Engineering 融合机械、电子与计算机技术，打造智能自动化系统——涵盖机械、电子、编程、自动化与机器人，培养智慧制造与工业4.0人才。',
+      en:'Diploma in Mechatronics Engineering blends mechanical, electronic and computing skills to build automated, intelligent systems — covering mechanics, electronics, programming, automation and robotics for careers in smart manufacturing and Industry 4.0.',
+      ms:'Diploma in Mechatronics Engineering menggabungkan kejuruteraan mekanikal, elektronik dan pengkomputeran untuk membina sistem automasi pintar — merangkumi mekanik, elektronik, pengaturcaraan, automasi dan robotik untuk kerjaya dalam pembuatan pintar dan Industri 4.0.' } },
+  { id:'dk4', x:148, z:-4, floorY:4, icon:'⚡', iconBg:'#d4a017',
+    tag:{ zh:'电机工程', en:'Elec. & Electronic Eng.', ms:'Kej. Elektrik & Elektronik' },
+    title:{ zh:'⚡ Diploma in Electrical and Electronic Engineering', en:'⚡ Diploma in Electrical and Electronic Engineering', ms:'⚡ Diploma in Electrical and Electronic Engineering' },
+    text:{
+      zh:'Diploma in Electrical and Electronic Engineering 专注电力的实际应用：电气工程涉及电力传输、机器控制与高压系统的设计测试；电子工程则专注低压电子电路、器件与通讯系统的设计制造。',
+      en:'Diploma in Electrical and Electronic Engineering covers the practical side of electricity — from designing and testing circuitry, machine control and high-power transmission systems (Electrical) to low-voltage electronic circuits, devices and communication systems (Electronic).',
+      ms:'Diploma in Electrical and Electronic Engineering menumpu kepada aplikasi praktikal elektrik — Kejuruteraan Elektrik merangkumi reka bentuk litar penghantaran, kawalan mesin dan sistem kuasa tinggi; Kejuruteraan Elektronik pula menumpu kepada litar elektronik voltan rendah, peranti dan sistem komunikasi.' } },
 ];
 const CM_TERMINALS = [                       // 两间电脑室共 10 台绿屏电脑，每台固定对应一章（工位 N → 第 N 章）
   { id:'t1',  x:41, z:-13, floorY:16, chapterIdx:0 },
@@ -3355,6 +3418,7 @@ function applyLang(){
   put('quiz-close', t('cmClose'));
   if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // CodingMine 弹窗开着时也跟着切换语言
   updateCMBoard();
+  refreshDiplomaKioskTags();
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>
@@ -3375,6 +3439,7 @@ markAllDirty();
 flushDirty();
 buildCarMeshes();
 buildCMBoard();
+buildDiplomaKiosks();
 respawn();
 
 const posEl=document.getElementById('pos');
@@ -3516,7 +3581,7 @@ window.__test = {
     chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, ...cmChapterProgress(ch) })),
     terminals:CM_TERMINALS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY})) }),
   openCodingMine, openCMChapter, answerCM, closeCM,
-  diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,kind:k.kind})) }),
+  diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,icon:k.icon})) }),
   openDiplomaKiosk,
 };
 </script>
