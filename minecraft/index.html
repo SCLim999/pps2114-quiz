@@ -933,8 +933,8 @@ function generate(){
       }
       set(x,12,z,B.WHITE);
     }else{
-      // 屋顶花园（绿色屋顶露台）
-      if(r>=19&&r<=21.5 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.GRASS);
+      // 屋顶露台（铺装地砖 + 盆栽绿植，无草坪）
+      if(r>=19&&r<=21.5 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.TILE);
     }
   }
   // 环形楼内部结构柱（放射状排布）
@@ -1009,6 +1009,8 @@ function generate(){
     {x0:20,x1:21,z0:-3,z1:3,y1:9},     // 面向环形楼的两层高中庭开口
     {x0:34,x1:38,z0:16,z1:16,y1:7},    // 南面门
   ]);
+  // 三楼（屋顶露台层）的门：连接环形楼与 VITROX 招牌大楼
+  for(let x=20;x<=21;x++) for(let z=-3;z<=3;z++) for(let y=12;y<=14;y++) set(x,y,z,B.AIR);
   buildBox(-36,-10,-50,-26,4,[
     {x0:-25,x1:-21,z0:-26,z1:-26,y1:7} // 面向园区的门
   ]);

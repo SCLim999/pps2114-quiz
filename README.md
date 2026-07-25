@@ -68,10 +68,12 @@ Open `js/questions.js`:
 `minecraft/index.html` is a standalone, Minecraft-Education-style voxel world that
 recreates the [ViTrox Campus 2.0 by CYC Architect](https://www.cycarch.com/vitrox-campus-20)
 (Batu Kawan, Penang) — central circular courtyard, radial layout, circular landscape
-ramp, doorless entrances on all four sides (E/S/W/N), green roof, and the rectangular production/office blocks
-punching through the circular form, including two computer rooms (~20 PCs total)
-on the 4th floor of the VITROX-lettered building, reached via a staircase next to
-the staff canteen.
+ramp, doorless entrances on all four sides (E/S/W/N), a paved roof terrace with
+planters, and the rectangular production/office blocks punching through the
+circular form, including two computer rooms (~20 PCs total) on the 4th floor of
+the VITROX-lettered building, reached via a staircase next to the staff canteen —
+or via a door straight from the ring building's roof terrace to the VITROX
+building's 3rd floor.
 
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).
