@@ -3100,6 +3100,12 @@ function animateRemotes(dt){
    NPC 人物（参照 Minecraft Education 的 Characters：可交谈的园区角色）
 ================================================================ */
 const NPCS = [
+  { name:'Game Master', color:0xffd23f, tie:0x333333, expr:'happy', range:2, x:-3.5, y:4, z:54.5, baseYaw:Math.PI,
+    role:{ zh:'游戏向导', en:'Game Master', ms:'Game Master' },
+    dialog:{
+      zh:'嗨，我是 Game Master，先教你怎么玩这个游戏！移动用 WASD，鼠标转视角，空格跳跃，按 F 切换飞行模式。左下角的快捷栏是你手上的方块，按数字键 1-9 或滚动鼠标滚轮切换。瞄准一个方块——鼠标左键可以「打掉」它，鼠标右键则会把你手上选中的方块「放」在你面对的那一面。走近 NPC 或金色信息方块时按 E 可以互动/阅读，按 Q 能看任务清单。祝你在 ViTrox Campus 玩得开心！',
+      en:"Hi, I'm the Game Master — let me show you how to play! Move with WASD, look around with the mouse, jump with Space, and press F to toggle flying. The hotbar in the bottom-left is the block in your hand — switch it with number keys 1-9 or the mouse scroll wheel. Aim at a block: left-click breaks it, and right-click places the block you're holding onto the face you're looking at. Press E near an NPC or a golden info block to interact or read, and press Q to see your quest checklist. Have fun exploring ViTrox Campus!",
+      ms:'Hai, saya Game Master — biar saya tunjukkan cara bermain! Bergerak dengan WASD, pusingkan pandangan dengan tetikus, lompat dengan Space, dan tekan F untuk bertukar mod terbang. Bar pantas di bawah kiri ialah blok di tangan anda — tukar dengan kekunci nombor 1-9 atau roda tetikus. Bidik satu blok: klik kiri memecahkannya, dan klik kanan meletakkan blok yang anda pegang pada permukaan yang anda hadapi. Tekan E berhampiran NPC atau blok maklumat emas untuk berinteraksi/membaca, dan tekan Q untuk melihat senarai misi anda. Selamat berseronok meneroka ViTrox Campus!' } },
   { name:'Ahmad', color:0x2c4a86, expr:'neutral', x:3.5, y:4, z:55.5, baseYaw:Math.PI,
     role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
     dialog:{
