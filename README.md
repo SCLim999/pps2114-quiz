@@ -77,7 +77,9 @@ or via a wide door straight from the ring building's roof terrace to the
 VITROX building's 3rd floor (its ground/2nd-floor atrium opening and the
 ring's own 2nd-floor entrance skybridge were widened to match). The ring
 building's own internal corridor was widened by a full block too, uniformly
-on every floor from the 1st floor up through the roof terrace. A wide
+on every floor from the 1st floor up through the roof terrace, and the radial
+support columns that used to stand in the middle of the 1st/2nd-floor walkway
+were removed so the corridor is unobstructed. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.

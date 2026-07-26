@@ -965,14 +965,6 @@ function generate(){
       if(r>=18.5&&r<=23 && !entrance) set(x,12,z, B.TILE);
     }
   }
-  // 环形楼内部结构柱（放射状排布）
-  for(let k=0;k<18;k++){
-    const a=k*20;
-    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<15)) continue;
-    const px=Math.round(20.75*cosd(a)), pz=Math.round(20.75*sind(a));
-    for(let y=4;y<11;y++) set(px,y,pz,B.WHITE);
-  }
-
   /* ---- 4. 环形楼四周保持平整草坪（原设计概念中的景观坡道不再建模）---- */
 
   /* ---- 4.7 庭院楼梯塔（深灰色，参照实景：连接地面→2F→屋顶花园，塔身高出屋面）---- */
