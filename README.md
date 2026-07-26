@@ -123,7 +123,11 @@ building's 3rd floor.
   computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
-  (Artificial Intelligence). Scattered through the ground-floor pilotis of the
+  (Artificial Intelligence). Ms Syira's dialogue has a "▶ Watch animation"
+  button that plays a small canvas animation of a data packet bouncing
+  between a client and a server (Request/Response) — a visual teaching aid
+  for the Networking & Internet DataMine topic. Scattered through the
+  ground-floor pilotis of the
   ViTrox Education college building — well apart from each other and from Dr
   Janaka Low (its Principal) — are 7 wooden mailbox-style kiosks — a post, a
   crate and a coloured icon plaque, Minecraft-signpost style — grouped by

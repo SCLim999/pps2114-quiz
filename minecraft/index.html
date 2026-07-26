@@ -114,6 +114,10 @@
     background:#e8f0fb; color:#123; border-radius:4px; padding:1px 7px;
     font-weight:bold; font-family:inherit;
   }
+  #modal-anim {
+    display:block; width:100%; max-width:560px; height:auto; margin:10px 0;
+    background:#0d1a2e; border:1px solid rgba(255,255,255,.18); border-radius:8px;
+  }
   .btn {
     display:inline-block; margin-top:16px; padding:12px 34px; font-size:17px;
     background:#3a9d3a; color:#fff; border:none; border-radius:8px; cursor:pointer;
@@ -328,9 +332,11 @@
     <h1 id="modal-title"></h1>
     <p class="en" id="modal-en"></p>
     <p id="modal-text"></p>
+    <canvas id="modal-anim" class="hidden" width="560" height="150"></canvas>
     <div class="modal-actions">
       <button class="btn" id="btn-close"></button>
       <button class="btn tts-btn hidden" id="btn-tts" title="Read aloud">🔊</button>
+      <button class="btn" id="btn-anim" style="display:none"></button>
     </div>
   </div>
 </div>
@@ -423,6 +429,8 @@ zh: {
   gmTrainingMsg:'🟡 别忘了先完成 Game Master 的练习：在黄色地砖上放 1 个方块，再打掉那叠 3 层木板！',
   gmTrainingDone:'🎉 练习完成！你已经学会放置和拆除方块了，尽情探索 ViTrox Campus 吧！',
   gmPadLabel:'👉 在这里放 1 个方块', gmStackLabel:'👉 打掉这叠木板',
+  animShow:'▶ 看动画：数据包如何传输', animHide:'⏹ 关闭动画',
+  animClient:'客户端', animServer:'服务器', animRequest:'请求 →', animResponse:'← 响应',
   hostOnlyReset:'只有房主可以重置世界',
   confirmReset:'确定要清除你放置/破坏的所有方块，恢复原始园区吗？',
   congrats:'🎉 恭喜！你已探索完 ViTrox Campus 的全部 {n} 个建筑知识点！',
@@ -484,6 +492,8 @@ en: {
   gmTrainingMsg:"🟡 Don't forget to finish the Game Master's practice first: place a block on the yellow tile, then break the 3-block plank stack!",
   gmTrainingDone:'🎉 Practice complete! You now know how to place and break blocks — go explore ViTrox Campus!',
   gmPadLabel:'👉 Place a block here', gmStackLabel:'👉 Break this stack',
+  animShow:'▶ Watch animation: how a data packet travels', animHide:'⏹ Close animation',
+  animClient:'Client', animServer:'Server', animRequest:'Request →', animResponse:'← Response',
   hostOnlyReset:'Only the host can reset the world',
   confirmReset:'Clear all blocks you placed/broke and restore the original campus?',
   congrats:'🎉 Congratulations! You have explored all {n} architecture lessons of ViTrox Campus!',
@@ -545,6 +555,8 @@ ms: {
   gmTrainingMsg:'🟡 Jangan lupa selesaikan latihan Game Master dahulu: letak satu blok atas jubin kuning, kemudian pecahkan timbunan 3 blok papan itu!',
   gmTrainingDone:'🎉 Latihan selesai! Anda kini tahu cara meletak dan memecahkan blok — jom terokai ViTrox Campus!',
   gmPadLabel:'👉 Letak satu blok di sini', gmStackLabel:'👉 Pecahkan timbunan ini',
+  animShow:'▶ Tonton animasi: cara paket data bergerak', animHide:'⏹ Tutup animasi',
+  animClient:'Klien', animServer:'Pelayan', animRequest:'Permintaan →', animResponse:'← Respons',
   hostOnlyReset:'Hanya hos boleh set semula dunia',
   confirmReset:'Padam semua blok yang anda letak/pecah dan pulihkan kampus asal?',
   congrats:'🎉 Tahniah! Anda telah meneroka kesemua {n} pelajaran seni bina ViTrox Campus!',
@@ -2734,6 +2746,7 @@ function openInfo(i){
   document.getElementById('modal-title').textContent = p.title[lang];
   document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
   document.getElementById('modal-text').textContent = p.text[lang];
+  setupModalAnim(null);
   modalEl.classList.remove('hidden');
   modalOpen=true;
   currentSpeech = p.title[lang] + '. ' + p.text[lang];
@@ -2762,6 +2775,7 @@ function closeInfo(){
   modalEl.classList.add('hidden');
   modalOpen=false;
   stopSpeak();
+  resetModalAnim();
   resumeAfterModal();
 }
 document.getElementById('btn-close').addEventListener('click',closeInfo);
@@ -2770,6 +2784,7 @@ function openDiplomaKiosk(i){
   document.getElementById('modal-title').textContent = p.title[lang];
   document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
   document.getElementById('modal-text').textContent = p.text[lang];
+  setupModalAnim(null);
   modalEl.classList.remove('hidden');
   modalOpen=true;
   currentSpeech = p.title[lang] + '. ' + p.text[lang];
@@ -2777,6 +2792,75 @@ function openDiplomaKiosk(i){
   if(ttsAuto) speakText(currentSpeech, currentGender);
   blip(660,0.12);
 }
+
+/* ---- 对话弹窗里的教学小动画（目前只有 Networking & Internet 一个：数据包往返动画）---- */
+const modalAnimCanvas = document.getElementById('modal-anim');
+const modalAnimCtx = modalAnimCanvas.getContext('2d');
+const btnAnimEl = document.getElementById('btn-anim');
+let modalAnimKind = null, modalAnimPlaying = false, modalAnimRaf = null, modalAnimT = 0;
+
+function drawNetworkAnim(ctx, W, H, time){
+  ctx.clearRect(0,0,W,H);
+  const cx0=24, cx1=150, sx1=W-24, sx0=W-150, boxY0=36, boxY1=104, midY=(boxY0+boxY1)/2;
+  ctx.lineWidth=2; ctx.strokeStyle='#6cf'; ctx.fillStyle='#1b3a5c';
+  ctx.fillRect(cx0,boxY0,cx1-cx0,boxY1-boxY0); ctx.strokeRect(cx0,boxY0,cx1-cx0,boxY1-boxY0);
+  ctx.fillRect(sx0,boxY0,sx1-sx0,boxY1-boxY0); ctx.strokeRect(sx0,boxY0,sx1-sx0,boxY1-boxY0);
+  ctx.fillStyle='#eaf5ff'; ctx.font='bold 15px "Microsoft YaHei",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('💻 '+t('animClient'), (cx0+cx1)/2, midY);
+  ctx.fillText('🖥 '+t('animServer'), (sx0+sx1)/2, midY);
+  ctx.strokeStyle='rgba(255,255,255,.3)';
+  ctx.beginPath(); ctx.moveTo(cx1,midY); ctx.lineTo(sx0,midY); ctx.stroke();
+  const cyc = time % 4;                              // 4 秒一个循环：去程 1.5s / 停留 0.5s / 回程 1.5s / 停留 0.5s
+  let px, label, color;
+  if(cyc<1.5){       px = cx1 + (cyc/1.5)*(sx0-cx1);        label=t('animRequest');  color='#ffd75e'; }
+  else if(cyc<2){    px = sx0;                               label=t('animRequest');  color='#ffd75e'; }
+  else if(cyc<3.5){  px = sx0 - ((cyc-2)/1.5)*(sx0-cx1);     label=t('animResponse'); color='#8ef58e'; }
+  else{              px = cx1;                               label=t('animResponse'); color='#8ef58e'; }
+  ctx.font='bold 13px "Microsoft YaHei",sans-serif'; ctx.fillStyle=color;
+  ctx.fillText(label, (cx1+sx0)/2, boxY0-14);
+  ctx.beginPath(); ctx.arc(px, midY, 8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0d1a2e'; ctx.font='bold 10px sans-serif'; ctx.fillText('📦', px, midY);
+}
+const ANIM_RENDERERS = { networking: drawNetworkAnim };
+
+function resetModalAnim(){
+  modalAnimKind = null; modalAnimPlaying = false;
+  if(modalAnimRaf) cancelAnimationFrame(modalAnimRaf);
+  modalAnimRaf = null;
+  modalAnimCanvas.classList.add('hidden');
+  btnAnimEl.style.display = 'none';
+}
+function setupModalAnim(kind){
+  resetModalAnim();
+  modalAnimKind = kind || null;
+  if(modalAnimKind){
+    btnAnimEl.style.display = 'inline-block';
+    btnAnimEl.textContent = t('animShow');
+  }
+}
+function toggleModalAnim(){
+  if(!modalAnimKind) return;
+  modalAnimPlaying = !modalAnimPlaying;
+  if(modalAnimPlaying){
+    modalAnimCanvas.classList.remove('hidden');
+    btnAnimEl.textContent = t('animHide');
+    modalAnimT = 0;
+    const loop=()=>{
+      if(!modalAnimPlaying) return;
+      ANIM_RENDERERS[modalAnimKind](modalAnimCtx, modalAnimCanvas.width, modalAnimCanvas.height, modalAnimT);
+      modalAnimT += 1/60;
+      modalAnimRaf = requestAnimationFrame(loop);
+    };
+    loop();
+  }else{
+    modalAnimCanvas.classList.add('hidden');
+    btnAnimEl.textContent = t('animShow');
+    if(modalAnimRaf) cancelAnimationFrame(modalAnimRaf);
+    modalAnimRaf = null;
+  }
+}
+btnAnimEl.addEventListener('click', toggleModalAnim);
 
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
@@ -3294,12 +3378,12 @@ const NPCS = [
       zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，同时是 ViTrox College「Diploma in Computer Science」文凭课程的 Programme Leader——从需求分析、系统设计到测试维护，教学生怎么把一个想法变成可靠的软件产品。想了解这个文凭课程的完整内容，可以到 college.vitrox.edu.my/diploma（第 4 页）查询。旁边绿屏的电脑是我们给新生设计的 DataMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
       en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I'm also the Programme Leader for the Diploma in Computer Science at ViTrox College — covering everything from requirements analysis and system design to testing and maintenance, teaching students how to turn an idea into a reliable software product. For the full programme details, check out college.vitrox.edu.my/diploma (page 4). The green-screen computers nearby are the DataMine exercise we designed for new students, learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
       ms:'Selamat datang ke makmal komputer Computing School! Saya Dr Lim SC, dan saya juga memiliki kelayakan Ts (Teknologis). Saya juga Programme Leader untuk Diploma in Computer Science di ViTrox College — merangkumi analisis keperluan, reka bentuk sistem, hingga pengujian dan penyelenggaraan, mengajar pelajar cara mengubah satu idea menjadi produk perisian yang boleh dipercayai. Untuk maklumat penuh program ini, layari college.vitrox.edu.my/diploma (halaman 4). Komputer skrin hijau berdekatan ialah latihan DataMine yang kami reka untuk pelajar baharu, belajar asas sintaks C/C++ melalui kisah sebuah syarikat fiksyen. Jemput duduk dan cuba!' } },
-  { name:'Ms Syira', color:0x6a4c93, expr:'happy', style:'f', range:2, x:49, y:16, z:-2, baseYaw:Math.PI,
+  { name:'Ms Syira', color:0x6a4c93, expr:'happy', style:'f', range:2, x:49, y:16, z:-2, baseYaw:Math.PI, anim:'networking',
     role:{ zh:'讲师 · 数据科学', en:'Lecturer · Data Science', ms:'Pensyarah · Sains Data' },
     dialog:{
-      zh:'嗨，我是 Syira，教数据科学（Data Science）。简单说，就是从一大堆数据里找出有用的规律——比如帮 ViTrox 分析产线的检测数据，找出瑕疵的原因。看到那三台绿屏电脑了吗？那是给编程新手准备的 DataMine 工作站，从认识算法开始，一步步打好基础，将来也能像我一样跟数据打交道！',
-      en:"Hi, I'm Syira, and I teach Data Science. Simply put, it's about finding useful patterns in a huge pile of data — like helping ViTrox analyse inspection data from the production line to find out why defects happen. Notice those three green-screen computers? Those are the DataMine workstations set up for programming beginners — starting from understanding algorithms, building a solid foundation step by step, so one day you can work with data just like I do!",
-      ms:'Hai, saya Syira, dan saya mengajar Sains Data. Secara ringkas, ia tentang mencari corak berguna daripada timbunan data yang besar — seperti membantu ViTrox menganalisis data pemeriksaan daripada barisan pengeluaran untuk mengetahui punca kecacatan. Perasan tiga komputer skrin hijau itu? Itu ialah stesen kerja DataMine yang disediakan untuk pemula pengaturcaraan — bermula daripada memahami algoritma, membina asas yang kukuh langkah demi langkah, supaya suatu hari nanti anda juga boleh bekerja dengan data seperti saya!' } },
+      zh:'嗨，我是 Syira，教数据科学（Data Science）。简单说，就是从一大堆数据里找出有用的规律——比如帮 ViTrox 分析产线的检测数据，找出瑕疵的原因。看到那三台绿屏电脑了吗？那是给编程新手准备的 DataMine 工作站，从认识算法开始，一步步打好基础，将来也能像我一样跟数据打交道！对了，这些数据分析之前，都要先透过网络从产线传到我的电脑——想看看数据包在网络里怎么跑的吗？',
+      en:"Hi, I'm Syira, and I teach Data Science. Simply put, it's about finding useful patterns in a huge pile of data — like helping ViTrox analyse inspection data from the production line to find out why defects happen. Notice those three green-screen computers? Those are the DataMine workstations set up for programming beginners — starting from understanding algorithms, building a solid foundation step by step, so one day you can work with data just like I do! By the way, all that data has to travel over the network to reach my computer before I can analyse it — want to see how a data packet actually travels?",
+      ms:'Hai, saya Syira, dan saya mengajar Sains Data. Secara ringkas, ia tentang mencari corak berguna daripada timbunan data yang besar — seperti membantu ViTrox menganalisis data pemeriksaan daripada barisan pengeluaran untuk mengetahui punca kecacatan. Perasan tiga komputer skrin hijau itu? Itu ialah stesen kerja DataMine yang disediakan untuk pemula pengaturcaraan — bermula daripada memahami algoritma, membina asas yang kukuh langkah demi langkah, supaya suatu hari nanti anda juga boleh bekerja dengan data seperti saya! Oh ya, semua data itu perlu melalui rangkaian untuk sampai ke komputer saya sebelum boleh dianalisis — nak lihat bagaimana paket data sebenarnya bergerak?' } },
   { name:'Ms Khor JY', color:0x1f7a5c, expr:'smile', style:'f', range:2, x:52, y:16, z:8, baseYaw:Math.PI,
     role:{ zh:'讲师 · 移动应用开发（Flutter）', en:'Lecturer · Mobile App Dev (Flutter)', ms:'Pensyarah · Pembangunan Apl Mudah Alih (Flutter)' },
     dialog:{
@@ -3392,6 +3476,7 @@ function openNpc(i){
   document.getElementById('modal-title').textContent = '💬 ' + n.name;
   document.getElementById('modal-en').textContent = n.role[lang];
   document.getElementById('modal-text').textContent = n.dialog[lang];
+  setupModalAnim(n.anim);
   modalEl.classList.remove('hidden');
   modalOpen = true;
   currentSpeech = n.dialog[lang];
