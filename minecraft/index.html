@@ -936,7 +936,7 @@ function generate(){
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
     const r = Math.hypot(cx,cz);
-    if(r<17||r>23.5) continue;
+    if(r<17||r>24.5) continue;
     const a = (Math.atan2(cz,cx)*180/Math.PI+360)%360;
     const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);  // 东南西北四面无门入口
     set(x,3,z,B.TILE);
@@ -945,7 +945,7 @@ function generate(){
       if(entrance && fy<=7) continue;       // 入口全高开洞，屋面板保留为门洞顶
       set(x,fy,z,B.WHITE);
     }
-    const inner = r<18, outer = r>22.5;
+    const inner = r<18, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
       for(let y=4;y<11;y++){
@@ -962,14 +962,14 @@ function generate(){
       set(x,12,z,B.WHITE);
     }else{
       // 屋顶露台（铺装地砖 + 盆栽绿植，无草坪）
-      if(r>=19&&r<=21.5 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.TILE);
+      if(r>=18.5&&r<=23 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.TILE);
     }
   }
   // 环形楼内部结构柱（放射状排布）
   for(let k=0;k<18;k++){
     const a=k*20;
     if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<15)) continue;
-    const px=Math.round(20.25*cosd(a)), pz=Math.round(20.25*sind(a));
+    const px=Math.round(20.75*cosd(a)), pz=Math.round(20.75*sind(a));
     for(let y=4;y<11;y++) set(px,y,pz,B.WHITE);
   }
 
@@ -1104,11 +1104,11 @@ function generate(){
     }
     for(let x=-7;x<=8;x++) for(let z=16;z<=25;z++){         // 连桥横跨入口门厅（加宽版）
       const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
-      if(r<18||r>23) continue;
+      if(r<18||r>24) continue;
       const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
       if(Math.abs(angDiff(a,90))>13) continue;
       set(x,7,z,B.WHITE);                                   // 桥面（与二楼楼板齐平）
-      if(r<18.7||r>22.3){
+      if(r<18.7||r>23.3){
         set(x,8,z,B.GLASS);                                 // 玻璃栏板
         if(x%2===0) set(x,6,z,B.LEAF);                      // 垂吊绿植
       }
@@ -1139,7 +1139,7 @@ function generate(){
     const cx=x+0.5, cz=z+0.5;
     const r=Math.hypot(cx,cz);
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    if(r>23.5&&r<=29 && Math.abs(angDiff(a,90))<14 && get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
+    if(r>24.5&&r<=29 && Math.abs(angDiff(a,90))<14 && get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
   }
   for(let z=24;z<=60;z++) for(let x=-2;x<=2;x++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
   for(let x=-26;x<=-20;x++) for(let z=-25;z<=-22;z++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
@@ -3760,7 +3760,7 @@ function drawMinimap(){
   mmCtx.fillStyle='rgba(15,22,34,.55)'; mmCtx.fillRect(0,0,W,H);
   mmCtx.strokeStyle='rgba(255,255,255,.3)'; mmCtx.lineWidth=1;
   mmCtx.beginPath();                                        // 中央圆形庭院，作为方位参照
-  mmCtx.ellipse(mmX(0),mmZ(0),23.5*MM_SX,23.5*MM_SZ,0,0,Math.PI*2);
+  mmCtx.ellipse(mmX(0),mmZ(0),24.5*MM_SX,24.5*MM_SZ,0,0,Math.PI*2);
   mmCtx.stroke();
   npcObjs.forEach(o=>{                                      // NPC：浅蓝小点
     mmCtx.fillStyle='rgba(120,190,255,.85)';
