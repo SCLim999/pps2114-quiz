@@ -73,9 +73,10 @@ planters, and the rectangular production/office blocks punching through the
 circular form, including two computer rooms (~20 PCs total) on the 4th floor of
 the VITROX-lettered building, reached via a staircase next to the staff canteen —
 or via a door straight from the ring building's roof terrace to the VITROX
-building's 3rd floor. A four-storey glass skybridge also connects the ring
-building's stair tower straight to the lab building (the one full of ViTrox
-inspection machines), with an opening at every one of the lab's four floors.
+building's 3rd floor. A wide four-storey glass skybridge also connects the
+ring building's stair tower straight to the lab building (the one full of
+ViTrox inspection machines), with an opening at every one of the lab's four
+floors.
 
 - Open `minecraft/index.html` in a desktop browser (needs internet once, to load
   Three.js from a CDN; everything else is generated procedurally — no assets).
