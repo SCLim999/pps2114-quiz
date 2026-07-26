@@ -429,8 +429,9 @@ zh: {
   gmTrainingMsg:'🟡 别忘了先完成 Game Master 的练习：在黄色地砖上放 1 个方块，再打掉那叠 3 层木板！',
   gmTrainingDone:'🎉 练习完成！你已经学会放置和拆除方块了，尽情探索 ViTrox Campus 吧！',
   gmPadLabel:'👉 在这里放 1 个方块', gmStackLabel:'👉 打掉这叠木板',
-  animShow:'▶ 看动画：数据包如何传输', animHide:'⏹ 关闭动画',
+  animShow:'▶ 看教学动画', animHide:'⏹ 关闭动画',
   animClient:'客户端', animServer:'服务器', animRequest:'请求 →', animResponse:'← 响应',
+  animCPU:'CPU', animRunning:'正在执行 P{p}',
   hostOnlyReset:'只有房主可以重置世界',
   confirmReset:'确定要清除你放置/破坏的所有方块，恢复原始园区吗？',
   congrats:'🎉 恭喜！你已探索完 ViTrox Campus 的全部 {n} 个建筑知识点！',
@@ -492,8 +493,9 @@ en: {
   gmTrainingMsg:"🟡 Don't forget to finish the Game Master's practice first: place a block on the yellow tile, then break the 3-block plank stack!",
   gmTrainingDone:'🎉 Practice complete! You now know how to place and break blocks — go explore ViTrox Campus!',
   gmPadLabel:'👉 Place a block here', gmStackLabel:'👉 Break this stack',
-  animShow:'▶ Watch animation: how a data packet travels', animHide:'⏹ Close animation',
+  animShow:'▶ Watch teaching animation', animHide:'⏹ Close animation',
   animClient:'Client', animServer:'Server', animRequest:'Request →', animResponse:'← Response',
+  animCPU:'CPU', animRunning:'Now running P{p}',
   hostOnlyReset:'Only the host can reset the world',
   confirmReset:'Clear all blocks you placed/broke and restore the original campus?',
   congrats:'🎉 Congratulations! You have explored all {n} architecture lessons of ViTrox Campus!',
@@ -555,8 +557,9 @@ ms: {
   gmTrainingMsg:'🟡 Jangan lupa selesaikan latihan Game Master dahulu: letak satu blok atas jubin kuning, kemudian pecahkan timbunan 3 blok papan itu!',
   gmTrainingDone:'🎉 Latihan selesai! Anda kini tahu cara meletak dan memecahkan blok — jom terokai ViTrox Campus!',
   gmPadLabel:'👉 Letak satu blok di sini', gmStackLabel:'👉 Pecahkan timbunan ini',
-  animShow:'▶ Tonton animasi: cara paket data bergerak', animHide:'⏹ Tutup animasi',
+  animShow:'▶ Tonton animasi pengajaran', animHide:'⏹ Tutup animasi',
   animClient:'Klien', animServer:'Pelayan', animRequest:'Permintaan →', animResponse:'← Respons',
+  animCPU:'CPU', animRunning:'Sedang berjalan P{p}',
   hostOnlyReset:'Hanya hos boleh set semula dunia',
   confirmReset:'Padam semua blok yang anda letak/pecah dan pulihkan kampus asal?',
   congrats:'🎉 Tahniah! Anda telah meneroka kesemua {n} pelajaran seni bina ViTrox Campus!',
@@ -2822,7 +2825,35 @@ function drawNetworkAnim(ctx, W, H, time){
   ctx.beginPath(); ctx.arc(px, midY, 8, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle='#0d1a2e'; ctx.font='bold 10px sans-serif'; ctx.fillText('📦', px, midY);
 }
-const ANIM_RENDERERS = { networking: drawNetworkAnim };
+function drawOSAnim(ctx, W, H, time){
+  ctx.clearRect(0,0,W,H);
+  const cpuW=110, cpuH=40, cpuX=(W-cpuW)/2, cpuY=10;
+  ctx.lineWidth=2; ctx.strokeStyle='#6cf'; ctx.fillStyle='#1b3a5c';
+  ctx.fillRect(cpuX,cpuY,cpuW,cpuH); ctx.strokeRect(cpuX,cpuY,cpuW,cpuH);
+  ctx.fillStyle='#eaf5ff'; ctx.font='bold 15px "Microsoft YaHei",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🖥 '+t('animCPU'), cpuX+cpuW/2, cpuY+cpuH/2);
+
+  const n=4, boxW=90, boxH=44, gap=14;
+  const startX = (W-(n*boxW+(n-1)*gap))/2, boxY = H-boxH-12;
+  const cyc = Math.floor(time/1.1) % n;                 // 每 1.1 秒轮到下一个进程（round-robin 调度）
+  for(let i=0;i<n;i++){
+    const x = startX + i*(boxW+gap), running = i===cyc;
+    ctx.fillStyle = running ? '#2f9e58' : '#243b57';
+    ctx.strokeStyle = running ? '#8ef58e' : 'rgba(255,255,255,.25)';
+    ctx.lineWidth = running ? 2 : 1;
+    ctx.fillRect(x,boxY,boxW,boxH); ctx.strokeRect(x,boxY,boxW,boxH);
+    ctx.fillStyle='#eaf5ff'; ctx.font='bold 13px "Microsoft YaHei",sans-serif';
+    ctx.fillText('P'+(i+1), x+boxW/2, boxY+boxH/2);
+    if(running){
+      ctx.strokeStyle='#8ef58e'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x+boxW/2, boxY); ctx.lineTo(cpuX+cpuW/2, cpuY+cpuH); ctx.stroke();
+    }
+  }
+  ctx.fillStyle='#ffe28a'; ctx.font='bold 13px "Microsoft YaHei",sans-serif';
+  ctx.fillText(t('animRunning',{p:cyc+1}), W/2, boxY-14);
+}
+const ANIM_RENDERERS = { networking: drawNetworkAnim, os: drawOSAnim };
 
 function resetModalAnim(){
   modalAnimKind = null; modalAnimPlaying = false;
@@ -2846,13 +2877,15 @@ function toggleModalAnim(){
     modalAnimCanvas.classList.remove('hidden');
     btnAnimEl.textContent = t('animHide');
     modalAnimT = 0;
-    const loop=()=>{
+    let lastTs = null;
+    const loop=(ts)=>{
       if(!modalAnimPlaying) return;
+      if(lastTs!==null) modalAnimT += Math.min((ts-lastTs)/1000, 0.1);   // 用真实经过的时间推进，不假设固定帧率
+      lastTs = ts;
       ANIM_RENDERERS[modalAnimKind](modalAnimCtx, modalAnimCanvas.width, modalAnimCanvas.height, modalAnimT);
-      modalAnimT += 1/60;
       modalAnimRaf = requestAnimationFrame(loop);
     };
-    loop();
+    modalAnimRaf = requestAnimationFrame(loop);
   }else{
     modalAnimCanvas.classList.add('hidden');
     btnAnimEl.textContent = t('animShow');
@@ -3390,12 +3423,12 @@ const NPCS = [
       zh:'你是自己爬楼梯上来的吧？做得好！我是 Khor JY，教移动应用开发，主要用 Flutter 这套框架——一套代码就能同时做出 Android 和 iOS 手机 App，效率很高。我常跟学生说：写程序就像爬这条楼梯一样，急不来，一步一步搭好界面、串好功能，App 才会稳。',
       en:"You climbed all the way up the stairs yourself — well done! I'm Khor JY, and I teach Mobile Application Development, mainly using the Flutter framework — one codebase that builds both Android and iOS apps, which is very efficient. I always tell my students: building an app is a bit like climbing this staircase — you can't rush it, you build the interface and wire up the features one step at a time, and that's what makes an app solid.",
       ms:'Anda mendaki tangga ini sendiri — syabas! Saya Khor JY, dan saya mengajar Pembangunan Aplikasi Mudah Alih, kebanyakannya menggunakan rangka kerja Flutter — satu kod boleh membina apl Android dan iOS sekali gus, sangat cekap. Saya selalu berpesan kepada pelajar: membina apl agak seperti mendaki tangga ini — tidak boleh tergesa-gesa, bina antara muka dan sambungkan fungsi langkah demi langkah, barulah apl itu kukuh.' } },
-  { name:'Mr Eng YK', color:0x8a5a2b, expr:'neutral', range:2, x:44, y:16, z:11, baseYaw:Math.PI,
+  { name:'Mr Eng YK', color:0x8a5a2b, expr:'neutral', range:2, x:44, y:16, z:11, baseYaw:Math.PI, anim:'os',
     role:{ zh:'讲师 · 人工智能', en:'Lecturer · Artificial Intelligence', ms:'Pensyarah · Kecerdasan Buatan' },
     dialog:{
-      zh:'嘿，我是 Eng YK，教人工智能（AI）。你知道吗，隔壁实验楼里那些 ViTrox 检测设备，用的就是机器视觉这种 AI 技术，能一秒检查几十颗芯片，比人眼快得多。我在这间电脑室带学生做 AI 专题项目，从最简单的分类模型开始练手。欢迎常来找我们几位讲师聊聊！',
-      en:"Hey, I'm Eng YK, and I teach Artificial Intelligence. Did you know those ViTrox inspection machines in the lab building next door use machine vision, a form of AI, to inspect dozens of chips a second — far faster than the human eye? I run AI project work with students in this computer room, starting from simple classification models. Feel free to drop by and chat with any of us lecturers anytime!",
-      ms:'Hei, saya Eng YK, dan saya mengajar Kecerdasan Buatan (AI). Tahukah anda mesin pemeriksaan ViTrox di bangunan makmal sebelah menggunakan penglihatan mesin, satu bentuk AI, untuk memeriksa berpuluh cip sesaat — jauh lebih pantas daripada mata manusia? Saya menjalankan kerja projek AI bersama pelajar di bilik komputer ini, bermula daripada model klasifikasi yang mudah. Jemput singgah untuk berbual dengan mana-mana daripada kami pensyarah bila-bila masa!' } },
+      zh:'嘿，我是 Eng YK，教人工智能（AI）。你知道吗，隔壁实验楼里那些 ViTrox 检测设备，用的就是机器视觉这种 AI 技术，能一秒检查几十颗芯片，比人眼快得多。我在这间电脑室带学生做 AI 专题项目，从最简单的分类模型开始练手。不过再厉害的 AI 程序，最终都要靠操作系统（Operating System）把 CPU 轮流分配给每个任务才能跑起来——想看看 CPU 是怎么在多个程序之间切换的吗？欢迎常来找我们几位讲师聊聊！',
+      en:"Hey, I'm Eng YK, and I teach Artificial Intelligence. Did you know those ViTrox inspection machines in the lab building next door use machine vision, a form of AI, to inspect dozens of chips a second — far faster than the human eye? I run AI project work with students in this computer room, starting from simple classification models. But even the smartest AI program only runs because the Operating System keeps sharing out the CPU between every task — want to see how the CPU switches between programs? Feel free to drop by and chat with any of us lecturers anytime!",
+      ms:'Hei, saya Eng YK, dan saya mengajar Kecerdasan Buatan (AI). Tahukah anda mesin pemeriksaan ViTrox di bangunan makmal sebelah menggunakan penglihatan mesin, satu bentuk AI, untuk memeriksa berpuluh cip sesaat — jauh lebih pantas daripada mata manusia? Saya menjalankan kerja projek AI bersama pelajar di bilik komputer ini, bermula daripada model klasifikasi yang mudah. Tetapi program AI paling bijak sekalipun hanya boleh berjalan kerana Sistem Operasi (Operating System) sentiasa berkongsi CPU antara setiap tugasan — nak lihat bagaimana CPU bertukar antara program? Jemput singgah untuk berbual dengan mana-mana daripada kami pensyarah bila-bila masa!' } },
 ];
 const npcObjs = [];
 for(const n of NPCS){
