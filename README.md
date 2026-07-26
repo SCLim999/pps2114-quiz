@@ -81,7 +81,9 @@ on every floor from the 1st floor up through the roof terrace, and the radial
 support columns that used to stand in the middle of the 1st/2nd-floor walkway
 were removed so the corridor is unobstructed. The roof terrace's paving was
 also cleared around the stair tower and to the northeast, dropping down to
-the slab below in those spots. A wide
+the slab below in those spots, with the inner glass wall opened up across
+that same stretch too so no jagged wall fragments trap the gardener NPC
+standing near the boundary. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.

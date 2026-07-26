@@ -945,7 +945,9 @@ function generate(){
       if(entrance && fy<=7) continue;       // 入口全高开洞，屋面板保留为门洞顶
       set(x,fy,z,B.WHITE);
     }
-    const inner = r<18, outer = r>23.5;
+    // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（该范围内不建内侧玻璃幕墙，避免在弧形边界上留下卡住 NPC 的锯齿状墙体碎块）
+    const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,10))<=60;
+    const inner = r<18 && !clearedArc, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
       for(let y=4;y<11;y++){
@@ -962,7 +964,6 @@ function generate(){
       set(x,12,z,B.WHITE);
     }else{
       // 屋顶露台（统一铺装地砖，不再穿插绿植方块；楼梯塔两侧及东北侧按要求清除铺装）
-      const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,10))<=60;
       if(r>=18.5&&r<=23 && !entrance && !clearedArc) set(x,12,z, B.TILE);
     }
   }
