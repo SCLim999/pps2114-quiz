@@ -426,9 +426,9 @@ zh: {
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
   gmLockedMsg:'🟡 请先去找穿黄色衣服的 Game Master 聊聊，学会怎么玩这个游戏！他就站在篮球场南门外。',
-  gmTrainingMsg:'🟡 别忘了先完成 Game Master 的练习：在黄色地砖上放 1 个方块，再打掉那叠 3 层木板！',
+  gmTrainingMsg:'🟡 别忘了先完成 Game Master 的练习：在黄色地砖上放 1 个方块，再打掉旁边那个方块！',
   gmTrainingDone:'🎉 练习完成！你已经学会放置和拆除方块了，尽情探索 ViTrox Campus 吧！',
-  gmPadLabel:'👉 在这里放 1 个方块', gmStackLabel:'👉 打掉这叠木板',
+  gmPadLabel:'👉 在这里放 1 个方块', gmStackLabel:'👉 打掉这个方块',
   animShow:'▶ 看教学动画', animHide:'⏹ 关闭动画',
   animClient:'客户端', animServer:'服务器', animRequest:'请求 →', animResponse:'← 响应',
   animCPU:'CPU', animRunning:'正在执行 P{p}',
@@ -490,9 +490,9 @@ en: {
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
   gmLockedMsg:"🟡 Find the Game Master (yellow shirt) first and talk to them to learn how to play! He's standing just outside the basketball court's south gate.",
-  gmTrainingMsg:"🟡 Don't forget to finish the Game Master's practice first: place a block on the yellow tile, then break the 3-block plank stack!",
+  gmTrainingMsg:"🟡 Don't forget to finish the Game Master's practice first: place a block on the yellow tile, then break the plank next to it!",
   gmTrainingDone:'🎉 Practice complete! You now know how to place and break blocks — go explore ViTrox Campus!',
-  gmPadLabel:'👉 Place a block here', gmStackLabel:'👉 Break this stack',
+  gmPadLabel:'👉 Place a block here', gmStackLabel:'👉 Break this block',
   animShow:'▶ Watch teaching animation', animHide:'⏹ Close animation',
   animClient:'Client', animServer:'Server', animRequest:'Request →', animResponse:'← Response',
   animCPU:'CPU', animRunning:'Now running P{p}',
@@ -554,9 +554,9 @@ ms: {
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
   gmLockedMsg:'🟡 Cari Game Master (baju kuning) dahulu dan berbual dengannya untuk belajar cara bermain! Dia berdiri betul-betul di luar pintu selatan gelanggang bola keranjang.',
-  gmTrainingMsg:'🟡 Jangan lupa selesaikan latihan Game Master dahulu: letak satu blok atas jubin kuning, kemudian pecahkan timbunan 3 blok papan itu!',
+  gmTrainingMsg:'🟡 Jangan lupa selesaikan latihan Game Master dahulu: letak satu blok atas jubin kuning, kemudian pecahkan papan di sebelahnya!',
   gmTrainingDone:'🎉 Latihan selesai! Anda kini tahu cara meletak dan memecahkan blok — jom terokai ViTrox Campus!',
-  gmPadLabel:'👉 Letak satu blok di sini', gmStackLabel:'👉 Pecahkan timbunan ini',
+  gmPadLabel:'👉 Letak satu blok di sini', gmStackLabel:'👉 Pecahkan blok ini',
   animShow:'▶ Tonton animasi pengajaran', animHide:'⏹ Tutup animasi',
   animClient:'Klien', animServer:'Pelayan', animRequest:'Permintaan →', animResponse:'← Respons',
   animCPU:'CPU', animRunning:'Sedang berjalan P{p}',
@@ -914,7 +914,7 @@ function writeSign(text,x0,y0,z){
 
 // Game Master 新手练习场坐标（球场南门外）：黄色地砖=放置任务，木板叠塔=拆除任务
 const GM_PAD = { x:-49, y:4, z:1 };
-const GM_STACK = [ {x:-42,y:4,z:1}, {x:-42,y:5,z:1}, {x:-42,y:6,z:1} ];
+const GM_STACK = [ {x:-42,y:4,z:1} ];
 let gmPadTag=null, gmStackTag=null;
 function refreshGmTags(){
   if(gmPadTag){ gmPadTag.material.map = nameTagTexture(t('gmPadLabel')); gmPadTag.material.needsUpdate = true; }
@@ -2023,7 +2023,7 @@ function buildCarMeshes(){
   carGroup.add(gmPadTag);
   gmStackTag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture(t('gmStackLabel')), depthTest:false }));
   gmStackTag.scale.set(1.8,0.45,1);
-  gmStackTag.position.set(GM_STACK[0].x+0.5, GM_STACK[2].y+1.3, GM_STACK[0].z+0.5);
+  gmStackTag.position.set(GM_STACK[0].x+0.5, GM_STACK[0].y+1.3, GM_STACK[0].z+0.5);
   carGroup.add(gmStackTag);
   const dummy=new THREE.Object3D();
   for(const b of buckets.values()){
@@ -3301,9 +3301,9 @@ const NPCS = [
   { name:'Game Master', color:0xffd23f, tie:0x333333, expr:'happy', range:2, x:-45.5, y:4, z:2.5, baseYaw:Math.PI,
     role:{ zh:'游戏向导', en:'Game Master', ms:'Game Master' },
     dialog:{
-      zh:'嗨，我是 Game Master，先教你怎么玩这个游戏！移动用 WASD，鼠标转视角，空格跳跃，按 F 切换飞行模式。左下角的快捷栏是你手上的方块，按数字键 1-9 或滚动鼠标滚轮切换。瞄准一个方块——鼠标左键可以「打掉」它，鼠标右键则会把你手上选中的方块「放」在你面对的那一面。走近 NPC 或金色信息方块时按 E 可以互动/阅读，按 Q 能看任务清单。🎯 现在来练习一下：我旁边有一块黄色地砖和一叠 3 层的木板——先在黄色地砖上放 1 个方块，再把那叠木板全部打掉，两件事都做完就正式解锁全部功能，可以开始探索 ViTrox Campus 啦！',
-      en:"Hi, I'm the Game Master — let me show you how to play! Move with WASD, look around with the mouse, jump with Space, and press F to toggle flying. The hotbar in the bottom-left is the block in your hand — switch it with number keys 1-9 or the mouse scroll wheel. Aim at a block: left-click breaks it, and right-click places the block you're holding onto the face you're looking at. Press E near an NPC or a golden info block to interact or read, and press Q to see your quest checklist. 🎯 Now for a quick practice: there's a yellow tile and a 3-block plank stack right next to me — place a block on the yellow tile, then break all 3 planks. Do both and everything unlocks, so you can properly start exploring ViTrox Campus!",
-      ms:'Hai, saya Game Master — biar saya tunjukkan cara bermain! Bergerak dengan WASD, pusingkan pandangan dengan tetikus, lompat dengan Space, dan tekan F untuk bertukar mod terbang. Bar pantas di bawah kiri ialah blok di tangan anda — tukar dengan kekunci nombor 1-9 atau roda tetikus. Bidik satu blok: klik kiri memecahkannya, dan klik kanan meletakkan blok yang anda pegang pada permukaan yang anda hadapi. Tekan E berhampiran NPC atau blok maklumat emas untuk berinteraksi/membaca, dan tekan Q untuk melihat senarai misi anda. 🎯 Sekarang latihan ringkas: ada jubin kuning dan timbunan 3 blok papan di sebelah saya — letak satu blok atas jubin kuning itu, kemudian pecahkan kesemua 3 papan. Buat kedua-duanya dan semuanya akan dibuka kunci, barulah anda boleh mula meneroka ViTrox Campus!' } },
+      zh:'嗨，我是 Game Master，先教你怎么玩这个游戏！移动用 WASD，鼠标转视角，空格跳跃，按 F 切换飞行模式。左下角的快捷栏是你手上的方块，按数字键 1-9 或滚动鼠标滚轮切换。瞄准一个方块——鼠标左键可以「打掉」它，鼠标右键则会把你手上选中的方块「放」在你面对的那一面。走近 NPC 或金色信息方块时按 E 可以互动/阅读，按 Q 能看任务清单。🎯 现在来练习一下：我旁边有一块黄色地砖和一个木板方块——先在黄色地砖上放 1 个方块，再把那个木板方块打掉，两件事都做完就正式解锁全部功能，可以开始探索 ViTrox Campus 啦！',
+      en:"Hi, I'm the Game Master — let me show you how to play! Move with WASD, look around with the mouse, jump with Space, and press F to toggle flying. The hotbar in the bottom-left is the block in your hand — switch it with number keys 1-9 or the mouse scroll wheel. Aim at a block: left-click breaks it, and right-click places the block you're holding onto the face you're looking at. Press E near an NPC or a golden info block to interact or read, and press Q to see your quest checklist. 🎯 Now for a quick practice: there's a yellow tile and a plank block right next to me — place a block on the yellow tile, then break the plank. Do both and everything unlocks, so you can properly start exploring ViTrox Campus!",
+      ms:'Hai, saya Game Master — biar saya tunjukkan cara bermain! Bergerak dengan WASD, pusingkan pandangan dengan tetikus, lompat dengan Space, dan tekan F untuk bertukar mod terbang. Bar pantas di bawah kiri ialah blok di tangan anda — tukar dengan kekunci nombor 1-9 atau roda tetikus. Bidik satu blok: klik kiri memecahkannya, dan klik kanan meletakkan blok yang anda pegang pada permukaan yang anda hadapi. Tekan E berhampiran NPC atau blok maklumat emas untuk berinteraksi/membaca, dan tekan Q untuk melihat senarai misi anda. 🎯 Sekarang latihan ringkas: ada jubin kuning dan satu blok papan di sebelah saya — letak satu blok atas jubin kuning itu, kemudian pecahkan blok papan itu. Buat kedua-duanya dan semuanya akan dibuka kunci, barulah anda boleh mula meneroka ViTrox Campus!' } },
   { name:'Ahmad', color:0x2c4a86, expr:'neutral', x:3.5, y:4, z:55.5, baseYaw:Math.PI,
     role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
     dialog:{
