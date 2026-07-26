@@ -60,6 +60,12 @@
     border-radius:8px; display:block;
   }
 
+  #compass {
+    position:fixed; top:44px; left:50%; transform:translateX(-50%); z-index:5;
+    background:rgba(15,22,34,.72); border:1px solid rgba(255,255,255,.28);
+    border-radius:6px; display:block;
+  }
+
   #prompt {
     position:fixed; left:50%; bottom:90px; transform:translateX(-50%);
     background:rgba(20,40,80,.8); color:#fff; padding:8px 20px; border-radius:8px;
@@ -244,6 +250,7 @@
 <div id="crosshair"></div>
 <div id="pos"></div>
 <canvas id="minimap" width="180" height="72"></canvas>
+<canvas id="compass" width="300" height="32"></canvas>
 <div id="chip"><span id="chip-main"></span><span id="chip-cm"></span><span id="chip-timer"></span><span id="chip-mp"></span></div>
 <div id="prompt"><kbd>E</kbd><span id="prompt-text"></span></div>
 <div id="toast"></div>
@@ -3670,6 +3677,44 @@ function drawMinimap(){
   mmCtx.restore();
 }
 
+/* ---- 指南针：顶部水平刻度条，随视角左右滚动，中央固定指针=当前朝向 ---- */
+const compassCanvas=document.getElementById('compass');
+const compassCtx=compassCanvas.getContext('2d');
+const COMPASS_PX_PER_DEG = 2.6;                 // 每度对应的像素宽度
+const COMPASS_DIRS = [
+  {a:0,  l:'N'},{a:45, l:'NE'},{a:90, l:'E'},{a:135,l:'SE'},
+  {a:180,l:'S'},{a:225,l:'SW'},{a:270,l:'W'},{a:315,l:'NW'},
+];
+function angleDelta(a,b){ let d=(b-a+540)%360-180; return d; }   // b 相对 a 的最短角差（-180~180）
+function drawCompass(){
+  const W=compassCanvas.width, H=compassCanvas.height, cx=W/2;
+  compassCtx.clearRect(0,0,W,H);
+  const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);
+  const heading = (Math.atan2(fwdX,-fwdZ)*180/Math.PI + 360) % 360;   // 0=北 90=东 180=南 270=西
+  compassCtx.strokeStyle='rgba(255,255,255,.35)'; compassCtx.lineWidth=1;
+  for(let d=0; d<360; d+=15){                     // 每 15° 一个小刻度
+    const x = cx + angleDelta(heading,d)*COMPASS_PX_PER_DEG;
+    if(x<-10||x>W+10) continue;
+    const tall = d%45===0;
+    compassCtx.beginPath();
+    compassCtx.moveTo(x, tall?6:12); compassCtx.lineTo(x, H-6);
+    compassCtx.stroke();
+  }
+  compassCtx.font='bold 13px "Microsoft YaHei",sans-serif';
+  compassCtx.fillStyle='#eaf5ff';
+  compassCtx.textAlign='center'; compassCtx.textBaseline='top';
+  COMPASS_DIRS.forEach(dir=>{
+    const x = cx + angleDelta(heading,dir.a)*COMPASS_PX_PER_DEG;
+    if(x<-14||x>W+14) return;
+    compassCtx.fillStyle = dir.a===0 ? '#ff5f5f' : (dir.l.length===1 ? '#ffe28a' : 'rgba(234,245,255,.75)');
+    compassCtx.fillText(dir.l, x, 4);
+  });
+  compassCtx.fillStyle='#6cf';                    // 中央固定指针：当前朝向
+  compassCtx.beginPath();
+  compassCtx.moveTo(cx,H-2); compassCtx.lineTo(cx-4,H-9); compassCtx.lineTo(cx+4,H-9);
+  compassCtx.closePath(); compassCtx.fill();
+}
+
 function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
@@ -3684,6 +3729,7 @@ function animate(){
     if(c.position.x>165) c.position.x=-165;
   }
   drawMinimap();
+  drawCompass();
   const chipMp=document.getElementById('chip-mp');
   chipMp.textContent = net.mode==='solo' ? '' : t('online', { c:remotes.size+1, code:net.code });
   markers.forEach((m,i)=>{
@@ -3817,6 +3863,10 @@ window.__test = {
   openDiplomaKiosk,
   playTime: ()=>playTime, formatTime,
   minimap: ()=>({ canvas:mmCanvas, sx:MM_SX, sz:MM_SZ }),
+  compassHeading(){
+    const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);
+    return (Math.atan2(fwdX,-fwdZ)*180/Math.PI + 360) % 360;
+  },
 };
 </script>
 </body>
