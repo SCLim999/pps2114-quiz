@@ -966,6 +966,10 @@ function generate(){
       // 屋顶露台（统一铺装地砖，不再穿插绿植方块；楼梯塔两侧及东北侧按要求清除铺装）
       if(r>=18.5&&r<=23 && !entrance && !clearedArc) set(x,12,z, B.TILE);
     }
+    // 拆除内侧玻璃幕墙的角度范围内，沿原幕墙边界补一道安全围栏，三层楼都有
+    if(clearedArc && !entrance && r>=17 && r<18){
+      for(const ry of [4,8,12]) set(x,ry,z,B.STEEL);
+    }
   }
   /* ---- 4. 环形楼四周保持平整草坪（原设计概念中的景观坡道不再建模）---- */
 

@@ -84,7 +84,10 @@ also cleared across a wide band from the stair tower around to the
 northeast, dropping down to the slab below in those spots, with the inner
 glass wall opened up across that same stretch too so no jagged wall
 fragments trap the gardener NPC standing near the boundary (only the
-southeast stretch facing the courtyard keeps its original paving). A wide
+southeast stretch facing the courtyard keeps its original paving), and a
+steel safety railing was added along that opened-up boundary on all three
+levels (ground floor, 2nd floor, and the terrace), except at the four open
+doorless entrances. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
