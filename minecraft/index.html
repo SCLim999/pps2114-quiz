@@ -411,7 +411,6 @@ zh: {
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
   promptLocked:' — 🔒 先找 Game Master（篮球场南门）',
-  promptTrainingLocked:' — 🔒 先完成 Game Master 的练习任务',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> 分',
   promptCMStart:' — 按 E 开始', promptCMRedo:' — 按 E 复习',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
@@ -426,9 +425,6 @@ zh: {
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
   gmLockedMsg:'🟡 请先去找穿黄色衣服的 Game Master 聊聊，学会怎么玩这个游戏！他就站在篮球场南门外。',
-  gmTrainingMsg:'🟡 别忘了先完成 Game Master 的练习：在黄色地砖上放 1 个方块，再打掉旁边那个方块！',
-  gmTrainingDone:'🎉 练习完成！你已经学会放置和拆除方块了，尽情探索 ViTrox Campus 吧！',
-  gmPadLabel:'👉 在这里放 1 个方块', gmStackLabel:'👉 打掉这个方块',
   animShow:'▶ 看教学动画', animHide:'⏹ 关闭动画',
   animClient:'客户端', animServer:'服务器', animRequest:'请求 →', animResponse:'← 响应',
   animCPU:'CPU', animRunning:'正在执行 P{p}',
@@ -475,7 +471,6 @@ en: {
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
   promptLocked:' — 🔒 find the Game Master first (basketball court, south gate)',
-  promptTrainingLocked:' — 🔒 finish the Game Master\'s practice task first',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> pts',
   promptCMStart:' — press E to start', promptCMRedo:' — press E to review',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
@@ -490,9 +485,6 @@ en: {
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
   gmLockedMsg:"🟡 Find the Game Master (yellow shirt) first and talk to them to learn how to play! He's standing just outside the basketball court's south gate.",
-  gmTrainingMsg:"🟡 Don't forget to finish the Game Master's practice first: place a block on the yellow tile, then break the plank next to it!",
-  gmTrainingDone:'🎉 Practice complete! You now know how to place and break blocks — go explore ViTrox Campus!',
-  gmPadLabel:'👉 Place a block here', gmStackLabel:'👉 Break this block',
   animShow:'▶ Watch teaching animation', animHide:'⏹ Close animation',
   animClient:'Client', animServer:'Server', animRequest:'Request →', animResponse:'← Response',
   animCPU:'CPU', animRunning:'Now running P{p}',
@@ -539,7 +531,6 @@ ms: {
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
   promptLocked:' — 🔒 cari Game Master dahulu (gelanggang bola keranjang, pintu selatan)',
-  promptTrainingLocked:' — 🔒 selesaikan latihan Game Master dahulu',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> mata',
   promptCMStart:' — tekan E untuk mula', promptCMRedo:' — tekan E untuk ulang kaji',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
@@ -554,9 +545,6 @@ ms: {
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
   gmLockedMsg:'🟡 Cari Game Master (baju kuning) dahulu dan berbual dengannya untuk belajar cara bermain! Dia berdiri betul-betul di luar pintu selatan gelanggang bola keranjang.',
-  gmTrainingMsg:'🟡 Jangan lupa selesaikan latihan Game Master dahulu: letak satu blok atas jubin kuning, kemudian pecahkan papan di sebelahnya!',
-  gmTrainingDone:'🎉 Latihan selesai! Anda kini tahu cara meletak dan memecahkan blok — jom terokai ViTrox Campus!',
-  gmPadLabel:'👉 Letak satu blok di sini', gmStackLabel:'👉 Pecahkan blok ini',
   animShow:'▶ Tonton animasi pengajaran', animHide:'⏹ Tutup animasi',
   animClient:'Klien', animServer:'Pelayan', animRequest:'Permintaan →', animResponse:'← Respons',
   animCPU:'CPU', animRunning:'Sedang berjalan P{p}',
@@ -912,15 +900,6 @@ function writeSign(text,x0,y0,z){
   }
 }
 
-// Game Master 新手练习场坐标（球场南门外）：黄色地砖=放置任务，木板叠塔=拆除任务
-const GM_PAD = { x:-49, y:4, z:1 };
-const GM_STACK = [ {x:-42,y:4,z:1} ];
-let gmPadTag=null, gmStackTag=null;
-function refreshGmTags(){
-  if(gmPadTag){ gmPadTag.material.map = nameTagTexture(t('gmPadLabel')); gmPadTag.material.needsUpdate = true; }
-  if(gmStackTag){ gmStackTag.material.map = nameTagTexture(t('gmStackLabel')); gmStackTag.material.needsUpdate = true; }
-}
-
 function generate(){
   vox.fill(B.AIR);
   CARS.length = 0;
@@ -996,28 +975,6 @@ function generate(){
 
   /* ---- 4. 环形楼四周保持平整草坪（原设计概念中的景观坡道不再建模）---- */
 
-  /* ---- 4.5 屋顶环形光伏雨棚（参照实景：弧形太阳能板架空于屋顶花园上方）---- */
-  for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
-    const cx=x+0.5, cz=z+0.5;
-    const r=Math.hypot(cx,cz);
-    if(r<18||r>23) continue;
-    const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<14)) continue;  // 入口上空留出缺口
-    const seg=Math.floor(a/12);
-    const h=15+(seg%2);                                   // 分段高低交错，模拟倾斜板列
-    set(x,h,z,B.SOLAR);
-    if(Math.abs(angDiff(a,seg*12))<1.1 || r>22.4) set(x,h-1,z,B.STEEL);  // 径向钢梁 + 外圈梁
-  }
-  for(let k=0;k<30;k++){                                  // 白色圆柱支撑
-    const a=k*12+6;
-    if(RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<16)) continue;
-    const h=15+(Math.floor(a/12)%2);
-    for(const rr of [18.8,22.2]){
-      const px=Math.floor(rr*cosd(a)), pz=Math.floor(rr*sind(a));
-      for(let y=12;y<h;y++) set(px,y,pz,B.WHITE);
-    }
-  }
-
   /* ---- 4.7 庭院楼梯塔（深灰色，参照实景：连接地面→2F→屋顶花园，塔身高出屋面）---- */
   {
     const X0=-22, X1=-14, Z0=-2, Z1=2;
@@ -1063,6 +1020,13 @@ function generate(){
   buildBox(-36,-10,-50,-26,4,[
     {x0:-25,x1:-21,z0:-26,z1:-26,y1:7} // 面向园区的门
   ]);
+  // 四层连廊：连接庭院楼梯塔（环形楼）与实验楼，每层都能直接走过去
+  buildBox(-20,-18,-25,-3,4,[]);
+  for(const [y0,y1] of [[4,6],[8,10],[12,14],[16,18]])
+    for(let x=-20;x<=-18;x++) for(let y=y0;y<=y1;y++){
+      set(x,y,-26,B.AIR); set(x,y,-25,B.AIR);   // 接实验楼南墙
+      set(x,y,-3,B.AIR);  set(x,y,-2,B.AIR);    // 接庭院楼梯塔北墙
+    }
   // 实验楼各层：ViTrox 检测设备产线（TR3000i / TH 系列 / V510），每层一排四台
   for(const [fy,mz] of [[4,-43],[8,-33],[12,-43],[16,-33]]){
     for(const mxc of [-30.5,-25.5,-20.5,-15.5]){
@@ -1235,13 +1199,6 @@ function generate(){
       for(let y=4;y<=9;y++) set(fx,y,fz,B.STEEL);
       set(fx,10,fz,B.YELLOW);
     }
-  }
-
-  /* ---- 6.55 Game Master 新手练习场（球场南门外）：黄色地砖=放置任务，木板叠塔=拆除任务 ---- */
-  {
-    set(GM_PAD.x, GM_PAD.y-1, GM_PAD.z, B.YELLOW);
-    set(GM_STACK[0].x, 3, GM_STACK[0].z, B.GRAY);
-    for(const b of GM_STACK) set(b.x, b.y, b.z, B.PLANK);
   }
 
   /* ---- 6.6 停车场（入口东侧）与车辆 ---- */
@@ -1484,12 +1441,12 @@ const INFO_POINTS = [
       zh:'在建筑师的设计概念里，有一条环形景观坡道沿着建筑的圆周缓缓盘旋而上——当弧形动线与笔直的矩形办公楼相交时，会产生明显的「旋转动感」，让静止的建筑仿佛在转动。想登上环形楼的屋顶花园看看？走庭院西侧深灰色楼梯塔里的楼梯就到了！',
       en:"In the architects' concept, a circular landscape ramp spirals gently up along the building's circumference — where the curved route meets the straight rectangular office block, an apparent rotary motion is created, as if the still building were turning. Want to see the roof garden of the ring building? Take the stairs inside the dark tower on the west side of the courtyard!",
       ms:'Dalam konsep arkitek, terdapat tanjakan landskap membulat yang melingkar naik di sepanjang lilitan bangunan — apabila laluan melengkung bertemu blok pejabat segi empat yang lurus, terhasil kesan gerakan berputar, seolah-olah bangunan yang pegun sedang berpusing. Mahu melihat taman bumbung bangunan cincin? Naiklah tangga di dalam menara gelap di sebelah barat laman!' } },
-  { x:-19, y:12, z:-7,
+  { x:-19, y:12, z:-1,
     title:{ zh:'④ 绿色屋顶花园', en:'④ The Green Roof Garden', ms:'④ Taman Bumbung Hijau' },
     text:{
-      zh:'恭喜你走上屋顶！ViTrox Campus 2.0 是在「绿色建筑环境」理念下设计的：屋顶绿化可以隔热降温、滞留雨水、减少空调能耗，也为员工提供了眺望整个峇都交湾工业园的休闲空间。抬头看——头顶这圈弧形的太阳能光伏雨棚一边发电，一边为屋顶花园遮阳，绿色能源与绿化屋顶在这里叠加在一起。',
-      en:'Congratulations on reaching the roof! ViTrox Campus 2.0 was designed within a green building environment: a planted roof insulates against heat, retains rainwater and cuts air-conditioning energy, while giving staff a relaxing lookout over Batu Kawan Industrial Park. Look up — the curved solar-panel canopy overhead generates clean electricity while shading the roof garden, stacking green energy on top of a green roof.',
-      ms:'Tahniah kerana sampai ke bumbung! ViTrox Campus 2.0 direka dalam persekitaran bangunan hijau: bumbung bertanaman menebat haba, menakung air hujan dan menjimatkan tenaga penyaman udara, sambil memberi pekerja ruang santai dengan pemandangan Taman Perindustrian Batu Kawan. Dongak ke atas — kanopi panel solar melengkung itu menjana elektrik bersih sambil meneduhkan taman bumbung; tenaga hijau bertindan di atas bumbung hijau.' } },
+      zh:'恭喜你走上屋顶！ViTrox Campus 2.0 是在「绿色建筑环境」理念下设计的：屋顶绿化可以隔热降温、滞留雨水、减少空调能耗，也为员工提供了眺望整个峇都交湾工业园的休闲空间。这片屋顶露台铺着地砖与盆栽绿植，走一圈还能看到东侧新开的门，直通隔壁 VITROX 招牌大楼的三楼。',
+      en:'Congratulations on reaching the roof! ViTrox Campus 2.0 was designed within a green building environment: a planted roof insulates against heat, retains rainwater and cuts air-conditioning energy, while giving staff a relaxing lookout over Batu Kawan Industrial Park. This roof terrace is paved with tiles and planters — walk around it and you will find a door on the east side leading straight into the 3rd floor of the VITROX-lettered building next door.',
+      ms:'Tahniah kerana sampai ke bumbung! ViTrox Campus 2.0 direka dalam persekitaran bangunan hijau: bumbung bertanaman menebat haba, menakung air hujan dan menjimatkan tenaga penyaman udara, sambil memberi pekerja ruang santai dengan pemandangan Taman Perindustrian Batu Kawan. Teres bumbung ini bersimen jubin dan pasu tanaman — berjalanlah di sekelilingnya dan anda akan jumpa pintu di sebelah timur yang terus ke tingkat 3 bangunan berlogo VITROX bersebelahan.' } },
   { x:18, y:4, z:19,
     title:{ zh:'⑤ 几何体量的碰撞', en:'⑤ Juxtaposition of Geometric Masses', ms:'⑤ Pertembungan Jisim Geometri' },
     text:{
@@ -2017,14 +1974,6 @@ function buildCarMeshes(){
     st._tag = tag;
     carGroup.add(tag);
   });
-  gmPadTag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture(t('gmPadLabel')), depthTest:false }));
-  gmPadTag.scale.set(1.8,0.45,1);
-  gmPadTag.position.set(GM_PAD.x+0.5, GM_PAD.y+1.3, GM_PAD.z+0.5);
-  carGroup.add(gmPadTag);
-  gmStackTag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture(t('gmStackLabel')), depthTest:false }));
-  gmStackTag.scale.set(1.8,0.45,1);
-  gmStackTag.position.set(GM_STACK[0].x+0.5, GM_STACK[0].y+1.3, GM_STACK[0].z+0.5);
-  carGroup.add(gmStackTag);
   const dummy=new THREE.Object3D();
   for(const b of buckets.values()){
     const im=new THREE.InstancedMesh(b.geo, b.mat, b.list.length);
@@ -2607,27 +2556,6 @@ function markGmMet(){
   gmMet = true;
   try{ localStorage.setItem('vitroxcraft_gm_met','1'); }catch(e){}
 }
-// 已听过 Game Master 的教学介绍，但还没完成放置/拆除练习任务
-let gmIntroduced = gmMet;
-try{ if(localStorage.getItem('vitroxcraft_gm_intro')==='1') gmIntroduced = true; }catch(e){}
-function markGmIntroduced(){
-  if(gmIntroduced) return;
-  gmIntroduced = true;
-  try{ localStorage.setItem('vitroxcraft_gm_intro','1'); }catch(e){}
-}
-function gmTrainingDone(){
-  const padDone = get(GM_PAD.x,GM_PAD.y,GM_PAD.z) !== B.AIR;
-  const stackDone = GM_STACK.every(b=>get(b.x,b.y,b.z)===B.AIR);
-  return padDone && stackDone;
-}
-function checkGmTraining(){
-  if(gmMet || !gmIntroduced) return;
-  if(gmTrainingDone()){
-    markGmMet();
-    toast(t('gmTrainingDone'));
-    blip(880,0.15);
-  }
-}
 const questList=document.getElementById('quest-list');
 function refreshQuests(){
   document.getElementById('chip-main').innerHTML =
@@ -2744,7 +2672,7 @@ if(ttsSupported){
 /* ---- 信息弹窗 ---- */
 const modalEl=document.getElementById('modal');
 function openInfo(i){
-  if(!gmMet){ toast(gmIntroduced ? t('gmTrainingMsg') : t('gmLockedMsg')); blip(220,0.1); return; }
+  if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
   const p=INFO_POINTS[i];
   document.getElementById('modal-title').textContent = p.title[lang];
   document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
@@ -2929,14 +2857,13 @@ function checkInfoProximity(){
     });
   }
   if(modalOpen){ promptEl.style.display='none'; return; }
-  const lockHint = ()=> gmIntroduced ? t('promptTrainingLocked') : t('promptLocked');
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
-      (!gmMet ? lockHint() : visited.has(nearInfo) ? t('promptRead') : t('promptLearn'));
+      (!gmMet ? t('promptLocked') : visited.has(nearInfo) ? t('promptRead') : t('promptLearn'));
     promptEl.style.display='block';
   }else if(nearNpc>=0){
     const isGM = NPCS[nearNpc].name==='Game Master';
-    promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + (!gmMet && !isGM ? lockHint() : t('promptTalk'));
+    promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + (!gmMet && !isGM ? t('promptLocked') : t('promptTalk'));
     promptEl.style.display='block';
   }else if(nearCM>=0){
     const ch = CM_CHAPTERS[CM_TERMINALS[nearCM].chapterIdx];
@@ -3301,9 +3228,9 @@ const NPCS = [
   { name:'Game Master', color:0xffd23f, tie:0x333333, expr:'happy', range:2, x:-45.5, y:4, z:2.5, baseYaw:Math.PI,
     role:{ zh:'游戏向导', en:'Game Master', ms:'Game Master' },
     dialog:{
-      zh:'嗨，我是 Game Master，先教你怎么玩这个游戏！移动用 WASD，鼠标转视角，空格跳跃，按 F 切换飞行模式。左下角的快捷栏是你手上的方块，按数字键 1-9 或滚动鼠标滚轮切换。瞄准一个方块——鼠标左键可以「打掉」它，鼠标右键则会把你手上选中的方块「放」在你面对的那一面。走近 NPC 或金色信息方块时按 E 可以互动/阅读，按 Q 能看任务清单。🎯 现在来练习一下：我旁边有一块黄色地砖和一个木板方块——先在黄色地砖上放 1 个方块，再把那个木板方块打掉，两件事都做完就正式解锁全部功能，可以开始探索 ViTrox Campus 啦！',
-      en:"Hi, I'm the Game Master — let me show you how to play! Move with WASD, look around with the mouse, jump with Space, and press F to toggle flying. The hotbar in the bottom-left is the block in your hand — switch it with number keys 1-9 or the mouse scroll wheel. Aim at a block: left-click breaks it, and right-click places the block you're holding onto the face you're looking at. Press E near an NPC or a golden info block to interact or read, and press Q to see your quest checklist. 🎯 Now for a quick practice: there's a yellow tile and a plank block right next to me — place a block on the yellow tile, then break the plank. Do both and everything unlocks, so you can properly start exploring ViTrox Campus!",
-      ms:'Hai, saya Game Master — biar saya tunjukkan cara bermain! Bergerak dengan WASD, pusingkan pandangan dengan tetikus, lompat dengan Space, dan tekan F untuk bertukar mod terbang. Bar pantas di bawah kiri ialah blok di tangan anda — tukar dengan kekunci nombor 1-9 atau roda tetikus. Bidik satu blok: klik kiri memecahkannya, dan klik kanan meletakkan blok yang anda pegang pada permukaan yang anda hadapi. Tekan E berhampiran NPC atau blok maklumat emas untuk berinteraksi/membaca, dan tekan Q untuk melihat senarai misi anda. 🎯 Sekarang latihan ringkas: ada jubin kuning dan satu blok papan di sebelah saya — letak satu blok atas jubin kuning itu, kemudian pecahkan blok papan itu. Buat kedua-duanya dan semuanya akan dibuka kunci, barulah anda boleh mula meneroka ViTrox Campus!' } },
+      zh:'嗨，我是 Game Master，先教你怎么玩这个游戏！移动用 WASD，鼠标转视角，空格跳跃，按 F 切换飞行模式。左下角的快捷栏是你手上的方块，按数字键 1-9 或滚动鼠标滚轮切换。瞄准一个方块——鼠标左键可以「打掉」它，鼠标右键则会把你手上选中的方块「放」在你面对的那一面。走近 NPC 或金色信息方块时按 E 可以互动/阅读，按 Q 能看任务清单。祝你在 ViTrox Campus 玩得开心！',
+      en:"Hi, I'm the Game Master — let me show you how to play! Move with WASD, look around with the mouse, jump with Space, and press F to toggle flying. The hotbar in the bottom-left is the block in your hand — switch it with number keys 1-9 or the mouse scroll wheel. Aim at a block: left-click breaks it, and right-click places the block you're holding onto the face you're looking at. Press E near an NPC or a golden info block to interact or read, and press Q to see your quest checklist. Have fun exploring ViTrox Campus!",
+      ms:'Hai, saya Game Master — biar saya tunjukkan cara bermain! Bergerak dengan WASD, pusingkan pandangan dengan tetikus, lompat dengan Space, dan tekan F untuk bertukar mod terbang. Bar pantas di bawah kiri ialah blok di tangan anda — tukar dengan kekunci nombor 1-9 atau roda tetikus. Bidik satu blok: klik kiri memecahkannya, dan klik kanan meletakkan blok yang anda pegang pada permukaan yang anda hadapi. Tekan E berhampiran NPC atau blok maklumat emas untuk berinteraksi/membaca, dan tekan Q untuk melihat senarai misi anda. Selamat berseronok meneroka ViTrox Campus!' } },
   { name:'Ahmad', color:0x2c4a86, expr:'neutral', x:3.5, y:4, z:55.5, baseYaw:Math.PI,
     role:{ zh:'保安', en:'Security Guard', ms:'Pengawal Keselamatan' },
     dialog:{
@@ -3325,9 +3252,9 @@ const NPCS = [
   { name:'Kumar', color:0x3e7d3a, expr:'happy', x:13.5, y:12, z:-12.5,
     role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
     dialog:{
-      zh:'屋顶上的植物都是我照顾的！绿色屋顶能隔热、留住雨水，头顶的太阳能板还能发电。你是从庭院那座深灰色楼梯塔爬上来的吧？风景不错吧！',
-      en:'I look after all the plants up here! The green roof insulates the building and holds rainwater, and the solar canopy overhead generates power too. Did you climb up through the dark stair tower from the courtyard? Quite a view, right?',
-      ms:'Saya yang menjaga semua tumbuhan di atas sini! Bumbung hijau menebat bangunan dan menakung air hujan, dan kanopi solar di atas turut menjana kuasa. Anda naik melalui menara tangga gelap dari laman itu, kan? Cantik pemandangannya!' } },
+      zh:'屋顶露台上的盆栽都是我照顾的！绿色屋顶能隔热、留住雨水，减少空调能耗。你是从庭院那座深灰色楼梯塔爬上来的吧？风景不错吧！',
+      en:'I look after all the planters up here! The green roof insulates the building, holds rainwater, and cuts air-conditioning energy. Did you climb up through the dark stair tower from the courtyard? Quite a view, right?',
+      ms:'Saya yang menjaga semua pasu tanaman di atas sini! Bumbung hijau menebat bangunan, menakung air hujan, dan menjimatkan tenaga penyaman udara. Anda naik melalui menara tangga gelap dari laman itu, kan? Cantik pemandangannya!' } },
   { name:'Chef Tan', color:0xf0f0f0, expr:'happy', range:1.5, x:36.5, y:4, z:-13.5,
     role:{ zh:'食堂厨师', en:'Canteen Chef', ms:'Cef Kantin' },
     dialog:{
@@ -3504,8 +3431,8 @@ function animateNpcs(dt){
 }
 function openNpc(i){
   const n = NPCS[i];
-  if(n.name==='Game Master') markGmIntroduced();
-  else if(!gmMet){ toast(gmIntroduced ? t('gmTrainingMsg') : t('gmLockedMsg')); blip(220,0.1); return; }
+  if(n.name==='Game Master') markGmMet();
+  else if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
   document.getElementById('modal-title').textContent = '💬 ' + n.name;
   document.getElementById('modal-en').textContent = n.role[lang];
   document.getElementById('modal-text').textContent = n.dialog[lang];
@@ -3719,7 +3646,6 @@ function doBreak(){
   markDirty(hit.x,hit.z); flushDirty();
   netSendSet(hit.x,hit.y,hit.z,B.AIR);
   blip(140,0.08);
-  checkGmTraining();
 }
 function doPlace(){
   if(modalOpen) return;
@@ -3740,7 +3666,6 @@ function doPlace(){
   markDirty(tx,tz); flushDirty();
   netSendSet(tx,ty,tz,HOT[hotSel]);
   blip(300,0.07);
-  checkGmTraining();
 }
 canvas.addEventListener('mousedown',e=>{
   if(!locked||modalOpen) return;
@@ -3785,7 +3710,6 @@ function applyLang(){
   updateCMBoard();
   refreshDiplomaKioskTags();
   refreshCMTerminalTags();
-  refreshGmTags();
   refreshQuests();
   buildHotbar();
   document.querySelectorAll('.lang-btn').forEach(b=>
@@ -4029,7 +3953,7 @@ window.__test = {
     return { solidBlocks:solid, chunkMeshes:chunks.size, infoPoints:INFO_POINTS.length };
   },
   openInfo, openNpc, closeInfo,
-  gmMet: ()=>gmMet, gmIntroduced: ()=>gmIntroduced, gmTrainingDone, checkGmTraining, GM_PAD, GM_STACK,
+  gmMet: ()=>gmMet,
   tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
   guessVoiceGender, pickVoice, ttsSanitize,
   COMPUTERS,
