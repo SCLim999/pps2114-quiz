@@ -84,12 +84,15 @@ building's 3rd floor.
 - Walk (WASD), fly (F), break/place blocks (mouse), and visit the **10 golden info
   blocks** to read architecture lessons about the building's design (including
   one at the computer lab's blackboard).
-- **Tutorial gate**: a yellow-shirted **Game Master** NPC waits just outside the
-  basketball court's south gate and explains the controls. Every other NPC and
-  golden info block stays locked until you talk to him at least once — both
-  the on-screen prompt and the reminder toast point you to the basketball
-  court's south gate; the unlock is saved to `localStorage`, so it only has
-  to happen once per browser.
+- **Tutorial gate with a hands-on practice**: a yellow-shirted **Game Master**
+  NPC waits just outside the basketball court's south gate and explains the
+  controls. Talking to him alone doesn't unlock the game, though — right next
+  to him is a yellow practice tile (place a block on it) and a 3-block plank
+  stack (break it). Every other NPC and golden info block stays locked (both
+  the on-screen prompt and the reminder toast point you back to him) until
+  you complete both, at which point a "🎉 Practice complete" toast unlocks
+  everything. Progress is saved to `localStorage`, so it only has to happen
+  once per browser.
 - **Trilingual**: the whole UI and all lessons switch between 中文 / English /
   Bahasa Melayu (top-right of the start menu; auto-detected on first load).
 - **Multiplayer**: host a room from the start menu, share the 5-letter code, and
