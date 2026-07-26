@@ -72,8 +72,10 @@ ramp, doorless entrances on all four sides (E/S/W/N), a paved roof terrace with
 planters, and the rectangular production/office blocks punching through the
 circular form, including two computer rooms (~20 PCs total) on the 4th floor of
 the VITROX-lettered building, reached via a staircase next to the staff canteen —
-or via a door straight from the ring building's roof terrace to the VITROX
-building's 3rd floor. A wide four-storey glass skybridge also connects the
+or via a wide door straight from the ring building's roof terrace to the
+VITROX building's 3rd floor (its ground/2nd-floor atrium opening and the
+ring's own 2nd-floor entrance skybridge were widened to match). A wide
+four-storey glass skybridge also connects the
 ring building's stair tower straight to the lab building (the one full of
 ViTrox inspection machines), with an opening at every one of the lab's four
 floors.

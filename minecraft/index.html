@@ -1012,11 +1012,11 @@ function generate(){
 
   /* ---- 5. 矩形体量：生产办公楼（东，5 层）与实验楼（西北，4 层）---- */
   buildBox(20,54,-16,16,5,[
-    {x0:20,x1:21,z0:-3,z1:3,y1:9},     // 面向环形楼的两层高中庭开口
+    {x0:19,x1:22,z0:-3,z1:3,y1:9},     // 面向环形楼的两层高中庭开口（加宽版）
     {x0:34,x1:38,z0:16,z1:16,y1:7},    // 南面门
   ]);
-  // 三楼（屋顶露台层）的门：连接环形楼与 VITROX 招牌大楼
-  for(let x=20;x<=21;x++) for(let z=-3;z<=3;z++) for(let y=12;y<=14;y++) set(x,y,z,B.AIR);
+  // 三楼（屋顶露台层）的门：连接环形楼与 VITROX 招牌大楼（加宽版）
+  for(let x=19;x<=22;x++) for(let z=-3;z<=3;z++) for(let y=12;y<=14;y++) set(x,y,z,B.AIR);
   buildBox(-36,-10,-50,-26,4,[
     {x0:-25,x1:-21,z0:-26,z1:-26,y1:7} // 面向园区的门
   ]);
@@ -1102,13 +1102,13 @@ function generate(){
     for(const [px,pz] of [[-3,21]]){                        // 门厅盆栽
       set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF);
     }
-    for(let x=-7;x<=8;x++) for(let z=16;z<=25;z++){         // 连桥横跨入口门厅
+    for(let x=-7;x<=8;x++) for(let z=16;z<=25;z++){         // 连桥横跨入口门厅（加宽版）
       const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
-      if(r<19||r>21.8) continue;
+      if(r<18||r>23) continue;
       const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
       if(Math.abs(angDiff(a,90))>13) continue;
       set(x,7,z,B.WHITE);                                   // 桥面（与二楼楼板齐平）
-      if(r<19.7||r>21.1){
+      if(r<18.7||r>22.3){
         set(x,8,z,B.GLASS);                                 // 玻璃栏板
         if(x%2===0) set(x,6,z,B.LEAF);                      // 垂吊绿植
       }
