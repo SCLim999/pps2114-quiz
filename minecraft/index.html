@@ -397,6 +397,7 @@ zh: {
   online:' · 🌐 {c} 人在线（{code}）',
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
+  promptLocked:' — 🔒 先找 Game Master',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> 分',
   promptCMStart:' — 按 E 开始', promptCMRedo:' — 按 E 复习',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
@@ -410,6 +411,7 @@ zh: {
   flyOn:'✈ 飞行模式：开（空格上升 / Shift 下降）', flyOff:'🚶 飞行模式：关',
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
+  gmLockedMsg:'🟡 请先去找穿黄色衣服的 Game Master 聊聊，学会怎么玩这个游戏！',
   hostOnlyReset:'只有房主可以重置世界',
   confirmReset:'确定要清除你放置/破坏的所有方块，恢复原始园区吗？',
   congrats:'🎉 恭喜！你已探索完 ViTrox Campus 的全部 {n} 个建筑知识点！',
@@ -452,6 +454,7 @@ en: {
   online:' · 🌐 {c} online ({code})',
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
+  promptLocked:' — 🔒 find the Game Master first',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> pts',
   promptCMStart:' — press E to start', promptCMRedo:' — press E to review',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
@@ -465,6 +468,7 @@ en: {
   flyOn:'✈ Fly mode ON (Space up / Shift down)', flyOff:'🚶 Fly mode OFF',
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
+  gmLockedMsg:'🟡 Find the Game Master (yellow shirt) first and talk to them to learn how to play!',
   hostOnlyReset:'Only the host can reset the world',
   confirmReset:'Clear all blocks you placed/broke and restore the original campus?',
   congrats:'🎉 Congratulations! You have explored all {n} architecture lessons of ViTrox Campus!',
@@ -507,6 +511,7 @@ ms: {
   online:' · 🌐 {c} dlm talian ({code})',
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
+  promptLocked:' — 🔒 cari Game Master dahulu',
   chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> mata',
   promptCMStart:' — tekan E untuk mula', promptCMRedo:' — tekan E untuk ulang kaji',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
@@ -520,6 +525,7 @@ ms: {
   flyOn:'✈ Mod terbang: HIDUP (Space naik / Shift turun)', flyOff:'🚶 Mod terbang: MATI',
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
+  gmLockedMsg:'🟡 Cari Game Master (baju kuning) dahulu dan berbual dengannya untuk belajar cara bermain!',
   hostOnlyReset:'Hanya hos boleh set semula dunia',
   confirmReset:'Padam semua blok yang anda letak/pecah dan pulihkan kampus asal?',
   congrats:'🎉 Tahniah! Anda telah meneroka kesemua {n} pelajaran seni bina ViTrox Campus!',
@@ -2535,6 +2541,14 @@ function updateCMBoard(){
 
 /* ---- 任务/进度 ---- */
 const visited = new Set();
+// 必须先找 Game Master 谈话（教学关），其余 NPC 和金色信息方块才会开放互动
+let gmMet = false;
+try{ gmMet = localStorage.getItem('vitroxcraft_gm_met')==='1'; }catch(e){}
+function markGmMet(){
+  if(gmMet) return;
+  gmMet = true;
+  try{ localStorage.setItem('vitroxcraft_gm_met','1'); }catch(e){}
+}
 const questList=document.getElementById('quest-list');
 function refreshQuests(){
   document.getElementById('chip-main').innerHTML =
@@ -2651,6 +2665,7 @@ if(ttsSupported){
 /* ---- 信息弹窗 ---- */
 const modalEl=document.getElementById('modal');
 function openInfo(i){
+  if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
   const p=INFO_POINTS[i];
   document.getElementById('modal-title').textContent = p.title[lang];
   document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
@@ -2735,10 +2750,11 @@ function checkInfoProximity(){
   if(modalOpen){ promptEl.style.display='none'; return; }
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
-      (visited.has(nearInfo) ? t('promptRead') : t('promptLearn'));
+      (!gmMet ? t('promptLocked') : visited.has(nearInfo) ? t('promptRead') : t('promptLearn'));
     promptEl.style.display='block';
   }else if(nearNpc>=0){
-    promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + t('promptTalk');
+    const isGM = NPCS[nearNpc].name==='Game Master';
+    promptText.textContent = ' 💬 ' + NPCS[nearNpc].name + (!gmMet && !isGM ? t('promptLocked') : t('promptTalk'));
     promptEl.style.display='block';
   }else if(nearCM>=0){
     const ch = CM_CHAPTERS[CM_TERMINALS[nearCM].chapterIdx];
@@ -3306,6 +3322,8 @@ function animateNpcs(dt){
 }
 function openNpc(i){
   const n = NPCS[i];
+  if(n.name==='Game Master') markGmMet();
+  else if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
   document.getElementById('modal-title').textContent = '💬 ' + n.name;
   document.getElementById('modal-en').textContent = n.role[lang];
   document.getElementById('modal-text').textContent = n.dialog[lang];
@@ -3786,6 +3804,7 @@ window.__test = {
     return { solidBlocks:solid, chunkMeshes:chunks.size, infoPoints:INFO_POINTS.length };
   },
   openInfo, openNpc, closeInfo,
+  gmMet: ()=>gmMet,
   tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
   guessVoiceGender, pickVoice, ttsSanitize,
   COMPUTERS,
