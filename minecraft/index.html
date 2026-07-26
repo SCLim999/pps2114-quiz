@@ -946,7 +946,7 @@ function generate(){
       set(x,fy,z,B.WHITE);
     }
     // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（该范围内不建内侧玻璃幕墙，避免在弧形边界上留下卡住 NPC 的锯齿状墙体碎块）
-    const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,10))<=60;
+    const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,340))<=90;
     const inner = r<18 && !clearedArc, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
