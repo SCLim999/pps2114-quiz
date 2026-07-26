@@ -961,8 +961,8 @@ function generate(){
       }
       set(x,12,z,B.WHITE);
     }else{
-      // 屋顶露台（铺装地砖 + 盆栽绿植，无草坪）
-      if(r>=18.5&&r<=23 && !entrance) set(x,12,z, rand()<0.12?B.LEAF:B.TILE);
+      // 屋顶露台（统一铺装地砖，不再穿插绿植方块）
+      if(r>=18.5&&r<=23 && !entrance) set(x,12,z, B.TILE);
     }
   }
   // 环形楼内部结构柱（放射状排布）
