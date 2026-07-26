@@ -215,7 +215,7 @@
   #modal h1 { color:#ffd75e; font-size:21px; }
   #modal .en { color:#9fb8d8; font-size:12px; font-style:italic; }
 
-  /* ---------- CodingMine 编程小任务 ---------- */
+  /* ---------- DataMine 编程小任务 ---------- */
   #quiz .panel { border-color:#2ee6a8; }
   #quiz h1 { color:#2ee6a8; font-size:21px; }
   #quiz .en { color:#9fb8d8; font-size:12px; font-style:italic; }
@@ -328,7 +328,7 @@
   </div>
 </div>
 
-<!-- CodingMine 编程小任务弹窗 -->
+<!-- DataMine 编程小任务弹窗 -->
 <div class="overlay hidden" id="quiz">
   <div class="panel">
     <h1 id="quiz-title"></h1>
@@ -398,10 +398,10 @@ zh: {
   questsTitle:'📋 建筑探索任务',
   promptLearn:' — 了解这里的设计', promptRead:'（已读）', promptTalk:' — 交谈',
   promptLocked:' — 🔒 先找 Game Master',
-  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> 分',
+  chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> 分',
   promptCMStart:' — 按 E 开始', promptCMRedo:' — 按 E 复习',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
-  cmDashHeader:'💻 CodingMine 编程课程',
+  cmDashHeader:'💻 DataMine 编程课程',
   cmScoreLine:'总分：{score} / {total}',
   cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
@@ -455,10 +455,10 @@ en: {
   questsTitle:'📋 Architecture Quests',
   promptLearn:' — learn about this design', promptRead:' (read)', promptTalk:' — talk',
   promptLocked:' — 🔒 find the Game Master first',
-  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> pts',
+  chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> pts',
   promptCMStart:' — press E to start', promptCMRedo:' — press E to review',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
-  cmDashHeader:'💻 CodingMine Coding Courses',
+  cmDashHeader:'💻 DataMine Coding Courses',
   cmScoreLine:'Total score: {score} / {total}',
   cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
@@ -512,10 +512,10 @@ ms: {
   questsTitle:'📋 Tugasan Seni Bina',
   promptLearn:' — pelajari reka bentuk ini', promptRead:' (sudah dibaca)', promptTalk:' — bersembang',
   promptLocked:' — 🔒 cari Game Master dahulu',
-  chipCM:' · 💻 CodingMine <b>{score}</b>/<b>{total}</b> mata',
+  chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> mata',
   promptCMStart:' — tekan E untuk mula', promptCMRedo:' — tekan E untuk ulang kaji',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
-  cmDashHeader:'💻 Kursus Pengaturcaraan CodingMine',
+  cmDashHeader:'💻 Kursus Pengaturcaraan DataMine',
   cmScoreLine:'Jumlah markah: {score} / {total}',
   cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
@@ -1122,7 +1122,7 @@ function generate(){
     for(let x=39;x<=53;x++) for(let y=16;y<=18;y++) set(x,y,0,B.WHITE); // 两室分隔墙（南=电脑室1，北=电脑室2）
     for(let z of [-1,0,1]) for(let y=16;y<=18;y++) set(39,y,z,B.AIR);   // 分隔墙留一个连通门洞
     const COLS = [41,43,46,49,52];                                     // 桌位横坐标（避开室内柱 x=40/48）
-    // 电脑室 1（南侧，z=-13/-3 两排，Ts Dr Lim SC 所在这一区）集中放置全部 10 台 CodingMine 电脑
+    // 电脑室 1（南侧，z=-13/-3 两排，Ts Dr Lim SC 所在这一区）集中放置全部 10 台 DataMine 电脑
     CM_TERMINALS.forEach(term => placeComputer(term.x, term.z, term.facing, term.floorY, term.color));
     for(const x of COLS){ placeComputer(x,3,1,16); placeComputer(x,13,-1,16); }         // 电脑室 2：两排纯装饰座位，屏幕用默认色
   }
@@ -1471,11 +1471,11 @@ const INFO_POINTS = [
       en:"The flowing white building ahead is ViTrox Education, newly built right beside Campus 3.0. ViTrox recently completed a rebrand: ViTrox College, ViTrox TVET and ViTrox Corporate Academy now share a unified 'ViTrox' signature, representing the company's dedicated mission to education and talent development, and aligning the education brands more closely with the parent company's technology prestige — instantly recognisable as one family. Walk through the open ground-floor colonnade and take in the curving glass ribbon facade!",
       ms:'Bangunan putih yang melengkung di hadapan ini ialah ViTrox Education, baru dibina bersebelahan Campus 3.0. ViTrox baru selesai menjenamakan semula: ViTrox College, ViTrox TVET dan ViTrox Corporate Academy kini berkongsi tandatangan "ViTrox" yang bersatu, mewakili misi khusus syarikat terhadap pendidikan dan pembangunan bakat, sekali gus menyelaraskan jenama pendidikan dengan lebih rapat dengan prestij teknologi syarikat induk — dikenali serta-merta sebagai satu keluarga. Berjalanlah melalui laluan bertiang terbuka di tingkat bawah dan nikmati fasad reben kaca yang melengkung ini!' } },
   { x:46, y:16, z:2,
-    title:{ zh:'⑩ 电脑室 · CodingMine 编程课堂', en:'⑩ The Computer Lab · CodingMine Classroom', ms:'⑩ Makmal Komputer · Kelas CodingMine' },
+    title:{ zh:'⑩ 电脑室 · DataMine 编程课堂', en:'⑩ The Computer Lab · DataMine Classroom', ms:'⑩ Makmal Komputer · Kelas DataMine' },
     text:{
-      zh:'你正站在 VITROX 招牌大楼的四楼电脑室——顺着食堂旁的直跑楼梯就能走上来。两间电脑室里摆着 20 台电脑，其中 10 台绿屏的是 CodingMine 编程工作站，墙上这块大黑板实时记录着全部 10 章课程的完成进度与总分。Computing School 的 4 位讲师——Lim SC 博士、Syira、Khor JY 和 Eng YK——也常驻在这里，教授软件工程、数据科学、移动应用开发和人工智能。走近黑板旁的电脑，试试完成一章练习吧！',
-      en:"You are standing in the 4th-floor computer lab of the VITROX-lettered building — reached via the straight staircase next to the canteen. The two rooms hold 20 computers, 10 of them green-screen CodingMine programming workstations; the big blackboard on the wall tracks live progress and total score across all 10 chapters. Four Computing School lecturers — Dr Lim SC, Syira, Khor JY and Eng YK — are stationed here too, teaching Software Engineering, Data Science, Mobile App Development and Artificial Intelligence. Walk up to a computer near the blackboard and try finishing a chapter!",
-      ms:'Anda kini berada di makmal komputer tingkat 4 bangunan berlogo VITROX — dicapai melalui tangga lurus di sebelah kantin. Kedua-dua bilik ini mempunyai 20 komputer, 10 daripadanya stesen kerja pengaturcaraan CodingMine berskrin hijau; papan hitam besar di dinding menjejaki kemajuan langsung dan jumlah markah merentasi kesemua 10 bab. Empat pensyarah Computing School — Dr Lim SC, Syira, Khor JY dan Eng YK — turut ditempatkan di sini, mengajar Kejuruteraan Perisian, Sains Data, Pembangunan Aplikasi Mudah Alih dan Kecerdasan Buatan. Hampiri komputer berhampiran papan hitam dan cuba selesaikan satu bab!' } },
+      zh:'你正站在 VITROX 招牌大楼的四楼电脑室——顺着食堂旁的直跑楼梯就能走上来。两间电脑室里摆着 20 台电脑，其中 10 台绿屏的是 DataMine 编程工作站，墙上这块大黑板实时记录着全部 10 章课程的完成进度与总分。Computing School 的 4 位讲师——Lim SC 博士、Syira、Khor JY 和 Eng YK——也常驻在这里，教授软件工程、数据科学、移动应用开发和人工智能。走近黑板旁的电脑，试试完成一章练习吧！',
+      en:"You are standing in the 4th-floor computer lab of the VITROX-lettered building — reached via the straight staircase next to the canteen. The two rooms hold 20 computers, 10 of them green-screen DataMine programming workstations; the big blackboard on the wall tracks live progress and total score across all 10 chapters. Four Computing School lecturers — Dr Lim SC, Syira, Khor JY and Eng YK — are stationed here too, teaching Software Engineering, Data Science, Mobile App Development and Artificial Intelligence. Walk up to a computer near the blackboard and try finishing a chapter!",
+      ms:'Anda kini berada di makmal komputer tingkat 4 bangunan berlogo VITROX — dicapai melalui tangga lurus di sebelah kantin. Kedua-dua bilik ini mempunyai 20 komputer, 10 daripadanya stesen kerja pengaturcaraan DataMine berskrin hijau; papan hitam besar di dinding menjejaki kemajuan langsung dan jumlah markah merentasi kesemua 10 bab. Empat pensyarah Computing School — Dr Lim SC, Syira, Khor JY dan Eng YK — turut ditempatkan di sini, mengajar Kejuruteraan Perisian, Sains Data, Pembangunan Aplikasi Mudah Alih dan Kecerdasan Buatan. Hampiri komputer berhampiran papan hitam dan cuba selesaikan satu bab!' } },
 ];
 
 /* ================================================================
@@ -1893,7 +1893,7 @@ const COMP_MAT = {
   keyboard:new THREE.MeshBasicMaterial({color:0xd8dadd}),
   led:   new THREE.MeshBasicMaterial({color:0x2fa7ff}),
 };
-const cmScreenMatCache = {};                    // CodingMine 工作站：每台颜色不同，材质按颜色缓存复用
+const cmScreenMatCache = {};                    // DataMine 工作站：每台颜色不同，材质按颜色缓存复用
 function cmScreenMat(hex){
   return cmScreenMatCache[hex] || (cmScreenMatCache[hex] = new THREE.MeshBasicMaterial({color:hex}));
 }
@@ -1959,7 +1959,7 @@ function buildCarMeshes(){
     put('cTower', COMP_GEO.tower,    MACH_MAT.dark,      T([0.26,0.13,0]),  rot);
     put('cLed',   COMP_GEO.led,      COMP_MAT.led,       T([0.26,0.13,0.12]),rot);
   }
-  CM_TERMINALS.forEach((st,i)=>{                           // CodingMine 工位悬浮编号牌：显示主题名称
+  CM_TERMINALS.forEach((st,i)=>{                           // DataMine 工位悬浮编号牌：显示主题名称
     const label = (i+1) + '. ' + CM_CHAPTERS[st.chapterIdx].tag[lang];
     const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map:nameTagTexture(label), depthTest:false }));
     tag.scale.set(1.8,0.45,1);
@@ -2135,12 +2135,12 @@ function toast(msg){
 }
 
 /* ================================================================
-   CodingMine 编程小任务 —— 四楼电脑室的 3 台绿屏电脑
-   每章设定在虚构软件公司 CodingMine 背景下，玩家扮演初级程序员，
+   DataMine 编程小任务 —— 四楼电脑室的 3 台绿屏电脑
+   每章设定在虚构软件公司 DataMine 背景下，玩家扮演初级程序员，
    通过帮同事/CEO 解决技术难题来学习编程；答对累计分数，存入 localStorage。
 ================================================================ */
 const CODINGMINE = {
-  company:{ zh:'CodingMine（编码矿业）', en:'CodingMine', ms:'CodingMine' },
+  company:{ zh:'DataMine（数据矿业）', en:'DataMine', ms:'DataMine' },
 };
 /* ViTrox Education 学院大楼底层（架空柱廊广场）里的 5 台木箱造型站立信息机（仿 Minecraft mailbox 设计：
    木柱 + 木箱 + 图标牌），散布在建筑内部、彼此拉开距离，也远离 Dr Janaka Low；每台介绍一个不同的真实文凭/学士课程。
@@ -2461,7 +2461,7 @@ function saveCM(){
   try{ localStorage.setItem('vitroxcraft_codingmine', JSON.stringify({ score:cmScore, done:[...cmDone] })); }catch(e){}
 }
 
-/* ---- 电脑室大黑板：实时显示 CodingMine 10 章进度与总分（挂在两室分隔墙上） ---- */
+/* ---- 电脑室大黑板：实时显示 DataMine 10 章进度与总分（挂在两室分隔墙上） ---- */
 let cmBoardCanvas=null, cmBoardCtx=null, cmBoardTexture=null;
 function buildCMBoard(){
   cmBoardCanvas = document.createElement('canvas');
@@ -2773,7 +2773,7 @@ function checkInfoProximity(){
 let net = { mode:'solo', peer:null, conns:new Map(), hostConn:null, myId:null, code:null };
 let netNames = new Map();          // peerId -> 玩家名
 const remotes = new Map();         // peerId -> 远程玩家形象
-const remoteCM = new Map();        // peerId -> { score, doneCount } 其他玩家的 CodingMine 进度（黑板用）
+const remoteCM = new Map();        // peerId -> { score, doneCount } 其他玩家的 DataMine 进度（黑板用）
 let posTimer = null, hostRetries = 0;
 
 const PEER_OPTS = (()=>{           // 默认用 PeerJS 官方免费云；?peerhost= 可指向自建服务器
@@ -3226,15 +3226,15 @@ const NPCS = [
   { name:'Ts Dr Lim SC', color:0x2c3e50, tie:0x1b9aaa, expr:'smile', range:2, x:44, y:16, z:-8, baseYaw:0,
     role:{ zh:'Programme Leader · 软件工程', en:'Programme Leader, Computing School · Software Engineering', ms:'Programme Leader, Computing School · Kejuruteraan Perisian' },
     dialog:{
-      zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，同时是 ViTrox College「Diploma in Computer Science」文凭课程的 Programme Leader——从需求分析、系统设计到测试维护，教学生怎么把一个想法变成可靠的软件产品。想了解这个文凭课程的完整内容，可以到 college.vitrox.edu.my/diploma（第 4 页）查询。旁边绿屏的电脑是我们给新生设计的 CodingMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
-      en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I'm also the Programme Leader for the Diploma in Computer Science at ViTrox College — covering everything from requirements analysis and system design to testing and maintenance, teaching students how to turn an idea into a reliable software product. For the full programme details, check out college.vitrox.edu.my/diploma (page 4). The green-screen computers nearby are the CodingMine exercise we designed for new students, learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
-      ms:'Selamat datang ke makmal komputer Computing School! Saya Dr Lim SC, dan saya juga memiliki kelayakan Ts (Teknologis). Saya juga Programme Leader untuk Diploma in Computer Science di ViTrox College — merangkumi analisis keperluan, reka bentuk sistem, hingga pengujian dan penyelenggaraan, mengajar pelajar cara mengubah satu idea menjadi produk perisian yang boleh dipercayai. Untuk maklumat penuh program ini, layari college.vitrox.edu.my/diploma (halaman 4). Komputer skrin hijau berdekatan ialah latihan CodingMine yang kami reka untuk pelajar baharu, belajar asas sintaks C/C++ melalui kisah sebuah syarikat fiksyen. Jemput duduk dan cuba!' } },
+      zh:'欢迎来到 Computing School 的电脑室！我是 Lim SC 博士，也考取了 Ts（专业技术员）资格，同时是 ViTrox College「Diploma in Computer Science」文凭课程的 Programme Leader——从需求分析、系统设计到测试维护，教学生怎么把一个想法变成可靠的软件产品。想了解这个文凭课程的完整内容，可以到 college.vitrox.edu.my/diploma（第 4 页）查询。旁边绿屏的电脑是我们给新生设计的 DataMine 教学任务，用一间虚构公司的故事学 C/C++ 基础语法，欢迎坐下来试一试！',
+      en:"Welcome to the Computing School's computer lab! I'm Dr Lim SC, and I also hold a Ts (Technologist) certification. I'm also the Programme Leader for the Diploma in Computer Science at ViTrox College — covering everything from requirements analysis and system design to testing and maintenance, teaching students how to turn an idea into a reliable software product. For the full programme details, check out college.vitrox.edu.my/diploma (page 4). The green-screen computers nearby are the DataMine exercise we designed for new students, learning C/C++ syntax fundamentals through a fictional company's story. Feel free to sit down and give it a try!",
+      ms:'Selamat datang ke makmal komputer Computing School! Saya Dr Lim SC, dan saya juga memiliki kelayakan Ts (Teknologis). Saya juga Programme Leader untuk Diploma in Computer Science di ViTrox College — merangkumi analisis keperluan, reka bentuk sistem, hingga pengujian dan penyelenggaraan, mengajar pelajar cara mengubah satu idea menjadi produk perisian yang boleh dipercayai. Untuk maklumat penuh program ini, layari college.vitrox.edu.my/diploma (halaman 4). Komputer skrin hijau berdekatan ialah latihan DataMine yang kami reka untuk pelajar baharu, belajar asas sintaks C/C++ melalui kisah sebuah syarikat fiksyen. Jemput duduk dan cuba!' } },
   { name:'Ms Syira', color:0x6a4c93, expr:'happy', style:'f', range:2, x:49, y:16, z:-2, baseYaw:Math.PI,
     role:{ zh:'讲师 · 数据科学', en:'Lecturer · Data Science', ms:'Pensyarah · Sains Data' },
     dialog:{
-      zh:'嗨，我是 Syira，教数据科学（Data Science）。简单说，就是从一大堆数据里找出有用的规律——比如帮 ViTrox 分析产线的检测数据，找出瑕疵的原因。看到那三台绿屏电脑了吗？那是给编程新手准备的 CodingMine 工作站，从认识算法开始，一步步打好基础，将来也能像我一样跟数据打交道！',
-      en:"Hi, I'm Syira, and I teach Data Science. Simply put, it's about finding useful patterns in a huge pile of data — like helping ViTrox analyse inspection data from the production line to find out why defects happen. Notice those three green-screen computers? Those are the CodingMine workstations set up for programming beginners — starting from understanding algorithms, building a solid foundation step by step, so one day you can work with data just like I do!",
-      ms:'Hai, saya Syira, dan saya mengajar Sains Data. Secara ringkas, ia tentang mencari corak berguna daripada timbunan data yang besar — seperti membantu ViTrox menganalisis data pemeriksaan daripada barisan pengeluaran untuk mengetahui punca kecacatan. Perasan tiga komputer skrin hijau itu? Itu ialah stesen kerja CodingMine yang disediakan untuk pemula pengaturcaraan — bermula daripada memahami algoritma, membina asas yang kukuh langkah demi langkah, supaya suatu hari nanti anda juga boleh bekerja dengan data seperti saya!' } },
+      zh:'嗨，我是 Syira，教数据科学（Data Science）。简单说，就是从一大堆数据里找出有用的规律——比如帮 ViTrox 分析产线的检测数据，找出瑕疵的原因。看到那三台绿屏电脑了吗？那是给编程新手准备的 DataMine 工作站，从认识算法开始，一步步打好基础，将来也能像我一样跟数据打交道！',
+      en:"Hi, I'm Syira, and I teach Data Science. Simply put, it's about finding useful patterns in a huge pile of data — like helping ViTrox analyse inspection data from the production line to find out why defects happen. Notice those three green-screen computers? Those are the DataMine workstations set up for programming beginners — starting from understanding algorithms, building a solid foundation step by step, so one day you can work with data just like I do!",
+      ms:'Hai, saya Syira, dan saya mengajar Sains Data. Secara ringkas, ia tentang mencari corak berguna daripada timbunan data yang besar — seperti membantu ViTrox menganalisis data pemeriksaan daripada barisan pengeluaran untuk mengetahui punca kecacatan. Perasan tiga komputer skrin hijau itu? Itu ialah stesen kerja DataMine yang disediakan untuk pemula pengaturcaraan — bermula daripada memahami algoritma, membina asas yang kukuh langkah demi langkah, supaya suatu hari nanti anda juga boleh bekerja dengan data seperti saya!' } },
   { name:'Ms Khor JY', color:0x1f7a5c, expr:'smile', style:'f', range:2, x:52, y:16, z:8, baseYaw:Math.PI,
     role:{ zh:'讲师 · 移动应用开发（Flutter）', en:'Lecturer · Mobile App Dev (Flutter)', ms:'Pensyarah · Pembangunan Apl Mudah Alih (Flutter)' },
     dialog:{
@@ -3391,7 +3391,7 @@ document.getElementById('quiz-next').addEventListener('click', ()=>{
   if(cmQIdx < ch.questions.length-1){ cmQIdx++; renderCMQuiz(); }
   else closeCM();
 });
-function openCodingMine(terminalIdx){
+function openDataMine(terminalIdx){
   cmChapterIdx = CM_TERMINALS[terminalIdx].chapterIdx;
   cmQIdx = 0;
   renderCMQuiz();
@@ -3492,7 +3492,7 @@ document.addEventListener('keydown',e=>{
     if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return; }
     if(playing() && nearInfo>=0){ openInfo(nearInfo); return; }
     if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
-    if(playing() && nearCM>=0){ openCodingMine(nearCM); return; }
+    if(playing() && nearCM>=0){ openDataMine(nearCM); return; }
     if(playing() && nearKiosk>=0){ openDiplomaKiosk(nearKiosk); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
@@ -3596,7 +3596,7 @@ function applyLang(){
   if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
   if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
   put('quiz-close', t('cmClose'));
-  if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // CodingMine 弹窗开着时也跟着切换语言
+  if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // DataMine 弹窗开着时也跟着切换语言
   updateCMBoard();
   refreshDiplomaKioskTags();
   refreshCMTerminalTags();
@@ -3773,7 +3773,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); }
     else if(nearInfo>=0) openInfo(nearInfo);
     else if(nearNpc>=0) openNpc(nearNpc);
-    else if(nearCM>=0) openCodingMine(nearCM);
+    else if(nearCM>=0) openDataMine(nearCM);
     else if(nearKiosk>=0) openDiplomaKiosk(nearKiosk);
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
@@ -3811,7 +3811,7 @@ window.__test = {
   codingMine: ()=>({ score:cmScore, total:cmTotalPoints(), done:[...cmDone], nearCM,
     chapters:CM_CHAPTERS.map(ch=>({ id:ch.id, tag:ch.tag, ...cmChapterProgress(ch) })),
     terminals:CM_TERMINALS.map(s=>({id:s.id,x:s.x,z:s.z,floorY:s.floorY,color:s.color})) }),
-  openCodingMine, openCMChapter, answerCM, closeCM,
+  openDataMine, openCMChapter, answerCM, closeCM,
   remoteCM: ()=>[...remoteCM], netSendCMScore,
   diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,icon:k.icon})) }),
   openDiplomaKiosk,
