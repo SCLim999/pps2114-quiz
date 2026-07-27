@@ -1435,6 +1435,9 @@ function generate(){
     }
   }
 
+  /* ---- 8.6 露台南入口旁的白色混凝土小平台（自定义添加，x:-3 到 x:3，y:12，z:16）---- */
+  for(let x=-3;x<=3;x++) set(x,12,16,B.WHITE);
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
