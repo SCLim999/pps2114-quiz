@@ -110,7 +110,11 @@ from the width of those two doors, so the rest of it cut straight
 through the skybridge corridor and the VITROX building's interior,
 leaving stray fence segments floating inside both — now excluded from
 each building's full footprint instead, so the fence no longer clips
-through walls. The four-storey skybridge used to open a
+through walls. The stair tower's own exclusion zone had a similar
+one-block margin beyond its actual footprint, leaving a visible sliver
+gap between the fence and the tower wall; tightened to match the
+tower's exact bounds so the fence now runs flush against it on both
+sides. The four-storey skybridge used to open a
 door into the tower on its top floor too, but the tower doesn't reach
 that high — there was nothing on the other side — so that floor now
 dead-ends at the skybridge's own solid glass wall instead, connecting to
