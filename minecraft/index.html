@@ -945,8 +945,8 @@ function generate(){
       if(entrance && fy<=7) continue;       // 入口全高开洞，屋面板保留为门洞顶
       set(x,fy,z,B.WHITE);
     }
-    // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（屋顶露台铺装清除范围；内侧玻璃幕墙恢复为原设计，每一段都完整建墙）
-    const clearedArc = Math.abs(angDiff(a,205))<=75 || Math.abs(angDiff(a,349))<=99;
+    // 屋顶露台铺装已按需求清除到整圈都统一低一级，内外两侧幕墙的女儿墙也一并降到与露台齐平，不再留任何锯齿状台阶
+    const clearedArc = true;
     const inner = r<18, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
@@ -955,13 +955,13 @@ function generate(){
         const k=(y-4)%4;
         set(x,y,z, (fin||k===0||k===3) ? B.WHITE : B.GLASS);
       }
-      set(x,12,z,B.WHITE);                                          // 女儿墙
+      if(!clearedArc) set(x,12,z,B.WHITE);                          // 女儿墙（铺装清除范围内不加高，与旁边低一级的露台齐平）
     }else if(inner){
       for(let y=4;y<11;y++){
         if(entrance) continue;
         set(x,y,z, y===4 ? B.WHITE : B.GLASS);                     // 面向庭院的玻璃幕墙
       }
-      set(x,12,z,B.WHITE);
+      if(!clearedArc) set(x,12,z,B.WHITE);
     }else{
       // 屋顶露台（统一铺装地砖，不再穿插绿植方块；楼梯塔两侧及东北侧按要求清除铺装）
       if(r>=18.5&&r<=23 && !entrance && !clearedArc) set(x,12,z, B.TILE);
