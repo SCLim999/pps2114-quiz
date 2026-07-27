@@ -1447,6 +1447,9 @@ function generate(){
   /* ---- 8.9 白色混凝土条带（自定义添加，x:-6 到 6，y:12，z:-24）---- */
   for(let x=-6;x<=6;x++) set(x,12,-24,B.WHITE);
 
+  /* ---- 8.10 白色混凝土条带（自定义添加，x:-3，y:12，z:-17 到 -16）---- */
+  for(let z=-17;z<=-16;z++) set(-3,12,z,B.WHITE);
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
