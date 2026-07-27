@@ -1438,6 +1438,9 @@ function generate(){
   /* ---- 8.6 露台南入口旁的白色混凝土小平台（自定义添加，x:-3 到 x:3，y:12，z:16）---- */
   for(let x=-3;x<=3;x++) set(x,12,16,B.WHITE);
 
+  /* ---- 8.7 白色混凝土实心方块（自定义添加，x:-6 到 6，y:12 到 25，z:16 到 24）---- */
+  for(let x=-6;x<=6;x++) for(let y=12;y<=25;y++) for(let z=16;z<=24;z++) set(x,y,z,B.WHITE);
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
