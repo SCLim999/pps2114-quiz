@@ -96,7 +96,11 @@ inner/outer curtain walls to their full original design had left their
 parapet caps sitting a block proud of the terrace wherever the paving was
 dropped (reading like scattered raised grey boxes) — the parapet is now
 dropped to match everywhere, so the terrace is one flat, uniform level
-all the way around. A wide
+all the way around. A steel safety fence now runs the full loop on both
+the inner (courtyard-facing) and outer edges of the terrace, with
+deliberate gaps at every door and junction (the stair tower, the
+skybridge's side door, the VITROX atrium connection, and around Kumar)
+so a full lap is still walkable. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
