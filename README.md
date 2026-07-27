@@ -87,7 +87,8 @@ fragments trap the gardener NPC standing near the boundary (only the
 southeast stretch facing the courtyard keeps its original paving), that
 boundary is left unguarded (no railing) on purpose, so players can walk a
 full lap around the ring's ground floor, 2nd floor, and terrace without
-anything blocking the loop. A wide
+anything blocking the loop; a small leftover wall fragment facing the
+courtyard along the ViTrox Gallery stretch was cleared too. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
