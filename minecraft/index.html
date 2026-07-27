@@ -1021,6 +1021,8 @@ function generate(){
       set(x,y,-26,B.AIR); set(x,y,-25,B.AIR);   // 接实验楼南墙
       set(x,y,-3,B.AIR);  set(x,y,-2,B.AIR);    // 接庭院楼梯塔北墙
     }
+  // 连廊三楼东侧再开一道门，直通环形楼屋顶露台，不必绕到楼梯塔
+  for(let z=-14;z<=-10;z++) for(let y=12;y<=14;y++) set(-17,y,z,B.AIR);
   // 实验楼各层：ViTrox 检测设备产线（TR3000i / TH 系列 / V510），每层一排四台
   for(const [fy,mz] of [[4,-43],[8,-33],[12,-43],[16,-33]]){
     for(const mxc of [-30.5,-25.5,-20.5,-15.5]){
