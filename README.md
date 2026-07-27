@@ -105,7 +105,12 @@ it forms one unbroken loop, with gaps only at the stair tower, the
 skybridge's side door, the VITROX atrium connection, and around Kumar —
 the stair tower and VITROX atrium gaps were originally several blocks
 wider than the actual doorway, since tightened to match the real door
-width exactly. The four-storey skybridge used to open a
+width exactly, and the fence's outer ring was originally only excluded
+from the width of those two doors, so the rest of it cut straight
+through the skybridge corridor and the VITROX building's interior,
+leaving stray fence segments floating inside both — now excluded from
+each building's full footprint instead, so the fence no longer clips
+through walls. The four-storey skybridge used to open a
 door into the tower on its top floor too, but the tower doesn't reach
 that high — there was nothing on the other side — so that floor now
 dead-ends at the skybridge's own solid glass wall instead, connecting to
