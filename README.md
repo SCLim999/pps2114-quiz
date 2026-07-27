@@ -99,10 +99,11 @@ dropped to match everywhere, so the terrace is one flat, uniform level
 all the way around. A steel safety fence now runs the full loop on both
 the inner (courtyard-facing) and outer edges of the terrace — placed by
 stepping through angles directly rather than filtering the block grid by
-radius, so the ring has no stray gaps — with deliberate openings only at
-every real door and junction (the stair tower, the skybridge's side door,
-the VITROX atrium connection, and around Kumar) so a full lap is still
-walkable. A wide
+radius, with corner blocks bridging the diagonal jumps and the fence
+built two blocks thick so it reads as one solid band instead of a dashed
+line — with deliberate openings only at every real door and junction (the
+stair tower, the skybridge's side door, the VITROX atrium connection, and
+around Kumar) so a full lap is still walkable. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.

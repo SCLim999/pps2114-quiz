@@ -974,14 +974,22 @@ function generate(){
       (x>=-18&&x<=-16&&z>=-15&&z<=-9) || // 连廊东侧门
       (x>=18&&x<=23&&z>=-6&&z<=6) ||     // 与 VITROX 招牌大楼中庭的连接
       (x>=13&&x<=18&&z>=-15&&z<=-11);    // Kumar 附近留空
-    for(let deg=0; deg<360; deg++){
-      const a = deg;
+    const prevCell = {};
+    for(let deg=0; deg<=360; deg++){
+      const a = deg%360;
       const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);
-      if(entrance) continue;
-      const rad = deg*Math.PI/180;
-      for(const rr of [18, 23.5]){
+      const rad = a*Math.PI/180;
+      for(const rr of [17.7, 18.3, 23.2, 23.8]){  // 内外两侧各用两圈半径，让围栏有两格厚，看起来是实心的一整条
+        if(entrance){ prevCell[rr]=null; continue; }
         const x = Math.round(rr*Math.cos(rad)-0.5), z = Math.round(rr*Math.sin(rad)-0.5);
-        if(!nearJunction(x,z)) set(x,12,z,B.STEEL);
+        if(!nearJunction(x,z)){
+          set(x,12,z,B.STEEL);
+          const prev = prevCell[rr];
+          if(prev && prev.x!==x && prev.z!==z && !nearJunction(prev.x,z)){
+            set(prev.x,12,z,B.STEEL);           // 补上对角跳跃之间的转角方块，避免出现斜角缺口
+          }
+          prevCell[rr] = {x,z};
+        }else prevCell[rr]=null;
       }
     }
   }
