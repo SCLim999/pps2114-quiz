@@ -966,16 +966,22 @@ function generate(){
       // 屋顶露台（统一铺装地砖，不再穿插绿植方块；楼梯塔两侧及东北侧按要求清除铺装）
       if(r>=18.5&&r<=23 && !entrance && !clearedArc) set(x,12,z, B.TILE);
     }
-    // 屋顶露台内外两侧安全围栏（在门洞/连接处留出缺口，四处无门入口本身也不设围栏）
-    if(!entrance){
-      const nearJunction =
-        (x>=-23&&x<=-13&&z>=-6&&z<=6) ||   // 庭院楼梯塔与南北门洞
-        (x>=-18&&x<=-16&&z>=-15&&z<=-9) || // 连廊东侧门
-        (x>=18&&x<=23&&z>=-6&&z<=6) ||     // 与 VITROX 招牌大楼中庭的连接
-        (x>=13&&x<=18&&z>=-15&&z<=-11);    // Kumar 附近留空
-      if(!nearJunction){
-        if(r>=17.3&&r<=18.3) set(x,12,z,B.STEEL);   // 内侧围栏（朝庭院）
-        if(r>=23&&r<=24) set(x,12,z,B.STEEL);        // 外侧围栏（朝外墙）
+  }
+  // 屋顶露台内外两侧安全围栏：按角度逐格放置（而非按半径筛选网格），确保围栏连续不留缝隙
+  {
+    const nearJunction = (x,z) =>
+      (x>=-23&&x<=-13&&z>=-6&&z<=6) ||   // 庭院楼梯塔与南北门洞
+      (x>=-18&&x<=-16&&z>=-15&&z<=-9) || // 连廊东侧门
+      (x>=18&&x<=23&&z>=-6&&z<=6) ||     // 与 VITROX 招牌大楼中庭的连接
+      (x>=13&&x<=18&&z>=-15&&z<=-11);    // Kumar 附近留空
+    for(let deg=0; deg<360; deg++){
+      const a = deg;
+      const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);
+      if(entrance) continue;
+      const rad = deg*Math.PI/180;
+      for(const rr of [18, 23.5]){
+        const x = Math.round(rr*Math.cos(rad)-0.5), z = Math.round(rr*Math.sin(rad)-0.5);
+        if(!nearJunction(x,z)) set(x,12,z,B.STEEL);
       }
     }
   }
