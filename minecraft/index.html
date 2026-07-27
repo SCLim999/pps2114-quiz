@@ -1407,35 +1407,6 @@ function generate(){
   /* ---- 8. 教育信息点（金色方块）---- */
   for(const p of INFO_POINTS) set(p.x,p.y,p.z,B.INFO);
 
-  /* ---- 8.5 屋顶露台内外两侧安全围栏（放在最后，避免被后建的实验楼/连廊/中庭等墙体覆盖掉） ---- */
-  {
-    const nearJunction = (x,z) =>
-      (x>=-23&&x<=-13&&z>=-6&&z<=6) ||   // 庭院楼梯塔与南北门洞
-      (x>=-18&&x<=-16&&z>=-15&&z<=-9) || // 连廊东侧门
-      (x>=18&&x<=23&&z>=-6&&z<=6) ||     // 与 VITROX 招牌大楼中庭的连接
-      (x>=13&&x<=18&&z>=-15&&z<=-11);    // Kumar 附近留空
-    const prevCell = {};
-    for(let deg=0; deg<=360; deg++){
-      const a = deg%360;
-      const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);
-      const rad = a*Math.PI/180;
-      for(const rr of [16.7, 17.3, 24.2, 24.8]){  // 内外两侧各用两圈半径，让围栏有两格厚，看起来是实心的一整条（随走廊加宽同步外移）
-        if(entrance){ prevCell[rr]=null; continue; }
-        const x = Math.round(rr*Math.cos(rad)-0.5), z = Math.round(rr*Math.sin(rad)-0.5);
-        if(!nearJunction(x,z)){
-          set(x,12,z,B.STEEL);
-          const prev = prevCell[rr];
-          if(prev && prev.x!==x && prev.z!==z){
-            // 补上对角跳跃之间的转角方块，避免出现斜角缺口（两个端点本身都已确认不在门洞缓冲区内，转角块本身不影响任何门洞通行）
-            set(prev.x,12,z,B.STEEL);
-            set(x,12,prev.z,B.STEEL);
-          }
-          prevCell[rr] = {x,z};
-        }else prevCell[rr]=null;
-      }
-    }
-  }
-
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
