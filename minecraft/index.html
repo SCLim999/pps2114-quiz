@@ -989,9 +989,9 @@ function generate(){
     for(const zf of [Z0,Z1])
       for(const [y0,y1] of [[4,5],[8,9]])
         for(let x=-20;x<=-18;x++) for(let y=y0;y<=y1;y++) set(x,y,zf,B.AIR);
-    // 南北面：屋顶花园出口（并清出门前的绿植）
-    for(const zf of [Z0,Z1]) for(let x=-21;x<=-19;x++){
-      for(let y=12;y<=13;y++) set(x,y,zf,B.AIR);
+    // 南北面：屋顶花园出口（加宽到与四层连廊同宽，并清出门前的绿植）
+    for(const zf of [Z0,Z1]) for(let x=-21;x<=-17;x++){
+      for(let y=12;y<=14;y++) set(x,y,zf,B.AIR);
       set(x,12, zf>0?3:-3, B.AIR);
     }
     // 两段折返楼梯（浅灰踏步）+ 层间平台

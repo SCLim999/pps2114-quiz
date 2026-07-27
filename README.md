@@ -85,7 +85,11 @@ northeast, dropping down to the slab below in those spots (only the
 southeast stretch facing the courtyard keeps its original paving). The
 ring's inner glass curtain wall is back to its original, fully continuous
 design (the gardener NPC Kumar was moved off the wall's boundary onto open
-terrace so he's no longer boxed in). A wide
+terrace so he's no longer boxed in). The stair tower's own roof-level
+doorways (north and south) used to be only 3 blocks wide, narrower than
+the skybridge itself, making the tower feel like a wall blocking the
+terrace walkway — both were widened to match the skybridge's 5-block
+width. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
