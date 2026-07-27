@@ -98,7 +98,12 @@ dropped (reading like scattered raised grey boxes) — the parapet is now
 dropped to match everywhere, so the terrace is one flat, uniform level
 all the way around. The terrace's ring corridor was later widened by
 another full block on both the inner and outer sides, with the entrance's
-2nd-floor skybridge moved out to match. The four-storey skybridge used to open a
+2nd-floor skybridge moved out to match. A thin, single-block steel
+safety fence now runs both the inner and outer edges of the terrace,
+placed by stepping through angles and bridging the diagonal corners so
+it forms one unbroken loop, with gaps only at the stair tower, the
+skybridge's side door, the VITROX atrium connection, and around Kumar.
+The four-storey skybridge used to open a
 door into the tower on its top floor too, but the tower doesn't reach
 that high — there was nothing on the other side — so that floor now
 dead-ends at the skybridge's own solid glass wall instead, connecting to
