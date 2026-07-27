@@ -102,8 +102,10 @@ another full block on both the inner and outer sides, with the entrance's
 safety fence now runs both the inner and outer edges of the terrace,
 placed by stepping through angles and bridging the diagonal corners so
 it forms one unbroken loop, with gaps only at the stair tower, the
-skybridge's side door, the VITROX atrium connection, and around Kumar.
-The four-storey skybridge used to open a
+skybridge's side door, the VITROX atrium connection, and around Kumar —
+the stair tower and VITROX atrium gaps were originally several blocks
+wider than the actual doorway, since tightened to match the real door
+width exactly. The four-storey skybridge used to open a
 door into the tower on its top floor too, but the tower doesn't reach
 that high — there was nothing on the other side — so that floor now
 dead-ends at the skybridge's own solid glass wall instead, connecting to
