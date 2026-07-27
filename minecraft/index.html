@@ -936,7 +936,7 @@ function generate(){
   for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
     const cx=x+0.5, cz=z+0.5;
     const r = Math.hypot(cx,cz);
-    if(r<17||r>24.5) continue;
+    if(r<16||r>25.5) continue;
     const a = (Math.atan2(cz,cx)*180/Math.PI+360)%360;
     const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);  // 东南西北四面无门入口
     set(x,3,z,B.TILE);
@@ -947,7 +947,7 @@ function generate(){
     }
     // 屋顶露台铺装已按需求清除到整圈都统一低一级，内外两侧幕墙的女儿墙也一并降到与露台齐平，不再留任何锯齿状台阶
     const clearedArc = true;
-    const inner = r<18, outer = r>23.5;
+    const inner = r<17, outer = r>24.5;   // 顶楼环形走廊再加宽一整圈（内外各多让出一格）
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
       for(let y=4;y<11;y++){
@@ -1100,11 +1100,11 @@ function generate(){
     }
     for(let x=-7;x<=8;x++) for(let z=16;z<=25;z++){         // 连桥横跨入口门厅（加宽版）
       const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
-      if(r<18||r>24) continue;
+      if(r<17||r>25) continue;
       const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
       if(Math.abs(angDiff(a,90))>13) continue;
       set(x,7,z,B.WHITE);                                   // 桥面（与二楼楼板齐平）
-      if(r<18.7||r>23.3){
+      if(r<17.7||r>24.3){
         set(x,8,z,B.GLASS);                                 // 玻璃栏板
         if(x%2===0) set(x,6,z,B.LEAF);                      // 垂吊绿植
       }
@@ -1135,7 +1135,7 @@ function generate(){
     const cx=x+0.5, cz=z+0.5;
     const r=Math.hypot(cx,cz);
     const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
-    if(r>24.5&&r<=29 && Math.abs(angDiff(a,90))<14 && get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
+    if(r>25.5&&r<=30 && Math.abs(angDiff(a,90))<14 && get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
   }
   for(let z=24;z<=60;z++) for(let x=-2;x<=2;x++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
   for(let x=-26;x<=-20;x++) for(let z=-25;z<=-22;z++) if(get(x,3,z)===B.GRASS) set(x,3,z,B.PATH);
@@ -1419,7 +1419,7 @@ function generate(){
       const a = deg%360;
       const entrance = RING_ENTRANCES.some(ea=>Math.abs(angDiff(a,ea))<12);
       const rad = a*Math.PI/180;
-      for(const rr of [17.7, 18.3, 23.2, 23.8]){  // 内外两侧各用两圈半径，让围栏有两格厚，看起来是实心的一整条
+      for(const rr of [16.7, 17.3, 24.2, 24.8]){  // 内外两侧各用两圈半径，让围栏有两格厚，看起来是实心的一整条（随走廊加宽同步外移）
         if(entrance){ prevCell[rr]=null; continue; }
         const x = Math.round(rr*Math.cos(rad)-0.5), z = Math.round(rr*Math.sin(rad)-0.5);
         if(!nearJunction(x,z)){
@@ -3783,7 +3783,7 @@ function drawMinimap(){
   mmCtx.fillStyle='rgba(15,22,34,.55)'; mmCtx.fillRect(0,0,W,H);
   mmCtx.strokeStyle='rgba(255,255,255,.3)'; mmCtx.lineWidth=1;
   mmCtx.beginPath();                                        // 中央圆形庭院，作为方位参照
-  mmCtx.ellipse(mmX(0),mmZ(0),24.5*MM_SX,24.5*MM_SZ,0,0,Math.PI*2);
+  mmCtx.ellipse(mmX(0),mmZ(0),25.5*MM_SX,25.5*MM_SZ,0,0,Math.PI*2);
   mmCtx.stroke();
   npcObjs.forEach(o=>{                                      // NPC：浅蓝小点
     mmCtx.fillStyle='rgba(120,190,255,.85)';

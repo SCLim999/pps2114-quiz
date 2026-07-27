@@ -106,7 +106,10 @@ since building it earlier meant the lab building, skybridge, and VITROX
 atrium (built afterward) were silently overwriting parts of it — with
 deliberate openings only at every real door and junction (the stair
 tower, the skybridge's side door, the VITROX atrium connection, and
-around Kumar) so a full lap is still walkable. A wide
+around Kumar) so a full lap is still walkable. The terrace's ring
+corridor was later widened by another full block on both the inner and
+outer sides, with the entrance's 2nd-floor skybridge and both fences
+moved out to match. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
