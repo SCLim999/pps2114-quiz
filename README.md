@@ -101,8 +101,11 @@ the inner (courtyard-facing) and outer edges of the terrace — placed by
 stepping through angles directly rather than filtering the block grid by
 radius, with corner blocks bridging the diagonal jumps and the fence
 built two blocks thick so it reads as one solid band instead of a dashed
-line — with deliberate openings only at every real door and junction (the
-stair tower, the skybridge's side door, the VITROX atrium connection, and
+line. It's also generated as the very last step of world-building now,
+since building it earlier meant the lab building, skybridge, and VITROX
+atrium (built afterward) were silently overwriting parts of it — with
+deliberate openings only at every real door and junction (the stair
+tower, the skybridge's side door, the VITROX atrium connection, and
 around Kumar) so a full lap is still walkable. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
