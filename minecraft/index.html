@@ -1019,7 +1019,7 @@ function generate(){
   for(const [y0,y1] of [[4,6],[8,10],[12,14],[16,18]])
     for(let x=-21;x<=-17;x++) for(let y=y0;y<=y1;y++){
       set(x,y,-26,B.AIR); set(x,y,-25,B.AIR);   // 接实验楼南墙
-      set(x,y,-3,B.AIR);  set(x,y,-2,B.AIR);    // 接庭院楼梯塔北墙
+      if(y1<18){ set(x,y,-3,B.AIR); set(x,y,-2,B.AIR); }   // 接庭院楼梯塔北墙（四楼塔身已到顶、没有房间可去，这一侧不开门，塔墙做成完整一圈）
     }
   // 连廊三楼东侧再开一道门，直通环形楼屋顶露台，不必绕到楼梯塔
   for(let z=-14;z<=-10;z++) for(let y=12;y<=14;y++) set(-17,y,z,B.AIR);

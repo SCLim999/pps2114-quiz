@@ -112,7 +112,11 @@ outer sides, with the entrance's 2nd-floor skybridge and both fences
 moved out to match. One last single-cell gap at a diagonal turn was
 patched too, so apart from the deliberate openings at the stair tower,
 skybridge door, VITROX atrium connection, and Kumar's area, the fence is
-now a completely unbroken loop. A wide
+now a completely unbroken loop. The four-storey skybridge used to open a
+door into the tower on its top floor too, but the tower doesn't reach
+that high — there was nothing on the other side — so that floor now
+dead-ends at the skybridge's own solid glass wall instead, connecting to
+the lab building only. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
