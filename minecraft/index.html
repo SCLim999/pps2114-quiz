@@ -945,9 +945,9 @@ function generate(){
       if(entrance && fy<=7) continue;       // 入口全高开洞，屋面板保留为门洞顶
       set(x,fy,z,B.WHITE);
     }
-    // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（该范围内不建内侧玻璃幕墙，避免在弧形边界上留下卡住 NPC 的锯齿状墙体碎块）
+    // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（屋顶露台铺装清除范围；内侧玻璃幕墙恢复为原设计，每一段都完整建墙）
     const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,349))<=99;
-    const inner = r<18 && !clearedArc, outer = r>23.5;
+    const inner = r<18, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片
       for(let y=4;y<11;y++){
@@ -3243,7 +3243,7 @@ const NPCS = [
       zh:'我是这里的视觉检测工程师。最喜欢午休时来庭院走走——不管从哪栋楼出来，放射状的走道都会把你带到这片草坪。待会儿我要去主楼的食堂吃饭，你也来吗？',
       en:'I am a machine-vision engineer here. I love walking in the courtyard at lunch — whichever building you leave, the radial walkways bring you to this lawn. I am heading to the canteen in the main building later, want to come along?',
       ms:'Saya jurutera penglihatan mesin di sini. Saya suka berjalan di laman pada waktu rehat — dari bangunan mana pun anda keluar, laluan jejari akan membawa anda ke padang ini. Nanti saya ke kantin di bangunan utama, nak ikut?' } },
-  { name:'Kumar', color:0x3e7d3a, expr:'happy', x:13.5, y:12, z:-12.5,
+  { name:'Kumar', color:0x3e7d3a, expr:'happy', x:15.5, y:12, z:-13.5,
     role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
     dialog:{
       zh:'屋顶露台上的盆栽都是我照顾的！绿色屋顶能隔热、留住雨水，减少空调能耗。你是从庭院那座深灰色楼梯塔爬上来的吧？风景不错吧！',

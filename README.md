@@ -81,14 +81,11 @@ on every floor from the 1st floor up through the roof terrace, and the radial
 support columns that used to stand in the middle of the 1st/2nd-floor walkway
 were removed so the corridor is unobstructed. The roof terrace's paving was
 also cleared across a wide band from the stair tower around to the
-northeast, dropping down to the slab below in those spots, with the inner
-glass wall opened up across that same stretch too so no jagged wall
-fragments trap the gardener NPC standing near the boundary (only the
-southeast stretch facing the courtyard keeps its original paving), that
-boundary is left unguarded (no railing) on purpose, so players can walk a
-full lap around the ring's ground floor, 2nd floor, and terrace without
-anything blocking the loop; a small leftover wall fragment facing the
-courtyard along the ViTrox Gallery stretch was cleared too. A wide
+northeast, dropping down to the slab below in those spots (only the
+southeast stretch facing the courtyard keeps its original paving). The
+ring's inner glass curtain wall is back to its original, fully continuous
+design (the gardener NPC Kumar was moved off the wall's boundary onto open
+terrace so he's no longer boxed in). A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
