@@ -946,7 +946,7 @@ function generate(){
       set(x,fy,z,B.WHITE);
     }
     // 楼梯塔两侧及东北侧按要求清除铺装的角度范围（屋顶露台铺装清除范围；内侧玻璃幕墙恢复为原设计，每一段都完整建墙）
-    const clearedArc = Math.abs(angDiff(a,205))<=55 || Math.abs(angDiff(a,349))<=99;
+    const clearedArc = Math.abs(angDiff(a,205))<=75 || Math.abs(angDiff(a,349))<=99;
     const inner = r<18, outer = r>23.5;
     if(outer){
       const fin = Math.abs(angDiff(a, Math.round(a/10)*10))<1.25;  // 竖向遮阳鳍片

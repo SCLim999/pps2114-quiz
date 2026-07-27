@@ -91,7 +91,10 @@ the skybridge itself, making the tower feel like a wall blocking the
 terrace walkway — both were widened to match the skybridge's 5-block
 width, and a second door was cut straight through the skybridge's own side
 wall partway along, opening directly onto the ring's terrace so players
-don't have to walk all the way to the tower. A wide
+don't have to walk all the way to the tower. The boundary between the
+cleared terrace paving and the untouched southeast stretch used to
+alternate height block-by-block (reading, from a distance, like a raised
+grey box sitting in the path) — widened to smooth that transition out. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
