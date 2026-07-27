@@ -1425,8 +1425,10 @@ function generate(){
         if(!nearJunction(x,z)){
           set(x,12,z,B.STEEL);
           const prev = prevCell[rr];
-          if(prev && prev.x!==x && prev.z!==z && !nearJunction(prev.x,z)){
-            set(prev.x,12,z,B.STEEL);           // 补上对角跳跃之间的转角方块，避免出现斜角缺口
+          if(prev && prev.x!==x && prev.z!==z){
+            // 补上对角跳跃之间的转角方块，避免出现斜角缺口（两个端点本身都已确认不在门洞缓冲区内，转角块本身不影响任何门洞通行）
+            set(prev.x,12,z,B.STEEL);
+            set(x,12,prev.z,B.STEEL);
           }
           prevCell[rr] = {x,z};
         }else prevCell[rr]=null;

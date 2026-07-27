@@ -109,7 +109,10 @@ tower, the skybridge's side door, the VITROX atrium connection, and
 around Kumar) so a full lap is still walkable. The terrace's ring
 corridor was later widened by another full block on both the inner and
 outer sides, with the entrance's 2nd-floor skybridge and both fences
-moved out to match. A wide
+moved out to match. One last single-cell gap at a diagonal turn was
+patched too, so apart from the deliberate openings at the stair tower,
+skybridge door, VITROX atrium connection, and Kumar's area, the fence is
+now a completely unbroken loop. A wide
 four-storey glass skybridge also connects the ring building's stair tower
 straight to the lab building (the one full of ViTrox inspection machines),
 with an opening at every one of the lab's four floors.
