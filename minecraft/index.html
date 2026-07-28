@@ -1927,45 +1927,6 @@ function buildIactgLabels(){                          // I.A.C.T.G. 柱列的浮
   });
 }
 
-function buildPufferfish(){                           // Campus 3.0 鱼池里的河豚（自定义添加，参照 Minecraft 河豚造型：圆滚滚身体+黑白大眼+白色尖刺）
-  const bodyMat  = new THREE.MeshBasicMaterial({color:0xd9b968});
-  const spotMat  = new THREE.MeshBasicMaterial({color:0x8a6a2f});
-  const eyeWMat  = new THREE.MeshBasicMaterial({color:0xffffff});
-  const eyeBMat  = new THREE.MeshBasicMaterial({color:0x000000});
-  const spikeMat = new THREE.MeshBasicMaterial({color:0xf3e9c7});
-
-  const fish = new THREE.Group();
-  fish.position.set(110.5, 4.15, -5.5);
-
-  fish.add(new THREE.Mesh(new THREE.SphereGeometry(0.34,10,8), bodyMat));
-
-  for(const [sx,sy,sz] of [[0.2,0.1,0.25],[-0.22,0.05,0.2],[0.05,-0.15,0.28],[-0.1,0.2,-0.22]]){
-    const s = new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6), spotMat);
-    s.position.set(sx,sy,sz); fish.add(s);
-  }
-
-  for(const ex of [-0.14,0.14]){                      // 突出的黑白大眼睛
-    const ew = new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8), eyeWMat);
-    ew.position.set(ex,0.12,0.28); fish.add(ew);
-    const eb = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), eyeBMat);
-    eb.position.set(ex,0.12,0.36); fish.add(eb);
-  }
-
-  const spikeDirs = [                                  // 向外辐射的白色尖刺，营造河豚鼓起的样子
-    [0.3,0.2,0.1],[-0.3,0.2,0.1],[0.1,0.32,-0.15],[-0.1,0.32,-0.15],
-    [0.26,-0.2,-0.15],[-0.26,-0.2,-0.15],[0,0.1,-0.34],[0.22,0,0.24],
-    [-0.22,0,0.24],[0,-0.32,0.1],
-  ];
-  for(const [dx,dy,dz] of spikeDirs){
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.05,0.18,5), spikeMat);
-    cone.position.set(dx*1.05, dy*1.05, dz*1.05);
-    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), new THREE.Vector3(dx,dy,dz).normalize());
-    fish.add(cone);
-  }
-
-  scene.add(fish);
-}
-
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
 const carGroup = new THREE.Group(); scene.add(carGroup);
 const CAR_GEO = {
@@ -3925,7 +3886,6 @@ buildCarMeshes();
 buildCMBoard();
 buildDiplomaKiosks();
 buildIactgLabels();
-buildPufferfish();
 respawn();
 
 const posEl=document.getElementById('pos');
