@@ -1488,6 +1488,9 @@ function generate(){
     [0,1,B.YELLOW],
   ]) set(-15+dx,15,14+dz,block);
 
+  /* ---- 8.18 白色混凝土实心方块（自定义添加，x:16，y:7 到 8，z:-4 到 4）---- */
+  for(let y=7;y<=8;y++) for(let z=-4;z<=4;z++) set(16,y,z,B.WHITE);
+
   /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 5 棵，每棵间隔 72°） ---- */
   for(let k=0;k<5;k++){
     const a = (22.5 + k*72) * Math.PI/180;
