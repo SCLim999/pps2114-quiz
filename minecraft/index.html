@@ -2249,11 +2249,36 @@ const CODINGMINE = {
    木柱 + 木箱 + 图标牌），散布在建筑内部、彼此拉开距离，也远离 Dr Janaka Low；每台介绍一个不同的真实文凭/学士课程。
    Cindy（市场专员）就在这层楼附近走动，介绍这几台信息机 */
 const IACTG_PILLARS = [                              // ViTrox 核心价值观 I.A.C.T.G.（参照官网 core-values 页面）
-  { x:-7, z:28, label:'I · Integrity' },
-  { x:-7, z:30, label:'A · Accountability' },
-  { x:-7, z:32, label:'C · Courage' },
-  { x:-7, z:34, label:'T · Trust & Respect' },
-  { x:-7, z:36, label:'G · Gratitude & Care' },
+  { x:-7, z:28, floorY:4, label:'I · Integrity',
+    title:{ zh:'I · 诚信 Integrity', en:'I · Integrity', ms:'I · Integriti' },
+    text:{
+      zh:'诚信（Integrity）代表真诚、正直、忠实与诚实。在 ViTrox，诚信就是即使没有人看着，也要做对的事。',
+      en:'Integrity means Sincerity, Righteousness, Faithfulness and Honesty. At ViTrox, it is about doing the right thing — even when nobody is watching.',
+      ms:'Integriti bermaksud Ketulusan, Kebenaran, Kesetiaan dan Kejujuran. Di ViTrox, integriti bermakna melakukan perkara yang betul — walaupun tiada sesiapa yang melihat.' } },
+  { x:-7, z:30, floorY:4, label:'A · Accountability',
+    title:{ zh:'A · 责任感 Accountability', en:'A · Accountability', ms:'A · Akauntabiliti' },
+    text:{
+      zh:'责任感（Accountability）是对自己承诺去做对的事，并且为自己的决定负责。正是这份责任感，让 ViTrox 成为客户与伙伴都信赖的公司。',
+      en:'Accountability is the self-commitment to do the right thing and stand by the decision. It is what makes ViTrox a credible company that customers and stakeholders can trust.',
+      ms:'Akauntabiliti ialah komitmen sendiri untuk melakukan perkara yang betul dan mempertahankan keputusan tersebut. Inilah yang menjadikan ViTrox syarikat yang boleh dipercayai oleh pelanggan dan pihak berkepentingan.' } },
+  { x:-7, z:32, floorY:4, label:'C · Courage',
+    title:{ zh:'C · 勇气 Courage', en:'C · Courage', ms:'C · Keberanian' },
+    text:{
+      zh:'勇气（Courage）是面对困难、克服挑战的力量。ViTrox 人敢于挑战现状、勇于求变，也敢于跳出框架思考。',
+      en:'Courage is the strength to face and overcome difficulties. ViTroxians are willing to challenge the status quo, make changes for the better, and think out of the box.',
+      ms:'Keberanian ialah kekuatan untuk menghadapi dan mengatasi kesukaran. Warga ViTrox berani mencabar status quo, membuat perubahan ke arah lebih baik, dan berfikir di luar kotak.' } },
+  { x:-7, z:34, floorY:4, label:'T · Trust & Respect',
+    title:{ zh:'T · 信任与尊重 Trust & Respect', en:'T · Trust & Respect', ms:'T · Kepercayaan & Hormat' },
+    text:{
+      zh:'ViTrox 提倡开放坦诚的沟通，也对客户、伙伴、供应商与社区给予尊重——把每个人当作独立的个体看待，并欣赏他们各自独特的才华。',
+      en:'ViTrox communicates openly and candidly, and extends respect to customers, partners, suppliers and communities — treating everyone as an individual and recognising their unique talents.',
+      ms:'ViTrox berkomunikasi secara terbuka dan jujur, serta memberi penghormatan kepada pelanggan, rakan kongsi, pembekal dan komuniti — melayan setiap orang sebagai individu dan menghargai bakat unik mereka.' } },
+  { x:-7, z:36, floorY:4, label:'G · Gratitude & Care',
+    title:{ zh:'G · 感恩与关怀 Gratitude & Care', en:'G · Gratitude & Care', ms:'G · Kesyukuran & Keprihatinan' },
+    text:{
+      zh:'感恩之心让我们以更积极的态度看待生活。ViTrox 每天都感激客户、同事、供应商与社区的支持，并以关怀之心服务大家——「我可以帮上什么忙？」是这里最常说的一句话。',
+      en:"Gratitude gives us a positive view of life. ViTrox feels grateful every day for the support of customers, colleagues, suppliers and communities — and serves them with a caring heart. 'How can I help?' is the common language here.",
+      ms:"Rasa syukur memberi kita pandangan positif terhadap kehidupan. ViTrox berasa bersyukur setiap hari atas sokongan pelanggan, rakan sekerja, pembekal dan komuniti — dan melayan mereka dengan hati yang prihatin. 'Bagaimana saya boleh membantu?' ialah bahasa biasa di sini." } },
 ];
 
 const DIPLOMA_KIOSKS = [
@@ -2827,6 +2852,19 @@ function openDiplomaKiosk(i){
   if(ttsAuto) speakText(currentSpeech, currentGender);
   blip(660,0.12);
 }
+function openIactgPillar(i){
+  const p=IACTG_PILLARS[i];
+  document.getElementById('modal-title').textContent = p.title[lang];
+  document.getElementById('modal-en').textContent = (lang==='en') ? p.title.ms : p.title.en;
+  document.getElementById('modal-text').textContent = p.text[lang];
+  setupModalAnim(null);
+  modalEl.classList.remove('hidden');
+  modalOpen=true;
+  currentSpeech = p.title[lang] + '. ' + p.text[lang];
+  currentGender = ttsGender;
+  if(ttsAuto) speakText(currentSpeech, currentGender);
+  blip(660,0.12);
+}
 
 /* ---- 对话弹窗里的教学小动画（目前只有 Networking & Internet 一个：数据包往返动画）---- */
 const modalAnimCanvas = document.getElementById('modal-anim');
@@ -2930,9 +2968,9 @@ btnAnimEl.addEventListener('click', toggleModalAnim);
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
 const promptText=document.getElementById('prompt-text');
-let nearInfo=-1, nearNpc=-1, nearCM=-1, nearKiosk=-1;
+let nearInfo=-1, nearNpc=-1, nearCM=-1, nearKiosk=-1, nearPillar=-1;
 function checkInfoProximity(){
-  nearInfo=-1; nearNpc=-1; nearCM=-1; nearKiosk=-1;
+  nearInfo=-1; nearNpc=-1; nearCM=-1; nearKiosk=-1; nearPillar=-1;
   let best=3.8;
   INFO_POINTS.forEach((p,i)=>{
     const d=Math.hypot(p.x+0.5-player.pos.x, p.y-player.pos.y, p.z+0.5-player.pos.z);
@@ -2960,6 +2998,13 @@ function checkInfoProximity(){
       if(d<bestK){ bestK=d; nearKiosk=i; }
     });
   }
+  if(nearInfo<0 && nearNpc<0 && nearCM<0 && nearKiosk<0){
+    let bestP=3.2;
+    IACTG_PILLARS.forEach((p,i)=>{
+      const d=Math.hypot(p.x+0.5-player.pos.x, p.floorY-player.pos.y, p.z+0.5-player.pos.z);
+      if(d<bestP){ bestP=d; nearPillar=i; }
+    });
+  }
   if(modalOpen){ promptEl.style.display='none'; return; }
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
@@ -2976,6 +3021,9 @@ function checkInfoProximity(){
     promptEl.style.display='block';
   }else if(nearKiosk>=0){
     promptText.textContent = ' ' + DIPLOMA_KIOSKS[nearKiosk].title[lang] + t('promptLearn');
+    promptEl.style.display='block';
+  }else if(nearPillar>=0){
+    promptText.textContent = ' ' + IACTG_PILLARS[nearPillar].title[lang] + t('promptLearn');
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -3708,6 +3756,7 @@ document.addEventListener('keydown',e=>{
     if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
     if(playing() && nearCM>=0){ openDataMine(nearCM); return; }
     if(playing() && nearKiosk>=0){ openDiplomaKiosk(nearKiosk); return; }
+    if(playing() && nearPillar>=0){ openIactgPillar(nearPillar); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
     quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return;
@@ -4029,6 +4078,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     else if(nearNpc>=0) openNpc(nearNpc);
     else if(nearCM>=0) openDataMine(nearCM);
     else if(nearKiosk>=0) openDiplomaKiosk(nearKiosk);
+    else if(nearPillar>=0) openIactgPillar(nearPillar);
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
     touchPlay=false;
