@@ -1476,6 +1476,7 @@ function generate(){
 
   /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 8 棵） ---- */
   for(let k=0;k<8;k++){
+    if(k===0||k===3||k===6) continue;   // 移除其中 3 棵（自定义请求），环形松树林由 8 棵减为 5 棵
     const a = (22.5 + k*45) * Math.PI/180;
     const px = Math.round(8*Math.cos(a)-0.5), pz = Math.round(8*Math.sin(a)-0.5);
     placePineTree(px,pz,rand);
