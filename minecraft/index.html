@@ -1474,6 +1474,13 @@ function generate(){
   /* ---- 8.14 环形楼地面层庭院里的松树（自定义添加，靠近 Chu Jenn Weng） ---- */
   placePineTree(5,-5,rand);
 
+  /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 8 棵） ---- */
+  for(let k=0;k<8;k++){
+    const a = (22.5 + k*45) * Math.PI/180;
+    const px = Math.round(8*Math.cos(a)-0.5), pz = Math.round(8*Math.sin(a)-0.5);
+    placePineTree(px,pz,rand);
+  }
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
