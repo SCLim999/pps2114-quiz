@@ -1712,7 +1712,13 @@ function galleryLabel(text){
   const g=c.getContext('2d');
   g.fillStyle='rgba(10,25,50,.88)'; g.fillRect(0,0,512,128);
   g.strokeStyle='#e3b93b'; g.lineWidth=6; g.strokeRect(6,6,500,116);
-  g.fillStyle='#e3b93b'; g.font='bold 46px Georgia,serif';
+  g.fillStyle='#e3b93b';
+  let size=46;
+  while(size>18){
+    g.font='bold '+size+'px Georgia,serif';
+    if(g.measureText(text).width<=470) break;
+    size-=2;
+  }
   g.textAlign='center'; g.textBaseline='middle';
   g.fillText(text,256,68);
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
