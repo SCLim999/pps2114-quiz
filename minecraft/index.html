@@ -3734,7 +3734,8 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   edits.clear();
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   generate(); markAllDirty(); flushDirty(); buildCarMeshes();
-  if(net.mode==='host') broadcast({t:'init', edits:[], names:[...netNames], hostId:net.myId});
+  if(net.mode==='host') broadcast({t:'init', edits:[], names:[...netNames], hostId:net.myId,
+    cmScores:[[net.myId,{score:cmScore,doneCount:cmDone.size}], ...remoteCM] });
   toast(t('resetDone'));
 });
 
