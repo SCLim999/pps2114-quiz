@@ -831,6 +831,21 @@ function placeSakuraTree(x,z,rand){
   }
 }
 
+function placePineTree(x,z,rand){                  // 松树：主干笔直，树冠呈锥形自下而上收窄
+  const h = 6 + Math.floor(rand()*2);
+  for(let y=4;y<4+h;y++) set(x,y,z,B.LOG);
+  const top = 3+h;
+  const rings = [ {y:top-4,r:2}, {y:top-3,r:2}, {y:top-2,r:1}, {y:top-1,r:1} ];
+  for(const {y:yy,r} of rings){
+    for(let dx=-r;dx<=r;dx++) for(let dz=-r;dz<=r;dz++){
+      if(Math.abs(dx)+Math.abs(dz)>r) continue;
+      if(dx===0&&dz===0) continue;
+      if(get(x+dx,yy,z+dz)===B.AIR) set(x+dx,yy,z+dz,B.LEAF);
+    }
+  }
+  set(x,top,z,B.LEAF); set(x,top+1,z,B.LEAF);
+}
+
 function buildSakuraGarden(cx,cz,rand){
   const R=10;
   for(let x=cx-R-1;x<=cx+R+1;x++) for(let z=cz-R-1;z<=cz+R+1;z++){
@@ -1455,6 +1470,9 @@ function generate(){
 
   /* ---- 8.12 白色混凝土小平台（自定义添加，x:16 到 17，y:12，z:-3 到 3）---- */
   for(let x=16;x<=17;x++) for(let z=-3;z<=3;z++) set(x,12,z,B.WHITE);
+
+  /* ---- 8.14 环形楼地面层庭院里的松树（自定义添加，靠近 Chu Jenn Weng） ---- */
+  placePineTree(5,-5,rand);
 
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
