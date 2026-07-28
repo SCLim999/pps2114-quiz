@@ -1777,6 +1777,11 @@ function galleryLabel(text){
   bridgeBanner.scale.set(3.6,0.9,1);
   bridgeBanner.position.set(0.5,9.0,22.6);
   grp.add(bridgeBanner);
+  // 指示牌：告知玩家电脑室在楼上（自定义添加，x:23,y:12,z:3 附近）
+  const compRoomSign=new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel('Computer Room — Next Floor Up')}));
+  compRoomSign.scale.set(3.2,0.8,1);
+  compRoomSign.position.set(23.5,13,3.5);
+  grp.add(compRoomSign);
   // 镇馆之宝：启发 ViTrox 的相机（放在金色信息方块展台上，罩玻璃罩）
   {
     const cam=new THREE.Group();
