@@ -158,7 +158,7 @@ VITROX 招牌大楼**四楼**东半层有**两间电脑室**，共约 20 台电�
 | 讲师 | 教授科目 |
 |---|---|
 | **Ts Dr Lim SC**（Programme Leader） | 软件工程（Software Engineering） |
-| **Ms Syira** | 数据科学（Data Science） |
+| **Ms Syira**（戴头巾的马来穆斯林女性造型） | 数据科学（Data Science） |
 | **Ms Khor JY** | 移动应用开发 · Flutter（Mobile App Dev） |
 | **Mr Eng YK** | 人工智能（Artificial Intelligence） |
 

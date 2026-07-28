@@ -170,7 +170,8 @@ with an opening at every one of the lab's four floors.
   column shows a live leaderboard of every connected player's score. The two
   computer rooms are also staffed by 4 Computing School
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
-  Ms Syira (Data Science), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
+  Ms Syira (Data Science — a Malay Muslim woman, shown wearing a hijab and
+  long dress), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
   (Artificial Intelligence). Two of them have a "▶ Watch teaching animation"
   button in their dialogue: Ms Syira's plays a data packet bouncing between
   a client and a server (Request/Response) for the Networking & Internet
