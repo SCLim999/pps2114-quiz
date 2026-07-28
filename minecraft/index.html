@@ -1456,6 +1456,9 @@ function generate(){
   /* ---- 8.12 白色混凝土小平台（自定义添加，x:16 到 17，y:12，z:-3 到 3）---- */
   for(let x=16;x<=17;x++) for(let z=-3;z<=3;z++) set(x,12,z,B.WHITE);
 
+  /* ---- 8.13 环形楼屋顶露台走廊上的花盆绿植（自定义添加）---- */
+  set(-15,12,14,B.WHITE); set(-15,13,14,B.LEAF); set(-15,14,14,B.LEAF);
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
