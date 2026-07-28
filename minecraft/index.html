@@ -1450,6 +1450,9 @@ function generate(){
   /* ---- 8.10 白色混凝土条带（自定义添加，x:-3，y:12，z:-17 到 -16）---- */
   for(let z=-17;z<=-16;z++) set(-3,12,z,B.WHITE);
 
+  /* ---- 8.11 白色混凝土小平台（自定义添加，x:-2 到 2，y:12，z:-17 到 -16）---- */
+  for(let x=-2;x<=2;x++) for(let z=-17;z<=-16;z++) set(x,12,z,B.WHITE);
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
