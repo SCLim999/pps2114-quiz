@@ -831,8 +831,8 @@ function placeSakuraTree(x,z,rand){
   }
 }
 
-function placePineTree(x,z,rand){                  // 松树：主干笔直，树冠呈锥形自下而上收窄
-  const h = 6 + Math.floor(rand()*2);
+function placePineTree(x,z,rand,baseH=6){          // 松树：主干笔直，树冠呈锥形自下而上收窄
+  const h = baseH + Math.floor(rand()*2);
   for(let y=4;y<4+h;y++) set(x,y,z,B.LOG);
   const top = 3+h;
   const rings = [ {y:top-4,r:2}, {y:top-3,r:2}, {y:top-2,r:1}, {y:top-1,r:1} ];
@@ -1472,7 +1472,7 @@ function generate(){
   for(let x=16;x<=17;x++) for(let z=-3;z<=3;z++) set(x,12,z,B.WHITE);
 
   /* ---- 8.14 环形楼地面层庭院里的松树（自定义添加，靠近 Chu Jenn Weng） ---- */
-  placePineTree(5,-5,rand);
+  placePineTree(5,-5,rand,4);
 
   /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 8 棵） ---- */
   for(let k=0;k<8;k++){
