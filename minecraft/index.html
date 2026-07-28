@@ -1481,6 +1481,12 @@ function generate(){
     placePineTree(px,pz,rand);
   }
 
+  /* ---- 8.16 正门入口左侧的 I.A.C.T.G. 核心价值观柱列（自定义添加） ---- */
+  for(const p of IACTG_PILLARS){
+    for(let y=4;y<=6;y++) set(p.x,y,p.z,B.STONE);
+    set(p.x,7,p.z,B.BLUE);
+  }
+
   /* ---- 9. 应用玩家已保存的改动 ---- */
   for(const [k,t] of edits){
     const [x,y,z] = k.split(',').map(Number);
@@ -1911,6 +1917,15 @@ function refreshCMTerminalTags(){
     st._tag.material.needsUpdate = true;
   });
 }
+function buildIactgLabels(){                          // I.A.C.T.G. 柱列的浮空文字牌
+  const grp = new THREE.Group(); scene.add(grp);
+  IACTG_PILLARS.forEach(p=>{
+    const lbl = new THREE.Sprite(new THREE.SpriteMaterial({map:galleryLabel(p.label)}));
+    lbl.scale.set(2.4,0.6,1);
+    lbl.position.set(p.x+0.5, 8.6, p.z+0.5);
+    grp.add(lbl);
+  });
+}
 
 /* ---- 车辆 3D 模型（Mod 风格：圆柱车轮、玻璃座舱、车灯、格栅、保险杠）---- */
 const carGroup = new THREE.Group(); scene.add(carGroup);
@@ -2233,6 +2248,14 @@ const CODINGMINE = {
 /* ViTrox Education 学院大楼底层（架空柱廊广场）里的 5 台木箱造型站立信息机（仿 Minecraft mailbox 设计：
    木柱 + 木箱 + 图标牌），散布在建筑内部、彼此拉开距离，也远离 Dr Janaka Low；每台介绍一个不同的真实文凭/学士课程。
    Cindy（市场专员）就在这层楼附近走动，介绍这几台信息机 */
+const IACTG_PILLARS = [                              // ViTrox 核心价值观 I.A.C.T.G.（参照官网 core-values 页面）
+  { x:-7, z:28, label:'I · Integrity' },
+  { x:-7, z:30, label:'A · Accountability' },
+  { x:-7, z:32, label:'C · Courage' },
+  { x:-7, z:34, label:'T · Trust & Respect' },
+  { x:-7, z:36, label:'G · Gratitude & Care' },
+];
+
 const DIPLOMA_KIOSKS = [
   // —— 文凭课程（Diploma）分为一组：占用前 4 个位置 ——
   { id:'dk1', x:161, z:-10, floorY:4, icon:'💻', iconBg:'#2f6fe0',
@@ -3812,6 +3835,7 @@ flushDirty();
 buildCarMeshes();
 buildCMBoard();
 buildDiplomaKiosks();
+buildIactgLabels();
 respawn();
 
 const posEl=document.getElementById('pos');
