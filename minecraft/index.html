@@ -1735,7 +1735,14 @@ function generate(){
   /* ---- 8.47 电脑室 2（另一侧）新增一台专用电脑，用来清空 DataMine 分数（深红色屏幕区别于其他电脑） ---- */
   placeComputer(CM_RESET_TERMINAL.x, CM_RESET_TERMINAL.z, CM_RESET_TERMINAL.facing, CM_RESET_TERMINAL.floorY, CM_RESET_TERMINAL.color);
 
-
+  /* ---- 8.48 环形楼内侧玻璃幕墙开一道小门（自定义添加，创办人 Yeoh Shih Hoong 站在庭院里，玩家在环形楼走廊隔着玻璃能看到他，但这一小段幕墙刚好卡在东入口 12° 容许范围之外，是完整实墙，进不去庭院；沿墙体实际弧线在 14°~24° 开一道门洞，做法与四个正式入口一致，上下全高打通） ---- */
+  for(let x=WORLD.minX;x<=WORLD.maxX;x++) for(let z=WORLD.minZ;z<=WORLD.maxZ;z++){
+    const cx=x+0.5, cz=z+0.5, r=Math.hypot(cx,cz);
+    if(r<16||r>=17) continue;
+    const a=(Math.atan2(cz,cx)*180/Math.PI+360)%360;
+    if(a<14||a>24) continue;
+    for(let y=4;y<11;y++) set(x,y,z,B.AIR);
+  }
 
   /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 5 棵，每棵间隔 72°） ---- */
   for(let k=0;k<5;k++){
