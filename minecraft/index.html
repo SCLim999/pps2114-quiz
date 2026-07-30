@@ -22,6 +22,16 @@
   body.photo-mode #compass, body.photo-mode #chip, body.photo-mode #prompt,
   body.photo-mode #quests, body.photo-mode #hotbar, body.photo-mode #touch-ui,
   body.photo-mode #mp-status { display:none !important; }
+  #photo-controls {
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:7;
+    display:flex; gap:18px;
+  }
+  #photo-controls button {
+    width:64px; height:64px; border-radius:50%; border:2px solid rgba(255,255,255,.55);
+    background:rgba(0,0,0,.45); color:#fff; font-size:27px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; user-select:none; touch-action:manipulation;
+  }
+  #photo-controls button:active { background:rgba(255,255,255,.3); }
 
   /* ---------- HUD ---------- */
   #crosshair {
@@ -287,8 +297,13 @@
     <button class="tbtn" id="tb-down">⬇</button>
     <button class="tbtn" id="tb-place">🧱</button>
     <button class="tbtn" id="tb-act">💬</button>
+    <button class="tbtn" id="tb-photo">📷</button>
   </div>
   <button id="tb-menu">☰</button>
+</div>
+<div id="photo-controls" class="hidden">
+  <button id="photo-capture-btn">📸</button>
+  <button id="photo-exit-btn">✕</button>
 </div>
 
 <!-- 密码锁屏：必须先输入正确密码才能看到/开始游戏 -->
@@ -488,6 +503,7 @@ zh: {
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
   photoOn:'📷 拍照模式：开（Enter 拍照，P 退出）', photoOff:'📷 拍照模式：关',
   photoHint:'📷 拍照模式 · Enter 拍照 · P 退出', photoSaved:'📸 照片已保存',
+  photoHintTouch:'📷 拍照模式 · 点 📸 拍照 · 点 ✕ 退出',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
   gmLockedMsg:'🟡 请先去找穿黄色衣服的 Game Master 聊聊，学会怎么玩这个游戏！他就站在篮球场南门外。',
   animShow:'▶ 看教学动画', animHide:'⏹ 关闭动画',
@@ -567,6 +583,7 @@ en: {
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
   photoOn:'📷 Photo mode ON (Enter to capture, P to exit)', photoOff:'📷 Photo mode OFF',
   photoHint:'📷 Photo mode · Enter to capture · P to exit', photoSaved:'📸 Photo saved',
+  photoHintTouch:'📷 Photo mode · Tap 📸 to capture · Tap ✕ to exit',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
   gmLockedMsg:"🟡 Find the Game Master (yellow shirt) first and talk to them to learn how to play! He's standing just outside the basketball court's south gate.",
   animShow:'▶ Watch teaching animation', animHide:'⏹ Close animation',
@@ -646,6 +663,7 @@ ms: {
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
   photoOn:'📷 Mod foto: HIDUP (Enter ambil gambar, P keluar)', photoOff:'📷 Mod foto: MATI',
   photoHint:'📷 Mod foto · Enter ambil gambar · P keluar', photoSaved:'📸 Foto disimpan',
+  photoHintTouch:'📷 Mod foto · Ketik 📸 untuk ambil gambar · Ketik ✕ untuk keluar',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
   gmLockedMsg:'🟡 Cari Game Master (baju kuning) dahulu dan berbual dengannya untuk belajar cara bermain! Dia berdiri betul-betul di luar pintu selatan gelanggang bola keranjang.',
   animShow:'▶ Tonton animasi pengajaran', animHide:'⏹ Tutup animasi',
@@ -4530,11 +4548,13 @@ function updateDayNight(t){
 /* ---- 拍照模式：隐藏 HUD 并截取当前画面 ---- */
 let photoMode=false, capturePending=false;
 const photoHintEl=document.getElementById('photo-hint');
+const photoControlsEl=document.getElementById('photo-controls');
 function togglePhotoMode(){
   photoMode=!photoMode;
   document.body.classList.toggle('photo-mode', photoMode);
-  photoHintEl.textContent = t('photoHint');
+  photoHintEl.textContent = touchPlay ? t('photoHintTouch') : t('photoHint');
   photoHintEl.classList.toggle('hidden', !photoMode);
+  photoControlsEl.classList.toggle('hidden', !(photoMode && touchPlay));
   toast(photoMode ? t('photoOn') : t('photoOff'));
 }
 function capturePhoto(){
@@ -4547,6 +4567,8 @@ function capturePhoto(){
     blip(880,0.1);
   }catch(e){}
 }
+document.getElementById('photo-capture-btn').addEventListener('click', ()=>{ capturePending=true; });
+document.getElementById('photo-exit-btn').addEventListener('click', togglePhotoMode);
 
 function animate(){
   requestAnimationFrame(animate);
@@ -4612,7 +4634,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     if(!touchPlay||modalOpen) return;
     for(const tc of e.changedTouches){
       const el=tc.target;
-      if(el && el.closest && el.closest('#vjoy,#tbtns,#tb-menu,#hotbar,.overlay,#quests,.panel')) continue;
+      if(el && el.closest && el.closest('#vjoy,#tbtns,#tb-menu,#hotbar,.overlay,#quests,.panel,#photo-controls')) continue;
       if(lookId===null){ lookId=tc.identifier; lastTX=tc.clientX; lastTY=tc.clientY; }
     }
   },{passive:true});
@@ -4650,6 +4672,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
   bind('tb-mine', ()=>{ doBreak(); mineTimer=setInterval(doBreak,300); },
                   ()=>clearInterval(mineTimer));
   bind('tb-place',()=>doPlace());
+  bind('tb-photo',()=>togglePhotoMode());
   bind('tb-act',  ()=>{
     if(modalOpen){ closeActiveModal(); }
     else if(nearInfo>=0) openInfo(nearInfo);
@@ -4660,6 +4683,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     else if(nearResetCM) resetDataMineScore();
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
+    if(photoMode) togglePhotoMode();
     touchPlay=false;
     document.getElementById('touch-ui').classList.add('hidden');
     overlayEl.classList.remove('hidden');
@@ -4710,8 +4734,11 @@ window.__test = {
     lampCount:NIGHT_LAMPS.length }),
   setElapsed(v){ elapsed=v; updateDayNight(elapsed); },
   photo: ()=>({ photoMode, bodyClass:document.body.classList.contains('photo-mode'),
-    hintHidden:photoHintEl.classList.contains('hidden') }),
+    hintHidden:photoHintEl.classList.contains('hidden'),
+    controlsHidden:photoControlsEl.classList.contains('hidden'), touchPlay,
+    capturePending }),
   togglePhotoMode, capturePhoto,
+  setTouchPlay(v){ touchPlay=v; },
   ambience: ()=>({ started:ambienceStarted, gain: ambienceGain?ambienceGain.gain.value:null, muted }),
   startAmbience, setAmbienceMuted,
 };
