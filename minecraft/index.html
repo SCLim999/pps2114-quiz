@@ -881,6 +881,7 @@ function set(x,y,z,t){ if(inBounds(x,y,z)) vox[idx(x,y,z)] = t; }
 const CARS = [];
 const MACHINES = [];
 const COMPUTERS = [];
+const NIGHT_LAMPS = [];         // 室内吸顶灯：夜晚自动点亮，白天熄灭
 const carCells = new Set();     // 车辆脚印（固定占 y4..5）
 const machSolid = new Set();    // 设备实体格 "x,y,z"（可在任意楼层）
 const CAR_PAINTS = [0xb83232, 0xe8e8e6, 0x2f5fb8, 0x9aa0a8, 0x24262b, 0xd9a520];
@@ -979,6 +980,10 @@ function placeComputer(x,z,facing,floorY=4,kind=null){
   COMPUTERS.push({ x:x+0.5, y:floorY+1, z:z+0.5, facing, kind });
 }
 
+function placeLamp(x,y,z){                // 室内吸顶灯：登记位置，网格与昼夜变化统一在 buildCarMeshes()/updateDayNight() 处理
+  NIGHT_LAMPS.push({ x, y, z });
+}
+
 function buildBox(x0,x1,z0,z1,storeys,openings){
   const yTop = 3 + storeys*4;   // 屋面板所在层
   for(let x=x0;x<=x1;x++) for(let z=z0;z<=z1;z++){
@@ -1023,6 +1028,7 @@ function generate(){
   CARS.length = 0;
   MACHINES.length = 0;
   COMPUTERS.length = 0;
+  NIGHT_LAMPS.length = 0;
   carCells.clear();
   machSolid.clear();
   const rand = mulberry32(4500001);
@@ -1084,6 +1090,10 @@ function generate(){
       // 屋顶露台（统一铺装地砖，不再穿插绿植方块；楼梯塔两侧及东北侧按要求清除铺装）
       if(r>=18.5&&r<=23 && !entrance && !clearedArc) set(x,12,z, B.TILE);
     }
+  }
+  for(const a of [45,135,225,315]){               // 环形楼走廊吸顶灯（避开四面入口），地面层与二楼各一圈，夜晚点亮
+    const lx=20.5*cosd(a), lz=20.5*sind(a);
+    placeLamp(lx,6.3,lz); placeLamp(lx,10.3,lz);
   }
   /* ---- 4. 环形楼四周保持平整草坪（原设计概念中的景观坡道不再建模）---- */
 
@@ -1155,6 +1165,7 @@ function generate(){
       for(let i=0;i<3;i++) for(const zz of [mz-1,mz]) for(let dy=0;dy<3;dy++)
         machSolid.add((Math.floor(mxc-1.5)+i)+','+(fy+dy)+','+zz);   // 3×2×3 实体
     }
+    placeLamp(-23, fy+2.3, -38);                       // 每层过道正上方吸顶灯，夜晚点亮
   }
   // 实验楼室内直跑楼梯（北侧 z=-48，一路通往 2F/3F/4F）
   for(let i=0;i<=11;i++) set(-12-i, 4+i, -48, B.GRAY);
@@ -1181,6 +1192,7 @@ function generate(){
     for(const [px,pz] of [[22,-5],[22,5],[35,-8],[35,8]]){                 // 白色花盆绿植
       set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF); set(px,6,pz,B.LEAF);
     }
+    for(const lz of [-4,4]) placeLamp(28,6.3,lz);                          // 长桌过道正上方吸顶灯，夜晚点亮
   }
 
   /* ---- 5.6 食堂外的超大洗碗棚（南侧檐下，参照实景：长洗碗台 + 垂吊水管 + 木百叶柜）---- */
@@ -1253,6 +1265,7 @@ function generate(){
     // 电脑室 1（南侧，z=-13/-3 两排，Ts Dr Lim SC 所在这一区）集中放置全部 10 台 DataMine 电脑
     CM_TERMINALS.forEach(term => placeComputer(term.x, term.z, term.facing, term.floorY, term.color));
     for(const x of COLS){ placeComputer(x,3,1,16); placeComputer(x,13,-1,16); }         // 电脑室 2：两排纯装饰座位，屏幕用默认色
+    placeLamp(46,18.3,-8); placeLamp(46,18.3,8);                          // 两间电脑室各一盏吸顶灯，夜晚点亮
   }
 
   /* ---- 6. 入口广场与步道 ---- */
@@ -2209,6 +2222,23 @@ function carPaint(hex){
   return CAR_MAT.paints[hex] || (CAR_MAT.paints[hex]=new THREE.MeshBasicMaterial({color:hex}));
 }
 
+/* 室内吸顶灯：共用同一份材质，昼夜切换时只需改这一份材质的颜色/透明度，无需逐个更新 */
+const LAMP_GEO = {
+  fixture: new THREE.BoxGeometry(0.6,0.1,0.6),
+  glow:    new THREE.BoxGeometry(0.9,0.04,0.9),
+};
+const LAMP_OFF = 0x6b6f66, LAMP_ON = 0xfff0b0;
+const lampFixtureMat = new THREE.MeshBasicMaterial({ color: LAMP_OFF });
+const lampGlowMat = new THREE.MeshBasicMaterial({
+  color:0xfff6c8, transparent:true, opacity:0, depthWrite:false,
+  blending:THREE.AdditiveBlending, side:THREE.DoubleSide,
+});
+const _lampColA = new THREE.Color(), _lampColB = new THREE.Color();
+function updateLamps(night){                  // night: 0(正午)~1(午夜)
+  lampFixtureMat.color.copy(_lampColA.set(LAMP_OFF)).lerp(_lampColB.set(LAMP_ON), night);
+  lampGlowMat.opacity = night*0.55;
+}
+
 /* 电脑室的电脑（显示器 + 主机），坐在体素书桌上 */
 const COMP_GEO = {
   base:    new THREE.BoxGeometry(0.20,0.03,0.14),
@@ -2290,6 +2320,10 @@ function buildCarMeshes(){
     put('cKbd',   COMP_GEO.keyboard, COMP_MAT.keyboard,  T([0,0.015,0.30]), rot);
     put('cTower', COMP_GEO.tower,    MACH_MAT.dark,      T([0.26,0.13,0]),  rot);
     put('cLed',   COMP_GEO.led,      COMP_MAT.led,       T([0.26,0.13,0.12]),rot);
+  }
+  for(const l of NIGHT_LAMPS){                             // 室内吸顶灯：夜晚点亮（共用材质，见 updateLamps()）
+    put('lampFixture', LAMP_GEO.fixture, lampFixtureMat, [l.x,l.y,l.z], 0);
+    put('lampGlow',    LAMP_GEO.glow,    lampGlowMat,    [l.x,l.y-0.1,l.z], 0);
   }
   CM_TERMINALS.forEach((st,i)=>{                           // DataMine 工位悬浮编号牌：显示主题名称
     const label = (i+1) + '. ' + CM_CHAPTERS[st.chapterIdx].tag[lang];
@@ -4490,6 +4524,7 @@ function updateDayNight(t){
   scene.background.copy(DAY_SKY).lerp(NIGHT_SKY, night);
   scene.fog.color.copy(DAY_FOG).lerp(NIGHT_FOG, night);
   nightOverlayEl.style.opacity = (night*0.65).toFixed(3);
+  updateLamps(night);
 }
 
 /* ---- 拍照模式：隐藏 HUD 并截取当前画面 ---- */
@@ -4670,7 +4705,9 @@ window.__test = {
     return (Math.atan2(fwdX,-fwdZ)*180/Math.PI + 360) % 360;
   },
   dayNight: ()=>({ elapsed, cycle:DAYNIGHT_CYCLE, sky:scene.background.getHexString(),
-    fog:scene.fog.color.getHexString(), overlayOpacity:nightOverlayEl.style.opacity }),
+    fog:scene.fog.color.getHexString(), overlayOpacity:nightOverlayEl.style.opacity,
+    lampColor:lampFixtureMat.color.getHexString(), lampGlowOpacity:lampGlowMat.opacity,
+    lampCount:NIGHT_LAMPS.length }),
   setElapsed(v){ elapsed=v; updateDayNight(elapsed); },
   photo: ()=>({ photoMode, bodyClass:document.body.classList.contains('photo-mode'),
     hintHidden:photoHintEl.classList.contains('hidden') }),
