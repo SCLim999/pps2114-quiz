@@ -114,7 +114,7 @@
     background:#e8f0fb; color:#123; border-radius:4px; padding:1px 7px;
     font-weight:bold; font-family:inherit;
   }
-  #modal-anim {
+  #modal-anim, #basket-canvas {
     display:block; width:100%; max-width:560px; height:auto; margin:10px 0;
     background:#0d1a2e; border:1px solid rgba(255,255,255,.18); border-radius:8px;
   }
@@ -337,6 +337,21 @@
       <button class="btn" id="btn-close"></button>
       <button class="btn tts-btn hidden" id="btn-tts" title="Read aloud">🔊</button>
       <button class="btn" id="btn-anim" style="display:none"></button>
+      <button class="btn" id="btn-play-basket" style="display:none"></button>
+    </div>
+  </div>
+</div>
+
+<!-- 罚球投篮小游戏（找 Aina 触发）-->
+<div class="overlay hidden" id="basket-modal">
+  <div class="panel">
+    <h1 id="basket-title"></h1>
+    <p class="en" id="basket-sub"></p>
+    <canvas id="basket-canvas" width="560" height="150"></canvas>
+    <p id="basket-feedback"></p>
+    <div class="modal-actions">
+      <button class="btn" id="basket-shoot"></button>
+      <button class="btn gray" id="basket-close"></button>
     </div>
   </div>
 </div>
@@ -416,6 +431,14 @@ zh: {
   promptCMReset:' — 按 E 清空 DataMine 分数', confirmResetCM:'确定要清空 DataMine 答题分数与进度吗？此操作无法撤销。', cmResetDone:'DataMine 分数已清空',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
   cmDashHeader:'💻 DataMine 编程课程',
+  basketPlayBtn:'🏀 一起投篮！', basketTitle:'🏀 罚球挑战',
+  basketSub:'第 {shot}/5 球 · 得分 {score}', basketShoot:'投篮！', basketPlayAgain:'再来一轮',
+  basketLeave:'离开球场（E）',
+  basketSwish:'🏀 空心入网，完美！', basketRim:'🙈 擦框而过，太可惜了！', basketMiss:'❌ 直接打铁，一分未得！',
+  basketResultPerfect:'🏆 满分 5 中 5！Aina 对你竖起大拇指！',
+  basketResultGreat:'🎉 中了 {score}/5 球，手感真不错！',
+  basketResultOk:'👍 中了 {score}/5 球，多练练手感会更好！',
+  basketResultBad:'😅 今天手感有点冷，{score}/5 球——再来一轮？',
   cmScoreLine:'总分：{score} / {total}',
   cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
@@ -477,6 +500,14 @@ en: {
   promptCMReset:' — press E to reset DataMine score', confirmResetCM:'Reset all DataMine scores and progress? This cannot be undone.', cmResetDone:'DataMine score has been reset',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
   cmDashHeader:'💻 DataMine Coding Courses',
+  basketPlayBtn:'🏀 Shoot some hoops!', basketTitle:'🏀 Free Throw Challenge',
+  basketSub:'Shot {shot}/5 · Score {score}', basketShoot:'Shoot!', basketPlayAgain:'Play Again',
+  basketLeave:'Leave the court (E)',
+  basketSwish:'🏀 Swish! Nothing but net!', basketRim:'🙈 Rim out — so close!', basketMiss:'❌ Air ball!',
+  basketResultPerfect:'🏆 Perfect 5-for-5! Aina gives you a thumbs-up!',
+  basketResultGreat:'🎉 {score}/5 shots made — nice shooting!',
+  basketResultOk:'👍 {score}/5 made — keep practicing!',
+  basketResultBad:'😅 Cold shooting day — {score}/5. Want another round?',
   cmScoreLine:'Total score: {score} / {total}',
   cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
@@ -538,6 +569,14 @@ ms: {
   promptCMReset:' — tekan E untuk set semula skor DataMine', confirmResetCM:'Set semula semua skor dan kemajuan DataMine? Tindakan ini tidak boleh dibuat asal.', cmResetDone:'Skor DataMine telah diset semula',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
   cmDashHeader:'💻 Kursus Pengaturcaraan DataMine',
+  basketPlayBtn:'🏀 Mari lontar bola!', basketTitle:'🏀 Cabaran Lontaran Percuma',
+  basketSub:'Lontaran {shot}/5 · Skor {score}', basketShoot:'Lontar!', basketPlayAgain:'Main Sekali Lagi',
+  basketLeave:'Tinggalkan gelanggang (E)',
+  basketSwish:'🏀 Lantunan sempurna, terus masuk jaring!', basketRim:'🙈 Terlantun pinggir gelung — hampir je!', basketMiss:'❌ Bola kosong!',
+  basketResultPerfect:'🏆 Sempurna 5 daripada 5! Aina angkat jempol untuk anda!',
+  basketResultGreat:'🎉 {score}/5 lontaran masuk — bagus tembakan anda!',
+  basketResultOk:'👍 {score}/5 masuk — teruskan berlatih!',
+  basketResultBad:'😅 Hari ini kurang bertuah — {score}/5. Nak cuba sekali lagi?',
   cmScoreLine:'Jumlah markah: {score} / {total}',
   cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
@@ -3747,8 +3786,111 @@ function openNpc(i){
   currentSpeech = n.dialog[lang];
   currentGender = (n.style==='f'||n.style==='hijab') ? 'f' : 'm';   // 按角色造型自动选男/女声
   if(ttsAuto) speakText(currentSpeech, currentGender);
+  btnPlayBasketEl.style.display = (n.name==='Aina') ? 'inline-block' : 'none';
+  btnPlayBasketEl.textContent = t('basketPlayBtn');
   blip(520,0.1);
 }
+
+/* ---- 罚球投篮小游戏（找 Aina 触发）---- */
+const basketModalEl = document.getElementById('basket-modal');
+const basketCanvas = document.getElementById('basket-canvas');
+const basketCtx = basketCanvas.getContext('2d');
+const btnPlayBasketEl = document.getElementById('btn-play-basket');
+const basketShootBtn = document.getElementById('basket-shoot');
+const basketCloseBtn = document.getElementById('basket-close');
+const BG_ROUNDS = 5, BG_SWEET = 0.07, BG_OK = 0.18;
+let bgShot=0, bgScore=0, bgPower=0.5, bgRaf=null, bgT=0, bgLocked=false, bgFinished=false;
+
+function drawBasketFrame(){
+  const W=basketCanvas.width, H=basketCanvas.height;
+  const ctx=basketCtx;
+  ctx.clearRect(0,0,W,H);
+  // 篮架（右上）
+  const hoopX=W-90, hoopY=30;
+  ctx.strokeStyle='#e8b23d'; ctx.lineWidth=4;
+  ctx.strokeRect(hoopX+18,hoopY-24,44,34);          // 篮板
+  ctx.beginPath(); ctx.ellipse(hoopX+18,hoopY+12,20,7,0,0,Math.PI*2); ctx.stroke();  // 篮筐
+  ctx.font='34px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🧺', hoopX+18, hoopY+16);
+  ctx.fillText('🏀', 60, hoopY+16);
+  // 力度计
+  const barX0=40, barX1=W-40, barY=H-38, barH=20;
+  ctx.fillStyle='#1b2a3f'; ctx.fillRect(barX0,barY,barX1-barX0,barH);
+  const mid=(barX0+barX1)/2, span=(barX1-barX0)/2;
+  ctx.fillStyle='rgba(90,200,120,.45)';
+  ctx.fillRect(mid-span*BG_OK, barY, span*BG_OK*2, barH);
+  ctx.fillStyle='#e8b23d';
+  ctx.fillRect(mid-span*BG_SWEET, barY, span*BG_SWEET*2, barH);
+  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1; ctx.strokeRect(barX0,barY,barX1-barX0,barH);
+  const px = barX0 + bgPower*(barX1-barX0);
+  ctx.strokeStyle = bgLocked ? '#ff4d4d' : '#fff';
+  ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(px,barY-6); ctx.lineTo(px,barY+barH+6); ctx.stroke();
+  ctx.font='bold 13px "Microsoft YaHei",sans-serif'; ctx.fillStyle='#9fd0ff';
+  ctx.fillText(lang==='zh' ? '力度' : (lang==='ms' ? 'Kuasa' : 'Power'), (barX0+barX1)/2, barY-16);
+}
+function basketLoop(ts){
+  if(!bgLocked){
+    bgT += 1/60;
+    bgPower = 0.5 + 0.45*Math.sin(bgT*2.3);
+  }
+  drawBasketFrame();
+  bgRaf = requestAnimationFrame(basketLoop);
+}
+function updateBasketSub(){
+  document.getElementById('basket-sub').textContent = t('basketSub', {shot:Math.min(bgShot+1,BG_ROUNDS), score:bgScore});
+}
+function openBasketGame(){
+  modalEl.classList.add('hidden');   // 隐藏 NPC 对话框，不走 closeInfo()（那会提前重新锁定鼠标指针，跟接下来要打开的投篮弹窗抢指针）
+  stopSpeak();
+  resetModalAnim();
+  bgShot=0; bgScore=0; bgPower=0.5; bgT=0; bgLocked=false; bgFinished=false;
+  document.getElementById('basket-title').textContent = t('basketTitle');
+  document.getElementById('basket-feedback').textContent = '';
+  basketShootBtn.textContent = t('basketShoot');
+  basketShootBtn.style.display = 'inline-block';
+  basketCloseBtn.textContent = t('basketLeave');
+  updateBasketSub();
+  basketModalEl.classList.remove('hidden');
+  modalOpen = true;
+  if(bgRaf) cancelAnimationFrame(bgRaf);
+  bgRaf = requestAnimationFrame(basketLoop);
+  blip(660,0.12);
+}
+function basketShoot(){
+  if(bgFinished){ openBasketGame(); return; }   // "再来一轮" 复用同一按钮
+  if(bgLocked) return;
+  bgLocked = true;
+  const diff = Math.abs(bgPower-0.5);
+  const feedbackEl = document.getElementById('basket-feedback');
+  if(diff<=BG_SWEET){ bgScore++; feedbackEl.textContent = t('basketSwish'); blip(880,0.15); }
+  else if(diff<=BG_OK){ bgScore++; feedbackEl.textContent = t('basketRim'); blip(660,0.12); }
+  else{ feedbackEl.textContent = t('basketMiss'); blip(220,0.15); }
+  bgShot++;
+  updateBasketSub();
+  if(bgShot>=BG_ROUNDS){
+    bgFinished = true;
+    const key = bgScore===BG_ROUNDS ? 'basketResultPerfect' : bgScore>=3 ? 'basketResultGreat' : bgScore>=1 ? 'basketResultOk' : 'basketResultBad';
+    setTimeout(()=>{ feedbackEl.textContent = t(key,{score:bgScore}); basketShootBtn.textContent = t('basketPlayAgain'); }, 700);
+  }else{
+    setTimeout(()=>{ bgLocked=false; bgT=0; }, 900);
+  }
+}
+function closeBasketGame(){
+  basketModalEl.classList.add('hidden');
+  modalOpen = false;
+  if(bgRaf) cancelAnimationFrame(bgRaf);
+  bgRaf = null;
+  resumeAfterModal();
+}
+function closeActiveModal(){                      // E/Esc/Enter 关闭当前弹窗——三种弹窗互斥，按打开优先级判断该关哪一个
+  if(!basketModalEl.classList.contains('hidden')) closeBasketGame();
+  else if(!quizEl.classList.contains('hidden')) closeCM();
+  else closeInfo();
+}
+btnPlayBasketEl.addEventListener('click', openBasketGame);
+basketShootBtn.addEventListener('click', basketShoot);
+basketCloseBtn.addEventListener('click', closeBasketGame);
 
 let cmChapterIdx=-1, cmQIdx=0;
 const quizEl = document.getElementById('quiz');
@@ -3905,7 +4047,7 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.code==='KeyE'){
-    if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return; }
+    if(modalOpen){ closeActiveModal(); return; }
     if(playing() && nearInfo>=0){ openInfo(nearInfo); return; }
     if(playing() && nearNpc>=0){ openNpc(nearNpc); return; }
     if(playing() && nearCM>=0){ openDataMine(nearCM); return; }
@@ -3914,7 +4056,7 @@ document.addEventListener('keydown',e=>{
     if(playing() && nearResetCM){ resetDataMineScore(); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
-    quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return;
+    closeActiveModal(); return;
   }
   if(!locked) return;
   keys.add(e.code);
@@ -4228,7 +4370,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
                   ()=>clearInterval(mineTimer));
   bind('tb-place',()=>doPlace());
   bind('tb-act',  ()=>{
-    if(modalOpen){ quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); }
+    if(modalOpen){ closeActiveModal(); }
     else if(nearInfo>=0) openInfo(nearInfo);
     else if(nearNpc>=0) openNpc(nearNpc);
     else if(nearCM>=0) openDataMine(nearCM);
