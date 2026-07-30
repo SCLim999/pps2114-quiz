@@ -2799,7 +2799,14 @@ function updateCMBoard(){
 }
 
 /* ---- 任务/进度 ---- */
-const visited = new Set();
+const visited = new Set();     // 已探索的金色信息方块（自定义添加：加上持久化，避免被误认成"重置世界"清掉）
+try{
+  const raw = localStorage.getItem('vitroxcraft_visited');
+  if(raw) JSON.parse(raw).forEach(i=>visited.add(i));
+}catch(e){}
+function saveVisited(){
+  try{ localStorage.setItem('vitroxcraft_visited', JSON.stringify([...visited])); }catch(e){}
+}
 // 必须先找 Game Master 谈话（教学关），其余 NPC 和金色信息方块才会开放互动
 let gmMet = false;
 try{ gmMet = localStorage.getItem('vitroxcraft_gm_met')==='1'; }catch(e){}
@@ -2936,7 +2943,7 @@ function openInfo(i){
   currentGender = ttsGender;                    // 建筑知识点没有固定角色，用用户选择的旁白声音
   if(ttsAuto) speakText(currentSpeech, currentGender);
   const isNew = !visited.has(i);
-  visited.add(i); refreshQuests();
+  visited.add(i); saveVisited(); refreshQuests();
   blip(660,0.12);
   if(isNew && visited.size===INFO_POINTS.length){
     setTimeout(()=>toast(t('congrats',{n:INFO_POINTS.length})),400);
