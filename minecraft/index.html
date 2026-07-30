@@ -114,10 +114,11 @@
     background:#e8f0fb; color:#123; border-radius:4px; padding:1px 7px;
     font-weight:bold; font-family:inherit;
   }
-  #modal-anim, #basket-canvas {
+  #modal-anim, #basket-canvas, #defect-canvas {
     display:block; width:100%; max-width:560px; height:auto; margin:10px 0;
     background:#0d1a2e; border:1px solid rgba(255,255,255,.18); border-radius:8px;
   }
+  #defect-canvas { cursor:crosshair; }
   .btn {
     display:inline-block; margin-top:16px; padding:12px 34px; font-size:17px;
     background:#3a9d3a; color:#fff; border:none; border-radius:8px; cursor:pointer;
@@ -338,6 +339,7 @@
       <button class="btn tts-btn hidden" id="btn-tts" title="Read aloud">🔊</button>
       <button class="btn" id="btn-anim" style="display:none"></button>
       <button class="btn" id="btn-play-basket" style="display:none"></button>
+      <button class="btn" id="btn-play-defect" style="display:none"></button>
     </div>
   </div>
 </div>
@@ -352,6 +354,20 @@
     <div class="modal-actions">
       <button class="btn" id="basket-shoot"></button>
       <button class="btn gray" id="basket-close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- 瑕疵检测小游戏（找 Priya 触发）-->
+<div class="overlay hidden" id="defect-modal">
+  <div class="panel">
+    <h1 id="defect-title"></h1>
+    <p class="en" id="defect-sub"></p>
+    <canvas id="defect-canvas" width="560" height="180"></canvas>
+    <p id="defect-feedback"></p>
+    <div class="modal-actions">
+      <button class="btn" id="defect-action" style="display:none"></button>
+      <button class="btn gray" id="defect-close"></button>
     </div>
   </div>
 </div>
@@ -439,6 +455,14 @@ zh: {
   basketResultGreat:'🎉 中了 {score}/5 球，手感真不错！',
   basketResultOk:'👍 中了 {score}/5 球，多练练手感会更好！',
   basketResultBad:'😅 今天手感有点冷，{score}/5 球——再来一轮？',
+  defectPlayBtn:'🔍 挑战瑕疵检测！', defectTitle:'🔍 瑕疵检测挑战',
+  defectSub:'已过 {n}/12 个 · 抓到 {caught} 个 · 误判 {mistakes} 次', defectAgain:'再检测一轮',
+  defectClose:'离开实验室（E）',
+  defectCaught:'✅ 抓到瑕疵芯片！', defectFalseAlarm:'⚠️ 这颗其实是合格品！',
+  defectResultPerfect:'🏆 5 个瑕疵全部抓到，而且零误判！Priya 说你可以来实习了！',
+  defectResultGreat:'🎉 抓到 {caught}/5 个瑕疵（误判 {mistakes} 次）——手感真准！',
+  defectResultOk:'👍 抓到 {caught}/5 个瑕疵——多练练会更准！',
+  defectResultBad:'😅 只抓到 {caught}/5 个，好几颗瑕疵芯片都溜走了——再试一次？',
   cmScoreLine:'总分：{score} / {total}',
   cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
@@ -508,6 +532,14 @@ en: {
   basketResultGreat:'🎉 {score}/5 shots made — nice shooting!',
   basketResultOk:'👍 {score}/5 made — keep practicing!',
   basketResultBad:'😅 Cold shooting day — {score}/5. Want another round?',
+  defectPlayBtn:'🔍 Try the Defect Spotter!', defectTitle:'🔍 Defect Spotter Challenge',
+  defectSub:'{n}/12 passed · {caught} caught · {mistakes} false alarms', defectAgain:'Inspect Again',
+  defectClose:'Leave the lab (E)',
+  defectCaught:'✅ Defect caught!', defectFalseAlarm:'⚠️ That one was actually good!',
+  defectResultPerfect:'🏆 All 5 defects caught, zero false alarms! Priya says you could intern here!',
+  defectResultGreat:'🎉 {caught}/5 defects caught ({mistakes} false alarms) — sharp eyes!',
+  defectResultOk:'👍 {caught}/5 defects caught — keep practicing your eye!',
+  defectResultBad:'😅 Only {caught}/5 caught — several defects slipped through. Try again?',
   cmScoreLine:'Total score: {score} / {total}',
   cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
@@ -577,6 +609,14 @@ ms: {
   basketResultGreat:'🎉 {score}/5 lontaran masuk — bagus tembakan anda!',
   basketResultOk:'👍 {score}/5 masuk — teruskan berlatih!',
   basketResultBad:'😅 Hari ini kurang bertuah — {score}/5. Nak cuba sekali lagi?',
+  defectPlayBtn:'🔍 Cuba Pengesan Kecacatan!', defectTitle:'🔍 Cabaran Pengesan Kecacatan',
+  defectSub:'{n}/12 berlalu · {caught} ditangkap · {mistakes} tangkapan silap', defectAgain:'Periksa Sekali Lagi',
+  defectClose:'Tinggalkan makmal (E)',
+  defectCaught:'✅ Cip rosak ditangkap!', defectFalseAlarm:'⚠️ Itu sebenarnya cip yang baik!',
+  defectResultPerfect:'🏆 Semua 5 kecacatan ditangkap, tiada tangkapan silap! Priya kata anda boleh magang di sini!',
+  defectResultGreat:'🎉 {caught}/5 kecacatan ditangkap ({mistakes} tangkapan silap) — mata yang tajam!',
+  defectResultOk:'👍 {caught}/5 kecacatan ditangkap — teruskan berlatih!',
+  defectResultBad:'😅 Hanya {caught}/5 ditangkap — beberapa kecacatan terlepas. Cuba lagi?',
   cmScoreLine:'Jumlah markah: {score} / {total}',
   cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
@@ -3788,6 +3828,8 @@ function openNpc(i){
   if(ttsAuto) speakText(currentSpeech, currentGender);
   btnPlayBasketEl.style.display = (n.name==='Aina') ? 'inline-block' : 'none';
   btnPlayBasketEl.textContent = t('basketPlayBtn');
+  btnPlayDefectEl.style.display = (n.name==='Priya') ? 'inline-block' : 'none';
+  btnPlayDefectEl.textContent = t('defectPlayBtn');
   blip(520,0.1);
 }
 
@@ -3799,7 +3841,7 @@ const btnPlayBasketEl = document.getElementById('btn-play-basket');
 const basketShootBtn = document.getElementById('basket-shoot');
 const basketCloseBtn = document.getElementById('basket-close');
 const BG_ROUNDS = 5, BG_SWEET = 0.07, BG_OK = 0.18;
-let bgShot=0, bgScore=0, bgPower=0.5, bgRaf=null, bgT=0, bgLocked=false, bgFinished=false;
+let bgShot=0, bgScore=0, bgPower=0.5, bgRaf=null, bgT=0, bgLocked=false, bgFinished=false, bgLastTs=null;
 
 function drawBasketFrame(){
   const W=basketCanvas.width, H=basketCanvas.height;
@@ -3830,8 +3872,11 @@ function drawBasketFrame(){
   ctx.fillText(lang==='zh' ? '力度' : (lang==='ms' ? 'Kuasa' : 'Power'), (barX0+barX1)/2, barY-16);
 }
 function basketLoop(ts){
+  if(bgLastTs===null) bgLastTs = ts;
+  const dt = Math.min((ts-bgLastTs)/1000, 0.1);   // 用真实经过的时间推进，不假设固定帧率（跟 modalAnim 的做法一致）
+  bgLastTs = ts;
   if(!bgLocked){
-    bgT += 1/60;
+    bgT += dt;
     bgPower = 0.5 + 0.45*Math.sin(bgT*2.3);
   }
   drawBasketFrame();
@@ -3844,7 +3889,7 @@ function openBasketGame(){
   modalEl.classList.add('hidden');   // 隐藏 NPC 对话框，不走 closeInfo()（那会提前重新锁定鼠标指针，跟接下来要打开的投篮弹窗抢指针）
   stopSpeak();
   resetModalAnim();
-  bgShot=0; bgScore=0; bgPower=0.5; bgT=0; bgLocked=false; bgFinished=false;
+  bgShot=0; bgScore=0; bgPower=0.5; bgT=0; bgLocked=false; bgFinished=false; bgLastTs=null;
   document.getElementById('basket-title').textContent = t('basketTitle');
   document.getElementById('basket-feedback').textContent = '';
   basketShootBtn.textContent = t('basketShoot');
@@ -3883,14 +3928,131 @@ function closeBasketGame(){
   bgRaf = null;
   resumeAfterModal();
 }
-function closeActiveModal(){                      // E/Esc/Enter 关闭当前弹窗——三种弹窗互斥，按打开优先级判断该关哪一个
+function closeActiveModal(){                      // E/Esc/Enter 关闭当前弹窗——弹窗互斥，按打开优先级判断该关哪一个
   if(!basketModalEl.classList.contains('hidden')) closeBasketGame();
+  else if(!defectModalEl.classList.contains('hidden')) closeDefectGame();
   else if(!quizEl.classList.contains('hidden')) closeCM();
   else closeInfo();
 }
 btnPlayBasketEl.addEventListener('click', openBasketGame);
 basketShootBtn.addEventListener('click', basketShoot);
 basketCloseBtn.addEventListener('click', closeBasketGame);
+
+/* ---- 瑕疵检测小游戏（找 Priya 触发）---- */
+const defectModalEl = document.getElementById('defect-modal');
+const defectCanvas = document.getElementById('defect-canvas');
+const defectCtx = defectCanvas.getContext('2d');
+const btnPlayDefectEl = document.getElementById('btn-play-defect');
+const defectActionBtn = document.getElementById('defect-action');
+const defectCloseBtn = document.getElementById('defect-close');
+const DG_TOTAL=12, DG_DEFECTS=5, DG_SPEED=95, DG_SPAWN_DT=1.0;
+let dgChips=[], dgSpawned=0, dgCaught=0, dgMistakes=0, dgMissed=0, dgOrder=[];
+let dgT=0, dgLastSpawn=0, dgRaf=null, dgFinished=false, dgLastTs=null;
+
+function dgShuffledOrder(){
+  const arr = Array.from({length:DG_TOTAL}, (_,i)=>i<DG_DEFECTS);
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function drawDefectFrame(){
+  const W=defectCanvas.width, H=defectCanvas.height;
+  const ctx=defectCtx;
+  ctx.clearRect(0,0,W,H);
+  const beltY=H/2, beltH=64;
+  ctx.fillStyle='#1b2a3f'; ctx.fillRect(0,beltY-beltH/2,W,beltH);
+  ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=20){ ctx.beginPath(); ctx.moveTo(x,beltY-beltH/2); ctx.lineTo(x-10,beltY+beltH/2); ctx.stroke(); }
+  for(const c of dgChips){
+    ctx.fillStyle='#3fae5c'; ctx.strokeStyle='#eaffef'; ctx.lineWidth=2;
+    ctx.fillRect(c.x-14,c.y-14,28,28); ctx.strokeRect(c.x-14,c.y-14,28,28);
+    if(c.defective){
+      ctx.strokeStyle='#ff3b3b'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(c.x-10,c.y-10); ctx.lineTo(c.x+10,c.y+10);
+      ctx.moveTo(c.x+10,c.y-10); ctx.lineTo(c.x-10,c.y+10); ctx.stroke();
+    }
+  }
+  ctx.font='bold 13px "Microsoft YaHei",sans-serif'; ctx.fillStyle='#9fd0ff'; ctx.textAlign='center';
+  ctx.fillText(lang==='zh' ? '👀 找出打叉的瑕疵芯片，点击它！' : (lang==='ms' ? '👀 Cari cip bertanda X dan klik!' : '👀 Spot the chips marked with an X and click them!'), W/2, beltY-beltH/2-14);
+}
+function updateDefectSub(){
+  document.getElementById('defect-sub').textContent = t('defectSub', {n:dgSpawned, caught:dgCaught, mistakes:dgMistakes});
+}
+function defectLoop(ts){
+  if(dgLastTs===null) dgLastTs = ts;
+  const dt = Math.min((ts-dgLastTs)/1000, 0.1);   // 用真实经过的时间推进，不假设固定帧率（跟 modalAnim 的做法一致）
+  dgLastTs = ts;
+  dgT += dt;
+  if(!dgFinished){
+    if(dgSpawned<DG_TOTAL && dgT-dgLastSpawn>=DG_SPAWN_DT){
+      dgLastSpawn = dgT;
+      dgChips.push({ x:-16, y: defectCanvas.height/2 + (Math.random()*2-1)*14, defective: dgOrder[dgSpawned] });
+      dgSpawned++;
+      updateDefectSub();
+    }
+    for(const c of dgChips) c.x += DG_SPEED*dt;
+    const stillOn = [];
+    for(const c of dgChips){
+      if(c.x > defectCanvas.width+16){ if(c.defective) dgMissed++; }
+      else stillOn.push(c);
+    }
+    dgChips = stillOn;
+    if(dgSpawned>=DG_TOTAL && dgChips.length===0) finishDefectGame();
+  }
+  drawDefectFrame();
+  dgRaf = requestAnimationFrame(defectLoop);
+}
+function openDefectGame(){
+  modalEl.classList.add('hidden');   // 隐藏 NPC 对话框，不走 closeInfo()（会提前抢鼠标指针）
+  stopSpeak();
+  resetModalAnim();
+  dgChips=[]; dgSpawned=0; dgCaught=0; dgMistakes=0; dgMissed=0; dgT=0; dgLastSpawn=0; dgFinished=false; dgLastTs=null;
+  dgOrder = dgShuffledOrder();
+  document.getElementById('defect-title').textContent = t('defectTitle');
+  document.getElementById('defect-feedback').textContent = '';
+  defectActionBtn.style.display = 'none';
+  defectCloseBtn.textContent = t('defectClose');
+  updateDefectSub();
+  defectModalEl.classList.remove('hidden');
+  modalOpen = true;
+  if(dgRaf) cancelAnimationFrame(dgRaf);
+  dgRaf = requestAnimationFrame(defectLoop);
+  blip(660,0.12);
+}
+function finishDefectGame(){
+  dgFinished = true;
+  const feedbackEl = document.getElementById('defect-feedback');
+  const key = (dgCaught===DG_DEFECTS && dgMistakes===0) ? 'defectResultPerfect'
+    : dgCaught>=4 ? 'defectResultGreat' : dgCaught>=2 ? 'defectResultOk' : 'defectResultBad';
+  feedbackEl.textContent = t(key, {caught:dgCaught, mistakes:dgMistakes});
+  defectActionBtn.textContent = t('defectAgain');
+  defectActionBtn.style.display = 'inline-block';
+  blip(dgCaught>=4 ? 880 : 440, 0.15);
+}
+defectCanvas.addEventListener('click', e=>{
+  if(dgFinished) return;
+  const rect = defectCanvas.getBoundingClientRect();
+  const scaleX = defectCanvas.width/rect.width, scaleY = defectCanvas.height/rect.height;
+  const mx = (e.clientX-rect.left)*scaleX, my = (e.clientY-rect.top)*scaleY;
+  let hitIdx=-1, bestD=18;
+  dgChips.forEach((c,i)=>{ const d=Math.hypot(c.x-mx,c.y-my); if(d<bestD){ bestD=d; hitIdx=i; } });
+  if(hitIdx<0) return;
+  const c = dgChips[hitIdx];
+  const feedbackEl = document.getElementById('defect-feedback');
+  if(c.defective){ dgCaught++; feedbackEl.textContent = t('defectCaught'); blip(880,0.1); }
+  else{ dgMistakes++; feedbackEl.textContent = t('defectFalseAlarm'); blip(220,0.1); }
+  dgChips.splice(hitIdx,1);
+  updateDefectSub();
+});
+function closeDefectGame(){
+  defectModalEl.classList.add('hidden');
+  modalOpen = false;
+  if(dgRaf) cancelAnimationFrame(dgRaf);
+  dgRaf = null;
+  resumeAfterModal();
+}
+btnPlayDefectEl.addEventListener('click', openDefectGame);
+defectActionBtn.addEventListener('click', openDefectGame);
+defectCloseBtn.addEventListener('click', closeDefectGame);
 
 let cmChapterIdx=-1, cmQIdx=0;
 const quizEl = document.getElementById('quiz');

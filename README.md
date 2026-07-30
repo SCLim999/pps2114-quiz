@@ -206,6 +206,16 @@ with an opening at every one of the lab's four floors.
   swish, the wider green zone for a rim-in, or outside both for an air ball.
   After 5 shots a tiered message reacts to the final score, and *Play Again*
   restarts the round on the same screen.
+- **Mini-game — Defect Spotter Challenge**: talk to Priya, the vision
+  algorithm engineer on the lab building's 3rd floor, and click "🔍 Try the
+  Defect Spotter!" to start it. Chips scroll across a conveyor belt; the ones
+  marked with a red X are defective and must be clicked before they scroll
+  off-screen, while clicking a good chip counts as a false alarm. 12 chips
+  pass through (5 of them defective); a tiered message reacts to how many
+  defects were caught vs. false alarms, and *Inspect Again* restarts the
+  round. Both mini-games advance their internal timers using real elapsed
+  time between frames rather than an assumed fixed frame rate, so they run
+  at the same speed regardless of the device's performance.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
   shows the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for
