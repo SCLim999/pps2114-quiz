@@ -413,6 +413,7 @@ zh: {
   promptLocked:' — 🔒 先找 Game Master（篮球场南门）',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> 分',
   promptCMStart:' — 按 E 开始', promptCMRedo:' — 按 E 复习',
+  promptCMReset:' — 按 E 清空 DataMine 分数', confirmResetCM:'确定要清空 DataMine 答题分数与进度吗？此操作无法撤销。', cmResetDone:'DataMine 分数已清空',
   cmNext:'下一题 ▶', cmFinish:'完成本章', cmClose:'离开工作站（E）',
   cmDashHeader:'💻 DataMine 编程课程',
   cmScoreLine:'总分：{score} / {total}',
@@ -473,6 +474,7 @@ en: {
   promptLocked:' — 🔒 find the Game Master first (basketball court, south gate)',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> pts',
   promptCMStart:' — press E to start', promptCMRedo:' — press E to review',
+  promptCMReset:' — press E to reset DataMine score', confirmResetCM:'Reset all DataMine scores and progress? This cannot be undone.', cmResetDone:'DataMine score has been reset',
   cmNext:'Next ▶', cmFinish:'Finish chapter', cmClose:'Leave workstation (E)',
   cmDashHeader:'💻 DataMine Coding Courses',
   cmScoreLine:'Total score: {score} / {total}',
@@ -533,6 +535,7 @@ ms: {
   promptLocked:' — 🔒 cari Game Master dahulu (gelanggang bola keranjang, pintu selatan)',
   chipCM:' · 💻 DataMine <b>{score}</b>/<b>{total}</b> mata',
   promptCMStart:' — tekan E untuk mula', promptCMRedo:' — tekan E untuk ulang kaji',
+  promptCMReset:' — tekan E untuk set semula skor DataMine', confirmResetCM:'Set semula semua skor dan kemajuan DataMine? Tindakan ini tidak boleh dibuat asal.', cmResetDone:'Skor DataMine telah diset semula',
   cmNext:'Seterusnya ▶', cmFinish:'Selesaikan bab', cmClose:'Tinggalkan stesen kerja (E)',
   cmDashHeader:'💻 Kursus Pengaturcaraan DataMine',
   cmScoreLine:'Jumlah markah: {score} / {total}',
@@ -1595,6 +1598,9 @@ function generate(){
     set(41+i, 5+i, 7, B.GLASS);   set(41+i, 5+i, 9, B.GLASS);       // 电脑室楼梯两侧
   }
 
+  /* ---- 8.47 电脑室 2（另一侧）新增一台专用电脑，用来清空 DataMine 分数（深红色屏幕区别于其他电脑） ---- */
+  placeComputer(CM_RESET_TERMINAL.x, CM_RESET_TERMINAL.z, CM_RESET_TERMINAL.facing, CM_RESET_TERMINAL.floorY, CM_RESET_TERMINAL.color);
+
 
 
   /* ---- 8.15 三位 ViTrox 创办人周围的环形松树林（自定义添加，半径 8，均匀分布 5 棵，每棵间隔 72°） ---- */
@@ -2469,6 +2475,7 @@ const CM_TERMINALS = [                       // 全部 10 台电脑都集中在�
   { id:'t9',  x:49, z:-3,  floorY:16, chapterIdx:8, color:0xff3860, facing:-1 },
   { id:'t10', x:52, z:-3,  floorY:16, chapterIdx:9, color:0x6c5ce7, facing:-1 },
 ];
+const CM_RESET_TERMINAL = { x:41, z:6, floorY:16, color:0xd32f2f, facing:1 };  // 电脑室 2（另一侧）的专用电脑，深红色屏幕区别于其他电脑，用来清空 DataMine 分数
 const CM_CHAPTERS = [
   { id:'ch1', tag:{ zh:'电脑入门', en:'Intro to Computing', ms:'Asas Komputer' },
     title:{ zh:'第一台 · 电脑入门知识', en:'Station 1 · Introduction to Computing', ms:'Stesen 1 · Asas Pengkomputeran' },
@@ -2996,6 +3003,14 @@ function openIactgPillar(i){
   blip(660,0.12);
 }
 
+function resetDataMineScore(){                    // 电脑室 2 的深红色专用电脑：清空 DataMine 分数
+  if(!confirm(t('confirmResetCM'))) return;
+  cmScore = 0; cmDone.clear(); saveCM();
+  refreshQuests(); updateCMBoard(); netSendCMScore();
+  toast(t('cmResetDone'));
+  blip(220,0.15);
+}
+
 /* ---- 对话弹窗里的教学小动画（目前只有 Networking & Internet 一个：数据包往返动画）---- */
 const modalAnimCanvas = document.getElementById('modal-anim');
 const modalAnimCtx = modalAnimCanvas.getContext('2d');
@@ -3098,9 +3113,9 @@ btnAnimEl.addEventListener('click', toggleModalAnim);
 /* ---- 附近信息点检测 ---- */
 const promptEl=document.getElementById('prompt');
 const promptText=document.getElementById('prompt-text');
-let nearInfo=-1, nearNpc=-1, nearCM=-1, nearKiosk=-1, nearPillar=-1;
+let nearInfo=-1, nearNpc=-1, nearCM=-1, nearKiosk=-1, nearPillar=-1, nearResetCM=false;
 function checkInfoProximity(){
-  nearInfo=-1; nearNpc=-1; nearCM=-1; nearKiosk=-1; nearPillar=-1;
+  nearInfo=-1; nearNpc=-1; nearCM=-1; nearKiosk=-1; nearPillar=-1; nearResetCM=false;
   let best=3.8;
   INFO_POINTS.forEach((p,i)=>{
     const d=Math.hypot(p.x+0.5-player.pos.x, p.y-player.pos.y, p.z+0.5-player.pos.z);
@@ -3135,6 +3150,11 @@ function checkInfoProximity(){
       if(d<bestP){ bestP=d; nearPillar=i; }
     });
   }
+  if(nearInfo<0 && nearNpc<0 && nearCM<0 && nearKiosk<0 && nearPillar<0){
+    const r=CM_RESET_TERMINAL;
+    const d=Math.hypot(r.x+0.5-player.pos.x, r.floorY-player.pos.y, r.z+0.5-player.pos.z);
+    if(d<3.2) nearResetCM=true;
+  }
   if(modalOpen){ promptEl.style.display='none'; return; }
   if(nearInfo>=0){
     promptText.textContent = ' ' + INFO_POINTS[nearInfo].title[lang] +
@@ -3154,6 +3174,9 @@ function checkInfoProximity(){
     promptEl.style.display='block';
   }else if(nearPillar>=0){
     promptText.textContent = ' ' + IACTG_PILLARS[nearPillar].title[lang] + t('promptLearn');
+    promptEl.style.display='block';
+  }else if(nearResetCM){
+    promptText.textContent = ' 💻' + t('promptCMReset');
     promptEl.style.display='block';
   }else promptEl.style.display='none';
 }
@@ -3888,6 +3911,7 @@ document.addEventListener('keydown',e=>{
     if(playing() && nearCM>=0){ openDataMine(nearCM); return; }
     if(playing() && nearKiosk>=0){ openDiplomaKiosk(nearKiosk); return; }
     if(playing() && nearPillar>=0){ openIactgPillar(nearPillar); return; }
+    if(playing() && nearResetCM){ resetDataMineScore(); return; }
   }
   if(modalOpen && (e.code==='Escape'||e.code==='Enter')){
     quizEl.classList.contains('hidden') ? closeInfo() : closeCM(); return;
@@ -4210,6 +4234,7 @@ if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     else if(nearCM>=0) openDataMine(nearCM);
     else if(nearKiosk>=0) openDiplomaKiosk(nearKiosk);
     else if(nearPillar>=0) openIactgPillar(nearPillar);
+    else if(nearResetCM) resetDataMineScore();
   });
   document.getElementById('tb-menu').addEventListener('click',()=>{
     touchPlay=false;
