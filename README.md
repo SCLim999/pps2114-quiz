@@ -225,7 +225,9 @@ with an opening at every one of the lab's four floors.
   effects. Press `P` to enter **photo mode**, which hides every HUD element for
   a clean shot; press `Enter` to save the current view as a PNG download, and
   `P` again to exit (on mobile/tablet, tap the 📷 button instead — a 📸 capture
-  and ✕ exit button appear in its place). Indoor ceiling lamps (16 of them, spread across the ring
+  and ✕ exit button appear in its place). The start-menu info page (shown
+  before you click "Start Exploring") now mentions all three, with a new
+  key-table row for `M`/`P`. Indoor ceiling lamps (16 of them, spread across the ring
   corridor, both computer rooms, the canteen, and the lab building) switch on
   at night in a warm yellow glow and back off by day, in sync with the sky.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
