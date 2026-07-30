@@ -216,6 +216,15 @@ with an opening at every one of the lab's four floors.
   round. Both mini-games advance their internal timers using real elapsed
   time between frames rather than an assumed fixed frame rate, so they run
   at the same speed regardless of the device's performance.
+- **Day/night cycle, ambient sound, photo mode**: the sky and fog colour drift
+  between day and night on a 5-minute loop, with a matching translucent overlay
+  darkening the screen at night (a cheap colour animation, since the world has
+  no dynamic lighting — every block's shading is baked into its vertex colours).
+  A soft ambient drone (two detuned tones plus a slow volume swell) starts once
+  you click "Start Exploring," respecting the same `M` mute toggle as the sound
+  effects. Press `P` to enter **photo mode**, which hides every HUD element for
+  a clean shot; press `Enter` to save the current view as a PNG download, and
+  `P` again to exit.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
   shows the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for

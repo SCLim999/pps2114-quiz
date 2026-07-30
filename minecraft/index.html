@@ -9,6 +9,19 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; overflow:hidden; background:#000; font-family:"Segoe UI", "Microsoft YaHei", sans-serif; }
   canvas#game { display:block; width:100%; height:100%; }
+  #night-overlay {
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    background:#0b1030; mix-blend-mode:multiply; opacity:0;
+  }
+  #photo-hint {
+    position:fixed; top:10px; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,.55); color:#ffd75e; padding:6px 16px; border-radius:20px;
+    font-size:14px; z-index:7; border:1px solid rgba(255,215,94,.5);
+  }
+  body.photo-mode #crosshair, body.photo-mode #pos, body.photo-mode #minimap,
+  body.photo-mode #compass, body.photo-mode #chip, body.photo-mode #prompt,
+  body.photo-mode #quests, body.photo-mode #hotbar, body.photo-mode #touch-ui,
+  body.photo-mode #mp-status { display:none !important; }
 
   /* ---------- HUD ---------- */
   #crosshair {
@@ -251,6 +264,7 @@
 <body>
 
 <canvas id="game"></canvas>
+<div id="night-overlay"></div>
 
 <div id="crosshair"></div>
 <div id="pos"></div>
@@ -261,6 +275,7 @@
 <div id="toast"></div>
 <div id="quests"><h3 id="quests-title"></h3><ul id="quest-list"></ul></div>
 <div id="hotbar"></div>
+<div id="photo-hint" class="hidden"></div>
 
 <!-- 触屏操作层（仅触屏设备显示） -->
 <div id="touch-ui" class="hidden">
@@ -471,6 +486,8 @@ zh: {
   voiceGenderLbl:'讲解旁白声音：', voiceSet:'旁白声音已切换',
   flyOn:'✈ 飞行模式：开（空格上升 / Shift 下降）', flyOff:'🚶 飞行模式：关',
   sndOff:'🔇 音效已关闭', sndOn:'🔊 音效已开启',
+  photoOn:'📷 拍照模式：开（Enter 拍照，P 退出）', photoOff:'📷 拍照模式：关',
+  photoHint:'📷 拍照模式 · Enter 拍照 · P 退出', photoSaved:'📸 照片已保存',
   infoNoBreak:'信息方块不可破坏', resetDone:'世界已重置',
   gmLockedMsg:'🟡 请先去找穿黄色衣服的 Game Master 聊聊，学会怎么玩这个游戏！他就站在篮球场南门外。',
   animShow:'▶ 看教学动画', animHide:'⏹ 关闭动画',
@@ -548,6 +565,8 @@ en: {
   voiceGenderLbl:'Narrator voice:', voiceSet:'Narrator voice switched',
   flyOn:'✈ Fly mode ON (Space up / Shift down)', flyOff:'🚶 Fly mode OFF',
   sndOff:'🔇 Sound off', sndOn:'🔊 Sound on',
+  photoOn:'📷 Photo mode ON (Enter to capture, P to exit)', photoOff:'📷 Photo mode OFF',
+  photoHint:'📷 Photo mode · Enter to capture · P to exit', photoSaved:'📸 Photo saved',
   infoNoBreak:'Info blocks cannot be broken', resetDone:'World has been reset',
   gmLockedMsg:"🟡 Find the Game Master (yellow shirt) first and talk to them to learn how to play! He's standing just outside the basketball court's south gate.",
   animShow:'▶ Watch teaching animation', animHide:'⏹ Close animation',
@@ -625,6 +644,8 @@ ms: {
   voiceGenderLbl:'Suara narator:', voiceSet:'Suara narator ditukar',
   flyOn:'✈ Mod terbang: HIDUP (Space naik / Shift turun)', flyOff:'🚶 Mod terbang: MATI',
   sndOff:'🔇 Bunyi dimatikan', sndOn:'🔊 Bunyi dihidupkan',
+  photoOn:'📷 Mod foto: HIDUP (Enter ambil gambar, P keluar)', photoOff:'📷 Mod foto: MATI',
+  photoHint:'📷 Mod foto · Enter ambil gambar · P keluar', photoSaved:'📸 Foto disimpan',
   infoNoBreak:'Blok maklumat tidak boleh dipecahkan', resetDone:'Dunia telah diset semula',
   gmLockedMsg:'🟡 Cari Game Master (baju kuning) dahulu dan berbual dengannya untuk belajar cara bermain! Dia berdiri betul-betul di luar pintu selatan gelanggang bola keranjang.',
   animShow:'▶ Tonton animasi pengajaran', animHide:'⏹ Tutup animasi',
@@ -2414,6 +2435,30 @@ function blip(freq,dur){
   }catch(e){}
 }
 
+/* ---- 环境音：两个略微失谐的持续音 + 缓慢音量起伏，营造氛围底噪 ---- */
+let ambienceStarted=false, ambienceGain=null;
+function startAmbience(){
+  if(ambienceStarted) return;
+  ambienceStarted = true;
+  try{
+    audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+    ambienceGain = audio.createGain();
+    ambienceGain.gain.value = muted ? 0 : 0.035;
+    ambienceGain.connect(audio.destination);
+    [110,165].forEach(freq=>{
+      const o=audio.createOscillator(), g=audio.createGain();
+      o.type='sine'; o.frequency.value=freq; g.gain.value=0.5;
+      o.connect(g); g.connect(ambienceGain); o.start();
+    });
+    const lfo=audio.createOscillator(), lfoGain=audio.createGain();
+    lfo.type='sine'; lfo.frequency.value=0.08; lfoGain.gain.value=0.012;
+    lfo.connect(lfoGain); lfoGain.connect(ambienceGain.gain); lfo.start();
+  }catch(e){}
+}
+function setAmbienceMuted(m){
+  if(ambienceGain) ambienceGain.gain.value = m ? 0 : 0.035;
+}
+
 /* ================================================================
    HUD：物品栏 / 提示 / 任务
 ================================================================ */
@@ -4177,6 +4222,7 @@ lockBtnEl.addEventListener('click', tryUnlock);
 lockInputEl.addEventListener('keydown', e=>{ if(e.code==='Enter') tryUnlock(); });
 
 document.getElementById('btn-start').addEventListener('click',()=>{
+  startAmbience();
   if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     touchPlay = true;
     overlayEl.classList.add('hidden');
@@ -4230,7 +4276,9 @@ document.addEventListener('keydown',e=>{
     const q=document.getElementById('quests');
     q.style.display = q.style.display==='block'?'none':'block';
   }
-  if(e.code==='KeyM'){ muted=!muted; toast(muted ? t('sndOff') : t('sndOn')); }
+  if(e.code==='KeyM'){ muted=!muted; setAmbienceMuted(muted); toast(muted ? t('sndOff') : t('sndOn')); }
+  if(e.code==='KeyP'){ togglePhotoMode(); }
+  if(e.code==='Enter' && photoMode){ capturePending=true; }
   if(e.code.startsWith('Digit')){
     const n=+e.code.slice(5);
     if(n>=1&&n<=HOT.length){ hotSel=n-1; buildHotbar(); }
@@ -4431,6 +4479,40 @@ function drawCompass(){
   compassCtx.closePath(); compassCtx.fill();
 }
 
+/* ---- 昼夜循环：仅改变天空色/雾色 + 半透明遮罩，不涉及真实光照 ---- */
+const nightOverlayEl = document.getElementById('night-overlay');
+const DAY_SKY = new THREE.Color(0x8ec8f0), NIGHT_SKY = new THREE.Color(0x0d1638);
+const DAY_FOG = new THREE.Color(0x8ec8f0), NIGHT_FOG = new THREE.Color(0x0d1638);
+const DAYNIGHT_CYCLE = 300; // 秒，一个完整昼夜循环
+function updateDayNight(t){
+  const phase = (t % DAYNIGHT_CYCLE) / DAYNIGHT_CYCLE;
+  const night = (1 - Math.cos(phase*Math.PI*2)) / 2; // 0=正午 1=午夜
+  scene.background.copy(DAY_SKY).lerp(NIGHT_SKY, night);
+  scene.fog.color.copy(DAY_FOG).lerp(NIGHT_FOG, night);
+  nightOverlayEl.style.opacity = (night*0.65).toFixed(3);
+}
+
+/* ---- 拍照模式：隐藏 HUD 并截取当前画面 ---- */
+let photoMode=false, capturePending=false;
+const photoHintEl=document.getElementById('photo-hint');
+function togglePhotoMode(){
+  photoMode=!photoMode;
+  document.body.classList.toggle('photo-mode', photoMode);
+  photoHintEl.textContent = t('photoHint');
+  photoHintEl.classList.toggle('hidden', !photoMode);
+  toast(photoMode ? t('photoOn') : t('photoOff'));
+}
+function capturePhoto(){
+  try{
+    const url = canvas.toDataURL('image/png');
+    const a=document.createElement('a');
+    a.href=url; a.download=`vitroxcraft-${Date.now()}.png`;
+    a.click();
+    toast(t('photoSaved'));
+    blip(880,0.1);
+  }catch(e){}
+}
+
 function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
@@ -4440,6 +4522,7 @@ function animate(){
   checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
+  updateDayNight(elapsed);
   for(const c of clouds){
     c.position.x += dt*1.4;
     if(c.position.x>165) c.position.x=-165;
@@ -4453,6 +4536,7 @@ function animate(){
   });
   posEl.textContent = `x:${player.pos.x.toFixed(0)} y:${player.pos.y.toFixed(0)} z:${player.pos.z.toFixed(0)}${player.fly?' ✈':''}`;
   renderer.render(scene,camera);
+  if(capturePending){ capturePending=false; capturePhoto(); }
 }
 animate();
 
@@ -4585,6 +4669,14 @@ window.__test = {
     const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);
     return (Math.atan2(fwdX,-fwdZ)*180/Math.PI + 360) % 360;
   },
+  dayNight: ()=>({ elapsed, cycle:DAYNIGHT_CYCLE, sky:scene.background.getHexString(),
+    fog:scene.fog.color.getHexString(), overlayOpacity:nightOverlayEl.style.opacity }),
+  setElapsed(v){ elapsed=v; updateDayNight(elapsed); },
+  photo: ()=>({ photoMode, bodyClass:document.body.classList.contains('photo-mode'),
+    hintHidden:photoHintEl.classList.contains('hidden') }),
+  togglePhotoMode, capturePhoto,
+  ambience: ()=>({ started:ambienceStarted, gain: ambienceGain?ambienceGain.gain.value:null, muted }),
+  startAmbience, setAmbienceMuted,
 };
 </script>
 </body>
