@@ -227,9 +227,10 @@ with an opening at every one of the lab's four floors.
   `P` again to exit (on mobile/tablet, tap the 📷 button instead — a 📸 capture
   and ✕ exit button appear in its place). The start-menu info page (shown
   before you click "Start Exploring") now mentions all three, with a new
-  key-table row for `M`/`P`. Indoor ceiling lamps (16 of them, spread across the ring
-  corridor, both computer rooms, the canteen, and the lab building) switch on
-  at night in a warm yellow glow and back off by day, in sync with the sky.
+  key-table row for `M`/`P`. Indoor ceiling lamps (20 of them, spread across the ring
+  corridor, both computer rooms, the canteen, the lab building, the entrance
+  hall/skybridge, and the ViTrox Gallery) switch on at night in a warm yellow
+  glow and back off by day, in sync with the sky.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
   shows the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for

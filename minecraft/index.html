@@ -1248,6 +1248,9 @@ function generate(){
     for(const [px,pz] of [[4,21],[9,18]]){                  // 迎宾盆栽
       set(px,4,pz,B.WHITE); set(px,5,pz,B.LEAF);
     }
+    for(const a of [25,65]){                                // 展廊吸顶灯，夜晚点亮
+      placeLamp(20.2*cosd(a), 6.3, 20.2*sind(a));
+    }
   }
 
   /* ---- 5.8 正门门厅：白色接待柜台 + 二楼连桥（玻璃栏板 + 垂吊绿植）---- */
@@ -1267,6 +1270,8 @@ function generate(){
         if(x%2===0) set(x,6,z,B.LEAF);                      // 垂吊绿植
       }
     }
+    placeLamp(0.5, 6.3, 19);                                // 门厅接待柜台上方吸顶灯（灯挂在二楼连桥楼板下方）
+    placeLamp(0.5, 10.3, 20.5);                              // 二楼连桥吸顶灯（灯挂在屋顶下方）
   }
 
   /* ---- 5.9 电脑室楼梯（食堂旁的空地直跑楼梯，一路通往四楼电脑室）---- */
@@ -3749,9 +3754,9 @@ const NPCS = [
   { name:'Mei Ling', color:0xd4643c, expr:'smile', style:'f', x:0.5, y:8, z:20.5,
     role:{ zh:'视觉检测工程师', en:'Vision Engineer', ms:'Jurutera Penglihatan' },
     dialog:{
-      zh:'我是这里的视觉检测工程师。最喜欢午休时来庭院走走——不管从哪栋楼出来，放射状的走道都会把你带到这片草坪。待会儿我要去主楼的食堂吃饭，你也来吗？',
-      en:'I am a machine-vision engineer here. I love walking in the courtyard at lunch — whichever building you leave, the radial walkways bring you to this lawn. I am heading to the canteen in the main building later, want to come along?',
-      ms:'Saya jurutera penglihatan mesin di sini. Saya suka berjalan di laman pada waktu rehat — dari bangunan mana pun anda keluar, laluan jejari akan membawa anda ke padang ini. Nanti saya ke kantin di bangunan utama, nak ikut?' } },
+      zh:'我是这里的视觉检测工程师。最喜欢午休时来这座二楼连桥上站一会儿——从这里能俯瞰整个入口大厅，看着同事们进进出出。待会儿我要去主楼的食堂吃饭，你也来吗？',
+      en:'I am a machine-vision engineer here. I love coming up to this 2nd-floor skybridge on my lunch break — from here I can look down over the whole entrance hall and watch everyone come and go. I am heading to the canteen in the main building later, want to come along?',
+      ms:'Saya jurutera penglihatan mesin di sini. Saya suka datang ke jejambat tingkat dua ini semasa waktu rehat — dari sini saya boleh melihat seluruh dewan pintu masuk dan melihat rakan sekerja keluar masuk. Nanti saya ke kantin di bangunan utama, nak ikut?' } },
   { name:'Kumar', color:0x3e7d3a, expr:'happy', x:15.5, y:12, z:-13.5,
     role:{ zh:'园丁', en:'Gardener', ms:'Tukang Kebun' },
     dialog:{
@@ -4754,6 +4759,7 @@ window.__test = {
     fog:scene.fog.color.getHexString(), overlayOpacity:nightOverlayEl.style.opacity,
     lampColor:lampFixtureMat.color.getHexString(), lampGlowOpacity:lampGlowMat.opacity,
     lampCount:NIGHT_LAMPS.length }),
+  nightLamps: ()=>NIGHT_LAMPS.map(l=>({x:l.x,y:l.y,z:l.z})),
   setElapsed(v){ elapsed=v; updateDayNight(elapsed); },
   photo: ()=>({ photoMode, bodyClass:document.body.classList.contains('photo-mode'),
     hintHidden:photoHintEl.classList.contains('hidden'),
