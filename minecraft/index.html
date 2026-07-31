@@ -903,6 +903,7 @@ const CARS = [];
 const MACHINES = [];
 const COMPUTERS = [];
 const NIGHT_LAMPS = [];         // 室内吸顶灯：夜晚自动点亮，白天熄灭
+const OUTDOOR_LAMPS = [];       // 室外灯柱（篮球场泛光灯、停车场路灯）：灯罩方块本身不变，夜晚叠加一层光晕
 const carCells = new Set();     // 车辆脚印（固定占 y4..5）
 const machSolid = new Set();    // 设备实体格 "x,y,z"（可在任意楼层）
 const CAR_PAINTS = [0xb83232, 0xe8e8e6, 0x2f5fb8, 0x9aa0a8, 0x24262b, 0xd9a520];
@@ -1005,6 +1006,10 @@ function placeLamp(x,y,z){                // 室内吸顶灯：登记位置，�
   NIGHT_LAMPS.push({ x, y, z });
 }
 
+function placeOutdoorLamp(x,y,z){         // 室外灯柱：登记位置，只叠加光晕（灯罩方块本身已经是黄色，不需要额外灯罩网格）
+  OUTDOOR_LAMPS.push({ x, y, z });
+}
+
 function buildBox(x0,x1,z0,z1,storeys,openings){
   const yTop = 3 + storeys*4;   // 屋面板所在层
   for(let x=x0;x<=x1;x++) for(let z=z0;z<=z1;z++){
@@ -1050,6 +1055,7 @@ function generate(){
   MACHINES.length = 0;
   COMPUTERS.length = 0;
   NIGHT_LAMPS.length = 0;
+  OUTDOOR_LAMPS.length = 0;
   carCells.clear();
   machSolid.clear();
   const rand = mulberry32(4500001);
@@ -1358,6 +1364,7 @@ function generate(){
     for(const [fx,fz] of [[gx0,gz0],[gx0,gz1],[gx1,gz0],[gx1,gz1]]){           // 四角泛光灯柱
       for(let y=4;y<=9;y++) set(fx,y,fz,B.STEEL);
       set(fx,10,fz,B.YELLOW);
+      placeOutdoorLamp(fx+0.5, 10.5, fz+0.5);                                 // 夜晚点亮的光晕
     }
   }
 
@@ -1391,6 +1398,7 @@ function generate(){
     for(const z of [40,50]){                                   // 路灯
       for(let y=4;y<=8;y++) set(6,y,z,B.STEEL);
       set(6,9,z,B.YELLOW);
+      placeOutdoorLamp(6.5, 9.5, z+0.5);                        // 夜晚点亮的光晕
     }
   }
 
@@ -1548,6 +1556,7 @@ function generate(){
     for(const lx of [-96,-79]) for(let lz=-30;lz<=30;lz+=20){ // 路灯
       for(let y=4;y<=8;y++) set(lx,y,lz,B.STEEL);
       set(lx,9,lz,B.YELLOW);
+      placeOutdoorLamp(lx+0.5, 9.5, lz+0.5);                  // 夜晚点亮的光晕
     }
     for(let x=-70;x<=-56;x++) for(let z=-2;z<=2;z++) set(x,3,z,B.ASPHALT);  // 接园区道路
   }
@@ -2269,8 +2278,9 @@ function carPaint(hex){
 
 /* 室内吸顶灯：共用同一份材质，昼夜切换时只需改这一份材质的颜色/透明度，无需逐个更新 */
 const LAMP_GEO = {
-  fixture: new THREE.BoxGeometry(0.6,0.1,0.6),
-  glow:    new THREE.BoxGeometry(0.9,0.04,0.9),
+  fixture:     new THREE.BoxGeometry(0.6,0.1,0.6),
+  glow:        new THREE.BoxGeometry(0.9,0.04,0.9),
+  outdoorGlow: new THREE.BoxGeometry(1.8,1.8,1.8),      // 室外灯柱：立体光晕包裹灯罩，任何角度都能看到
 };
 const LAMP_OFF = 0x6b6f66, LAMP_ON = 0xfff0b0;
 const lampFixtureMat = new THREE.MeshBasicMaterial({ color: LAMP_OFF });
@@ -2278,10 +2288,15 @@ const lampGlowMat = new THREE.MeshBasicMaterial({
   color:0xfff6c8, transparent:true, opacity:0, depthWrite:false,
   blending:THREE.AdditiveBlending, side:THREE.DoubleSide,
 });
+const outdoorLampGlowMat = new THREE.MeshBasicMaterial({
+  color:0xfff2b0, transparent:true, opacity:0, depthWrite:false,
+  blending:THREE.AdditiveBlending, side:THREE.DoubleSide,
+});
 const _lampColA = new THREE.Color(), _lampColB = new THREE.Color();
 function updateLamps(night){                  // night: 0(正午)~1(午夜)
   lampFixtureMat.color.copy(_lampColA.set(LAMP_OFF)).lerp(_lampColB.set(LAMP_ON), night);
   lampGlowMat.opacity = night*0.55;
+  outdoorLampGlowMat.opacity = night*0.3;
 }
 
 /* 电脑室的电脑（显示器 + 主机），坐在体素书桌上 */
@@ -2369,6 +2384,9 @@ function buildCarMeshes(){
   for(const l of NIGHT_LAMPS){                             // 室内吸顶灯：夜晚点亮（共用材质，见 updateLamps()）
     put('lampFixture', LAMP_GEO.fixture, lampFixtureMat, [l.x,l.y,l.z], 0);
     put('lampGlow',    LAMP_GEO.glow,    lampGlowMat,    [l.x,l.y-0.1,l.z], 0);
+  }
+  for(const l of OUTDOOR_LAMPS){                           // 室外灯柱：灯罩方块已经是黄色，只在夜晚叠加一层立体光晕
+    put('outdoorLampGlow', LAMP_GEO.outdoorGlow, outdoorLampGlowMat, [l.x,l.y,l.z], 0);
   }
   CM_TERMINALS.forEach((st,i)=>{                           // DataMine 工位悬浮编号牌：显示主题名称
     const label = (i+1) + '. ' + CM_CHAPTERS[st.chapterIdx].tag[lang];
@@ -4758,8 +4776,10 @@ window.__test = {
   dayNight: ()=>({ elapsed, cycle:DAYNIGHT_CYCLE, sky:scene.background.getHexString(),
     fog:scene.fog.color.getHexString(), overlayOpacity:nightOverlayEl.style.opacity,
     lampColor:lampFixtureMat.color.getHexString(), lampGlowOpacity:lampGlowMat.opacity,
-    lampCount:NIGHT_LAMPS.length }),
+    lampCount:NIGHT_LAMPS.length, outdoorLampCount:OUTDOOR_LAMPS.length,
+    outdoorLampGlowOpacity:outdoorLampGlowMat.opacity }),
   nightLamps: ()=>NIGHT_LAMPS.map(l=>({x:l.x,y:l.y,z:l.z})),
+  outdoorLamps: ()=>OUTDOOR_LAMPS.map(l=>({x:l.x,y:l.y,z:l.z})),
   setElapsed(v){ elapsed=v; updateDayNight(elapsed); },
   photo: ()=>({ photoMode, bodyClass:document.body.classList.contains('photo-mode'),
     hintHidden:photoHintEl.classList.contains('hidden'),

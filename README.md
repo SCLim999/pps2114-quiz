@@ -230,7 +230,10 @@ with an opening at every one of the lab's four floors.
   key-table row for `M`/`P`. Indoor ceiling lamps (20 of them, spread across the ring
   corridor, both computer rooms, the canteen, the lab building, the entrance
   hall/skybridge, and the ViTrox Gallery) switch on at night in a warm yellow
-  glow and back off by day, in sync with the sky.
+  glow and back off by day, in sync with the sky. The 14 outdoor lamp posts
+  (the basketball court's 4 corner floodlights and the parking-lot streetlights)
+  get the same treatment — the lamp head itself doesn't change, but a soft
+  warm halo fades in around it at night and disappears by day.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
   shows the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for
