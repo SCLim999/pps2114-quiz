@@ -240,9 +240,18 @@ with an opening at every one of the lab's four floors.
   unvisited/visited info points, blue dots for NPCs, and a white arrow for
   the player's position and facing. A scrolling compass tape (top-center)
   shows N/E/S/W sliding past a fixed center pointer as you turn, so it's
-  always obvious which way you're facing and where to walk next. A play
-  timer next to the explore/DataMine chips counts actual play time (paused
-  while a menu or dialogue is open).
+  always obvious which way you're facing and where to walk next.
+- **20-minute timed challenge**: the whole game is a race against a 20-minute
+  countdown shown next to the explore/DataMine chips (paused while a menu or
+  dialogue is open; turns red under a minute). Finish both the exploration
+  quest and the DataMine quiz (20/20 combined) before time runs out for an
+  instant "Challenge Complete!" screen — otherwise the clock hits zero, play
+  freezes, and you get "⏰ Time's Up! Practice makes perfect — give it another
+  go!" Either way you're awarded a title based on your combined score and
+  time taken — 🧠 Geek Player, ⭐ Skilled Player, 🙂 Casual Player, 📘 Advanced
+  Player, 🌱 Novice Player, or 🔰 Beginner — with a "🔄 Try Again" button that
+  resets progress and the timer for a fresh run (world edits are untouched;
+  that's what the separate reset-world button is for).
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 

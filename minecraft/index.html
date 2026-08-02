@@ -402,6 +402,24 @@
   </div>
 </div>
 
+<!-- 20 分钟限时挑战结算画面 -->
+<div class="overlay hidden" id="endgame-modal">
+  <div class="panel" style="text-align:center;">
+    <h1 id="endgame-title"></h1>
+    <p id="endgame-msg"></p>
+    <div id="endgame-badge" style="font-size:26px;margin:16px 0 4px;font-weight:bold;"></div>
+    <p id="endgame-badge-desc" style="color:#9fd0ff;"></p>
+    <table>
+      <tr><td id="endgame-time-lbl"></td><td id="endgame-time-val"></td></tr>
+      <tr><td id="endgame-explore-lbl"></td><td id="endgame-explore-val"></td></tr>
+      <tr><td id="endgame-quiz-lbl"></td><td id="endgame-quiz-val"></td></tr>
+    </table>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn" id="endgame-retry"></button>
+    </div>
+  </div>
+</div>
+
 <!-- DataMine 编程小任务弹窗 -->
 <div class="overlay hidden" id="quiz">
   <div class="panel">
@@ -496,6 +514,16 @@ zh: {
   defectResultBad:'😅 只抓到 {caught}/5 个，好几颗瑕疵芯片都溜走了——再试一次？',
   cmScoreLine:'总分：{score} / {total}',
   cmCongrats:'🎉 太厉害了！DataMine 全部 {n} 题都答对了，你说不定就是未来的电脑科学家！',
+  timeUpTitle:'⏰ 时间到！', timeUpMsg:'熟能生巧，再接再厉！',
+  completeTitle:'🎉 挑战成功！', completeMsg:'你在 20 分钟内完成了全部探索任务和 DataMine 测验！',
+  endgameTimeLbl:'⏱ 用时', endgameExploreLbl:'🧭 探索进度', endgameQuizLbl:'💻 DataMine 分数',
+  endgameRetry:'🔄 再试一次',
+  badgeGeek:'🧠 极客玩家', badgeGeekDesc:'不到 8 分钟就把探索和 DataMine 全部满分拿下，效率高到离谱！',
+  badgeSkilled:'⭐ 熟练玩家', badgeSkilledDesc:'15 分钟内就全部完成，对园区和题目都很熟悉了。',
+  badgeCasual:'🙂 普通玩家', badgeCasualDesc:'踩着时间线全部完成，稳扎稳打！',
+  badgeAdvanced:'📘 进阶玩家', badgeAdvancedDesc:'时间到时已经完成大半，只差一点点就全部满分了。',
+  badgeNovice:'🌱 新手玩家', badgeNoviceDesc:'完成了一部分，多熟悉一下园区和题目，下次会更快！',
+  badgeBeginner:'🔰 萌新玩家', badgeBeginnerDesc:'才刚开始探索，多来几次就会越来越顺手！',
   cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
@@ -578,6 +606,16 @@ en: {
   defectResultBad:'😅 Only {caught}/5 caught — several defects slipped through. Try again?',
   cmScoreLine:'Total score: {score} / {total}',
   cmCongrats:'🎉 Amazing! You got all {n} DataMine questions right — you might just be a future computer scientist!',
+  timeUpTitle:"⏰ Time's Up!", timeUpMsg:'Practice makes perfect — give it another go!',
+  completeTitle:'🎉 Challenge Complete!', completeMsg:'You finished all the exploration quests and the DataMine quiz within 20 minutes!',
+  endgameTimeLbl:'⏱ Time used', endgameExploreLbl:'🧭 Exploration', endgameQuizLbl:'💻 DataMine score',
+  endgameRetry:'🔄 Try Again',
+  badgeGeek:'🧠 Geek Player', badgeGeekDesc:'Finished everything in under 8 minutes — ridiculously efficient!',
+  badgeSkilled:'⭐ Skilled Player', badgeSkilledDesc:'Completed everything within 15 minutes — you know your way around.',
+  badgeCasual:'🙂 Casual Player', badgeCasualDesc:'Finished right under the wire — steady and complete!',
+  badgeAdvanced:'📘 Advanced Player', badgeAdvancedDesc:'Got most of the way there by the time limit — so close to a perfect run.',
+  badgeNovice:'🌱 Novice Player', badgeNoviceDesc:'Made a good start — get more familiar with the campus and questions for a faster run next time.',
+  badgeBeginner:'🔰 Beginner', badgeBeginnerDesc:"Just getting started — a few more tries and you'll get the hang of it!",
   cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
@@ -660,6 +698,16 @@ ms: {
   defectResultBad:'😅 Hanya {caught}/5 ditangkap — beberapa kecacatan terlepas. Cuba lagi?',
   cmScoreLine:'Jumlah markah: {score} / {total}',
   cmCongrats:'🎉 Hebat! Anda menjawab semua {n} soalan DataMine dengan betul — mungkin anda bakal saintis komputer masa depan!',
+  timeUpTitle:'⏰ Masa Tamat!', timeUpMsg:'Amalan menjadikan sempurna — cuba lagi!',
+  completeTitle:'🎉 Cabaran Selesai!', completeMsg:'Anda menyelesaikan semua misi penerokaan dan kuiz DataMine dalam masa 20 minit!',
+  endgameTimeLbl:'⏱ Masa digunakan', endgameExploreLbl:'🧭 Penerokaan', endgameQuizLbl:'💻 Markah DataMine',
+  endgameRetry:'🔄 Cuba Lagi',
+  badgeGeek:'🧠 Pemain Genius', badgeGeekDesc:'Selesaikan semuanya dalam masa kurang 8 minit — cekap gila!',
+  badgeSkilled:'⭐ Pemain Mahir', badgeSkilledDesc:'Selesaikan semuanya dalam 15 minit — anda dah biasa dengan kampus ini.',
+  badgeCasual:'🙂 Pemain Biasa', badgeCasualDesc:'Selesai tepat pada masanya — mantap dan lengkap!',
+  badgeAdvanced:'📘 Pemain Lanjutan', badgeAdvancedDesc:'Hampir siap semua apabila masa tamat — sikit lagi sempurna.',
+  badgeNovice:'🌱 Pemain Baharu', badgeNoviceDesc:'Permulaan yang baik — biasakan diri dengan kampus dan soalan untuk larian lebih pantas.',
+  badgeBeginner:'🔰 Pemain Pemula', badgeBeginnerDesc:'Baru bermula — cuba beberapa kali lagi dan anda akan mahir!',
   cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
@@ -3161,6 +3209,52 @@ if(ttsSupported){
 
 /* ---- 信息弹窗 ---- */
 const modalEl=document.getElementById('modal');
+/* ---- 20 分钟限时挑战：结算画面相关的早期声明（applyLang() 需要在启动时引用） ---- */
+const GAME_TIME_LIMIT = 1200;           // 20 分钟
+let gameEnded = false, lastEndgameReason = null;
+const endgameEl = document.getElementById('endgame-modal');
+function badgeInfo(pct, timeUsed){                // pct: 探索+DataMine 综合完成度 0~100；timeUsed: 秒
+  if(pct>=100){
+    if(timeUsed<=480) return { name:t('badgeGeek'),    desc:t('badgeGeekDesc') };
+    if(timeUsed<=900) return { name:t('badgeSkilled'), desc:t('badgeSkilledDesc') };
+    return { name:t('badgeCasual'), desc:t('badgeCasualDesc') };
+  }
+  if(pct>=70) return { name:t('badgeAdvanced'), desc:t('badgeAdvancedDesc') };
+  if(pct>=40) return { name:t('badgeNovice'),   desc:t('badgeNoviceDesc') };
+  return { name:t('badgeBeginner'), desc:t('badgeBeginnerDesc') };
+}
+function renderEndgame(reason){
+  const totalQuiz = cmTotalPoints();
+  const totalAll = INFO_POINTS.length + totalQuiz;
+  const pct = totalAll>0 ? (visited.size+cmScore)/totalAll*100 : 0;
+  document.getElementById('endgame-title').textContent = reason==='timeout' ? t('timeUpTitle') : t('completeTitle');
+  document.getElementById('endgame-msg').textContent = reason==='timeout' ? t('timeUpMsg') : t('completeMsg');
+  const b = badgeInfo(pct, playTime);
+  document.getElementById('endgame-badge').textContent = b.name;
+  document.getElementById('endgame-badge-desc').textContent = b.desc;
+  document.getElementById('endgame-time-val').textContent = formatTime(playTime);
+  document.getElementById('endgame-explore-val').textContent = visited.size + ' / ' + INFO_POINTS.length;
+  document.getElementById('endgame-quiz-val').textContent = cmScore + ' / ' + totalQuiz;
+}
+function endGame(reason){                          // reason: 'timeout' | 'complete'
+  if(gameEnded) return;
+  gameEnded = true;
+  lastEndgameReason = reason;
+  modalOpen = true;
+  renderEndgame(reason);
+  endgameEl.classList.remove('hidden');
+  stopSpeak();
+  if(document.pointerLockElement) document.exitPointerLock();
+}
+function restartChallenge(){
+  visited.clear(); saveVisited();
+  cmScore = 0; cmDone.clear(); saveCM();
+  playTime = 0; gameEnded = false; modalOpen = false;
+  refreshQuests(); updateCMBoard(); netSendCMScore();
+  endgameEl.classList.add('hidden');
+  resumeAfterModal();
+}
+document.getElementById('endgame-retry').addEventListener('click', restartChallenge);
 function openInfo(i){
   if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
   const p=INFO_POINTS[i];
@@ -4074,6 +4168,7 @@ function closeBasketGame(){
   resumeAfterModal();
 }
 function closeActiveModal(){                      // E/Esc/Enter 关闭当前弹窗——弹窗互斥，按打开优先级判断该关哪一个
+  if(!endgameEl.classList.contains('hidden')) return;   // 限时挑战结算画面只能靠「再试一次」按钮关闭
   if(!basketModalEl.classList.contains('hidden')) closeBasketGame();
   else if(!defectModalEl.classList.contains('hidden')) closeDefectGame();
   else if(!quizEl.classList.contains('hidden')) closeCM();
@@ -4469,6 +4564,9 @@ function applyLang(){
   if(ttsBtn) ttsBtn.title = (window.speechSynthesis && window.speechSynthesis.speaking) ? t('ttsTitleStop') : t('ttsTitle');
   if(modalOpen) stopSpeak();     // 弹窗开着时切换语言，避免朗读语言和显示文字对不上
   put('quiz-close', t('cmClose'));
+  put('endgame-time-lbl', t('endgameTimeLbl')); put('endgame-explore-lbl', t('endgameExploreLbl'));
+  put('endgame-quiz-lbl', t('endgameQuizLbl')); put('endgame-retry', t('endgameRetry'));
+  if(!endgameEl.classList.contains('hidden')) renderEndgame(lastEndgameReason);
   if(!quizEl.classList.contains('hidden')) renderCMQuiz();  // DataMine 弹窗开着时也跟着切换语言
   updateCMBoard();
   refreshDiplomaKioskTags();
@@ -4625,9 +4723,15 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
   elapsed+=dt;
-  if(playing() && !modalOpen){ physics(dt); playTime+=dt; }
-  chipTimerEl.textContent = ' · ⏱ ' + formatTime(playTime);
-  checkInfoProximity();
+  if(playing() && !modalOpen && !gameEnded){
+    physics(dt); playTime+=dt;
+    if(playTime>=GAME_TIME_LIMIT) endGame('timeout');
+    else if(visited.size===INFO_POINTS.length && cmScore===cmTotalPoints()) endGame('complete');
+  }
+  const remain = Math.max(0, GAME_TIME_LIMIT-playTime);
+  chipTimerEl.textContent = ' · ⏱ ' + formatTime(remain);
+  chipTimerEl.style.color = remain<=60 ? '#ff6b6b' : '';
+  if(!gameEnded) checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
   updateDayNight(elapsed);
@@ -4774,6 +4878,19 @@ window.__test = {
   diplomaKiosks: ()=>({ nearKiosk, kiosks:DIPLOMA_KIOSKS.map(k=>({id:k.id,x:k.x,z:k.z,floorY:k.floorY,icon:k.icon})) }),
   openDiplomaKiosk,
   playTime: ()=>playTime, formatTime,
+  setPlayTime(v){ playTime=v; },
+  gameEnded: ()=>gameEnded, lastEndgameReason: ()=>lastEndgameReason,
+  endgameVisible: ()=>!endgameEl.classList.contains('hidden'),
+  endgameContent: ()=>({
+    title: document.getElementById('endgame-title').textContent,
+    msg: document.getElementById('endgame-msg').textContent,
+    badge: document.getElementById('endgame-badge').textContent,
+    badgeDesc: document.getElementById('endgame-badge-desc').textContent,
+    time: document.getElementById('endgame-time-val').textContent,
+    explore: document.getElementById('endgame-explore-val').textContent,
+    quiz: document.getElementById('endgame-quiz-val').textContent,
+  }),
+  restartChallenge, GAME_TIME_LIMIT,
   minimap: ()=>({ canvas:mmCanvas, sx:MM_SX, sz:MM_SZ }),
   compassHeading(){
     const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);
