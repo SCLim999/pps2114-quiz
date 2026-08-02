@@ -347,6 +347,7 @@
       <input type="checkbox" id="music-cb"><span id="music-toggle-lbl"></span>
     </label>
     <audio id="bgm" src="pixelrush.mp3" loop preload="auto"></audio>
+    <audio id="endgame-bgm" src="starlightstrut.mp3" loop preload="auto"></audio>
     <label class="tts-toggle hidden" id="tts-toggle-row">
       <input type="checkbox" id="tts-auto-cb"><span id="tts-toggle-lbl"></span>
     </label>
@@ -2644,6 +2645,18 @@ musicCb.addEventListener('change',()=>{
   toast(musicOn ? t('musicOn') : t('musicOff'));
 });
 
+/* ---- 结算音乐：20 分钟挑战结束时播放（starlightstrut.mp3），沿用同一套 M / 背景音乐开关 ---- */
+const endgameBgmEl = document.getElementById('endgame-bgm');
+endgameBgmEl.volume = 0.4;
+function playEndgameMusic(){
+  bgmEl.pause();
+  if(musicOn && !muted){ endgameBgmEl.currentTime = 0; endgameBgmEl.play().catch(()=>{}); }
+}
+function stopEndgameMusic(){
+  endgameBgmEl.pause();
+  endgameBgmEl.currentTime = 0;
+}
+
 /* ================================================================
    HUD：物品栏 / 提示 / 任务
 ================================================================ */
@@ -3283,6 +3296,7 @@ function endGame(reason){                          // reason: 'timeout' | 'compl
   renderEndgame(reason);
   endgameEl.classList.remove('hidden');
   stopSpeak();
+  playEndgameMusic();
   if(document.pointerLockElement) document.exitPointerLock();
 }
 function restartChallenge(){
@@ -3291,6 +3305,8 @@ function restartChallenge(){
   playTime = 0; gameEnded = false; modalOpen = false;
   refreshQuests(); updateCMBoard(); netSendCMScore();
   endgameEl.classList.add('hidden');
+  stopEndgameMusic();
+  updateMusicPlayback();
   resumeAfterModal();
 }
 document.getElementById('endgame-retry').addEventListener('click', restartChallenge);
@@ -4971,6 +4987,8 @@ window.__test = {
   music: ()=>({ musicOn, muted, paused:bgmEl.paused, currentTime:bgmEl.currentTime,
     volume:bgmEl.volume, src:bgmEl.currentSrc }),
   setMusicOn, updateMusicPlayback,
+  endgameMusic: ()=>({ paused:endgameBgmEl.paused, currentTime:endgameBgmEl.currentTime,
+    volume:endgameBgmEl.volume, src:endgameBgmEl.currentSrc, bgmPaused:bgmEl.paused }),
 };
 </script>
 </body>

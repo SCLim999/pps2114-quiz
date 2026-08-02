@@ -259,7 +259,11 @@ with an opening at every one of the lab's four floors.
   time taken — 🧠 Geek Player, ⭐ Skilled Player, 🙂 Casual Player, 📘 Advanced
   Player, 🌱 Novice Player, or 🔰 Beginner — with a "🔄 Try Again" button that
   resets progress and the timer for a fresh run (world edits are untouched;
-  that's what the separate reset-world button is for).
+  that's what the separate reset-world button is for). The result screen
+  swaps the background track for a dedicated end-of-challenge piece
+  (`minecraft/starlightstrut.mp3`), on either ending, and switches back to
+  the regular background music on "Try Again" — following the same music
+  checkbox and `M` mute state as everything else.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
