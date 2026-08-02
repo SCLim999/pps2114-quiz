@@ -346,6 +346,7 @@
     <label class="tts-toggle" id="music-toggle-row">
       <input type="checkbox" id="music-cb"><span id="music-toggle-lbl"></span>
     </label>
+    <audio id="bgm" src="pixelrush.mp3" loop preload="auto"></audio>
     <label class="tts-toggle hidden" id="tts-toggle-row">
       <input type="checkbox" id="tts-auto-cb"><span id="tts-toggle-lbl"></span>
     </label>
@@ -2622,47 +2623,19 @@ function setAmbienceMuted(m){
   if(ambienceGain) ambienceGain.gain.value = m ? 0 : 0.035;
 }
 
-/* ---- 背景音乐：欢快的五声音阶旋律循环，玩家可在开始菜单勾选开关（独立于 M 静音键，二者都关时才真正静音） ---- */
-const MUSIC_MELODY = [261.63,329.63,392.00,329.63,440.00,392.00,329.63,293.66]; // C4 E4 G4 E4 A4 G4 E4 D4
-const MUSIC_BASS = [130.81,196.00];                                            // C3 G3
+/* ---- 背景音乐：循环播放一段真实音轨（pixelrush.mp3），玩家可在开始菜单勾选开关（独立于 M 静音键，二者都关时才真正静音） ---- */
+const bgmEl = document.getElementById('bgm');
+bgmEl.volume = 0.35;
 let musicOn = true;
 try{ const v = localStorage.getItem('vitroxcraft_music'); if(v!==null) musicOn = v==='1'; }catch(e){}
-let musicStarted=false, musicGain=null, musicTimer=null, musicStep=0, musicNotesPlayed=0;
-function playMusicNote(freq,dur,gain,type){
-  musicNotesPlayed++;
-  try{
-    const o=audio.createOscillator(), g=audio.createGain();
-    o.type=type; o.frequency.value=freq;
-    g.gain.setValueAtTime(0.0001,audio.currentTime);
-    g.gain.exponentialRampToValueAtTime(gain,audio.currentTime+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+dur);
-    o.connect(g); g.connect(musicGain);
-    o.start(); o.stop(audio.currentTime+dur+0.05);
-  }catch(e){}
-}
-function startMusic(){
-  if(musicStarted) return;
-  musicStarted = true;
-  try{
-    audio = audio || new (window.AudioContext||window.webkitAudioContext)();
-    musicGain = audio.createGain();
-    musicGain.gain.value = 1;
-    musicGain.connect(audio.destination);
-    const stepDur = 0.32;
-    const tick=()=>{
-      if(musicOn && !muted){
-        playMusicNote(MUSIC_MELODY[musicStep%MUSIC_MELODY.length], stepDur*0.85, 0.05, 'triangle');
-        if(musicStep%2===0) playMusicNote(MUSIC_BASS[(musicStep/2)%MUSIC_BASS.length], stepDur*1.6, 0.03, 'sine');
-      }
-      musicStep++;
-      musicTimer = setTimeout(tick, stepDur*1000);
-    };
-    tick();
-  }catch(e){}
+function updateMusicPlayback(){
+  if(musicOn && !muted) bgmEl.play().catch(()=>{});
+  else bgmEl.pause();
 }
 function setMusicOn(v){
   musicOn = v;
   try{ localStorage.setItem('vitroxcraft_music', v?'1':'0'); }catch(e){}
+  updateMusicPlayback();
 }
 const musicCb = document.getElementById('music-cb');
 musicCb.checked = musicOn;
@@ -4487,7 +4460,7 @@ lockInputEl.addEventListener('keydown', e=>{ if(e.code==='Enter') tryUnlock(); }
 
 document.getElementById('btn-start').addEventListener('click',()=>{
   startAmbience();
-  startMusic();
+  updateMusicPlayback();
   if(IS_TOUCH && !matchMedia('(pointer:fine)').matches){
     touchPlay = true;
     overlayEl.classList.add('hidden');
@@ -4541,7 +4514,7 @@ document.addEventListener('keydown',e=>{
     const q=document.getElementById('quests');
     q.style.display = q.style.display==='block'?'none':'block';
   }
-  if(e.code==='KeyM'){ muted=!muted; setAmbienceMuted(muted); toast(muted ? t('sndOff') : t('sndOn')); }
+  if(e.code==='KeyM'){ muted=!muted; setAmbienceMuted(muted); updateMusicPlayback(); toast(muted ? t('sndOff') : t('sndOn')); }
   if(e.code==='KeyP'){ togglePhotoMode(); }
   if(e.code==='Enter' && photoMode){ capturePending=true; }
   if(e.code.startsWith('Digit')){
@@ -4995,8 +4968,9 @@ window.__test = {
   setTouchPlay(v){ touchPlay=v; },
   ambience: ()=>({ started:ambienceStarted, gain: ambienceGain?ambienceGain.gain.value:null, muted }),
   startAmbience, setAmbienceMuted,
-  music: ()=>({ musicOn, musicStarted, musicStep, musicNotesPlayed, muted }),
-  setMusicOn, startMusic,
+  music: ()=>({ musicOn, muted, paused:bgmEl.paused, currentTime:bgmEl.currentTime,
+    volume:bgmEl.volume, src:bgmEl.currentSrc }),
+  setMusicOn, updateMusicPlayback,
 };
 </script>
 </body>

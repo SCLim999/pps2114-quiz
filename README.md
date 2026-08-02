@@ -235,12 +235,12 @@ with an opening at every one of the lab's four floors.
   (the basketball court's 4 corner floodlights and the parking-lot streetlights)
   get the same treatment — the lamp head itself doesn't change, but a soft
   warm halo fades in around it at night and disappears by day.
-- **Cheerful background music**: a looping pentatonic melody (generated live
-  from oscillators, no audio files) plays softly once you click "Start
-  Exploring." It's on by default via a checkbox in the start menu, independent
-  from the `M` mute key — `M` silences everything (sound effects, ambience,
-  and music together), while the checkbox lets you keep the ambience but turn
-  off just the tune. The choice is remembered between visits.
+- **Cheerful background music**: a looping track (`minecraft/pixelrush.mp3`)
+  plays softly once you click "Start Exploring." It's on by default via a
+  checkbox in the start menu, independent from the `M` mute key — `M`
+  silences everything (sound effects, ambience, and music together), while
+  the checkbox lets you keep the ambience but turn off just the music. The
+  choice is remembered between visits.
 - **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
   shows the central courtyard as a reference circle, gold/green dots for
   unvisited/visited info points, blue dots for NPCs, and a white arrow for
