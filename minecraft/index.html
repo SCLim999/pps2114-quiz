@@ -495,6 +495,7 @@ zh: {
   defectResultOk:'👍 抓到 {caught}/5 个瑕疵——多练练会更准！',
   defectResultBad:'😅 只抓到 {caught}/5 个，好几颗瑕疵芯片都溜走了——再试一次？',
   cmScoreLine:'总分：{score} / {total}',
+  cmCongrats:'🎉 太厉害了！DataMine 全部 {n} 题都答对了，你说不定就是未来的电脑科学家！',
   cmLeaderboard:'🌐 玩家排行榜', cmYou:'你', cmPtsShort:'分',
   btnClose:'继续探索（E）',
   ttsToggle:'🔊 自动朗读讲解内容', ttsOn:'🔊 自动朗读已开启', ttsOff:'🔇 自动朗读已关闭',
@@ -576,6 +577,7 @@ en: {
   defectResultOk:'👍 {caught}/5 defects caught — keep practicing your eye!',
   defectResultBad:'😅 Only {caught}/5 caught — several defects slipped through. Try again?',
   cmScoreLine:'Total score: {score} / {total}',
+  cmCongrats:'🎉 Amazing! You got all {n} DataMine questions right — you might just be a future computer scientist!',
   cmLeaderboard:'🌐 Player Leaderboard', cmYou:'You', cmPtsShort:'pts',
   btnClose:'Continue exploring (E)',
   ttsToggle:'🔊 Auto-read lesson text aloud', ttsOn:'🔊 Auto-read turned on', ttsOff:'🔇 Auto-read turned off',
@@ -657,6 +659,7 @@ ms: {
   defectResultOk:'👍 {caught}/5 kecacatan ditangkap — teruskan berlatih!',
   defectResultBad:'😅 Hanya {caught}/5 ditangkap — beberapa kecacatan terlepas. Cuba lagi?',
   cmScoreLine:'Jumlah markah: {score} / {total}',
+  cmCongrats:'🎉 Hebat! Anda menjawab semua {n} soalan DataMine dengan betul — mungkin anda bakal saintis komputer masa depan!',
   cmLeaderboard:'🌐 Papan Kedudukan Pemain', cmYou:'Anda', cmPtsShort:'mata',
   btnClose:'Terus meneroka (E)',
   ttsToggle:'🔊 Baca kuat teks pelajaran secara automatik', ttsOn:'🔊 Bacaan automatik dihidupkan', ttsOff:'🔇 Bacaan automatik dimatikan',
@@ -4242,6 +4245,9 @@ function answerCM(i){
   if(correct && !cmDone.has(q.id)){
     cmDone.add(q.id); cmScore += q.points; saveCM(); refreshQuests(); updateCMBoard(); netSendCMScore();
     blip(880,0.12);
+    if(cmScore===cmTotalPoints()){
+      setTimeout(()=>toast(t('cmCongrats',{n:cmTotalPoints()})),400);
+    }
   }else{
     blip(220,0.1);
   }
