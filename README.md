@@ -175,7 +175,9 @@ with an opening at every one of the lab's four floors.
   lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
   Ms Syira (Data Science — a Malay Muslim woman, shown wearing a hijab and
   long dress), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
-  (Artificial Intelligence). Two of them have a "▶ Watch teaching animation"
+  (Artificial Intelligence). All four wander the aisles between the desks
+  rather than standing still, and pause to face you once you walk up. Two of
+  them have a "▶ Watch teaching animation"
   button in their dialogue: Ms Syira's plays a data packet bouncing between
   a client and a server (Request/Response) for the Networking & Internet
   topic, and Mr Eng YK's plays a CPU box cycling round-robin through four
