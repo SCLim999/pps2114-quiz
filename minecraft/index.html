@@ -13,6 +13,14 @@
     position:fixed; inset:0; z-index:2; pointer-events:none;
     background:#0b1030; mix-blend-mode:multiply; opacity:0;
   }
+  #urgency-vignette {
+    position:fixed; inset:0; z-index:3; pointer-events:none; opacity:0;
+    background:radial-gradient(ellipse at center, rgba(200,0,0,0) 55%, rgba(180,0,0,.6) 100%);
+  }
+  #urgency-vignette.urgent-active { animation:urgentPulse 1s ease-in-out infinite; }
+  @keyframes urgentPulse { 0%,100%{opacity:.25} 50%{opacity:.8} }
+  #chip-timer.urgent-text { display:inline-block; animation:urgentText 1s ease-in-out infinite; }
+  @keyframes urgentText { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
   #photo-hint {
     position:fixed; top:10px; left:50%; transform:translateX(-50%);
     background:rgba(0,0,0,.55); color:#ffd75e; padding:6px 16px; border-radius:20px;
@@ -275,6 +283,7 @@
 
 <canvas id="game"></canvas>
 <div id="night-overlay"></div>
+<div id="urgency-vignette"></div>
 
 <div id="crosshair"></div>
 <div id="pos"></div>
@@ -3213,6 +3222,8 @@ const modalEl=document.getElementById('modal');
 const GAME_TIME_LIMIT = 1200;           // 20 分钟
 let gameEnded = false, lastEndgameReason = null;
 const endgameEl = document.getElementById('endgame-modal');
+const urgencyEl = document.getElementById('urgency-vignette');
+let lastTickSec = null;
 function badgeInfo(pct, timeUsed){                // pct: 探索+DataMine 综合完成度 0~100；timeUsed: 秒
   if(pct>=100){
     if(timeUsed<=480) return { name:t('badgeGeek'),    desc:t('badgeGeekDesc') };
@@ -4731,6 +4742,18 @@ function animate(){
   const remain = Math.max(0, GAME_TIME_LIMIT-playTime);
   chipTimerEl.textContent = ' · ⏱ ' + formatTime(remain);
   chipTimerEl.style.color = remain<=60 ? '#ff6b6b' : '';
+  const urgent = !gameEnded && remain<=60 && remain>0;
+  chipTimerEl.classList.toggle('urgent-text', urgent);
+  urgencyEl.classList.toggle('urgent-active', urgent);
+  if(urgent){
+    const sec = Math.ceil(remain);
+    if(sec !== lastTickSec){
+      lastTickSec = sec;
+      blip(sec<=10 ? 1046 : 660, sec<=10 ? 0.1 : 0.07);
+    }
+  }else{
+    lastTickSec = null;
+  }
   if(!gameEnded) checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
@@ -4891,6 +4914,9 @@ window.__test = {
     quiz: document.getElementById('endgame-quiz-val').textContent,
   }),
   restartChallenge, GAME_TIME_LIMIT,
+  urgency: ()=>({ urgentActive:urgencyEl.classList.contains('urgent-active'),
+    timerUrgentText:chipTimerEl.classList.contains('urgent-text'),
+    timerColor:chipTimerEl.style.color, lastTickSec }),
   minimap: ()=>({ canvas:mmCanvas, sx:MM_SX, sz:MM_SZ }),
   compassHeading(){
     const fwdX=-Math.sin(player.yaw), fwdZ=-Math.cos(player.yaw);

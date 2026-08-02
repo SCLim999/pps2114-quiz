@@ -243,7 +243,9 @@ with an opening at every one of the lab's four floors.
   always obvious which way you're facing and where to walk next.
 - **20-minute timed challenge**: the whole game is a race against a 20-minute
   countdown shown next to the explore/DataMine chips (paused while a menu or
-  dialogue is open; turns red under a minute). Finish both the exploration
+  dialogue is open; turns red under a minute, with a pulsing red screen
+  vignette, a pulsing timer, and a once-a-second tick that speeds up to a
+  higher-pitched tick in the final 10 seconds). Finish both the exploration
   quest and the DataMine quiz (20/20 combined) before time runs out for an
   instant "Challenge Complete!" screen — otherwise the clock hits zero, play
   freezes, and you get "⏰ Time's Up! Practice makes perfect — give it another
