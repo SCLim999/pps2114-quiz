@@ -4440,7 +4440,7 @@ const overlayEl=document.getElementById('overlay');
 /* ---- 密码锁屏：必须先输入正确密码，才会显示开始菜单 ----
    密码本身不会以明文出现在源码里——这里只存了它的 SHA-256 哈希值，
    解锁时把用户输入也算一次哈希，两个哈希值相等才算对。*/
-const LOCK_PASSWORD_HASH = '3fe1df6f581d2840a3f26103e45e0fcdcadf7f7544b1b49487e781dba71e87bc';
+const LOCK_PASSWORD_HASH = 'f178c00ab1af8e4610af031860317b8bdd420f7405c6ed80086d9b0864bfd640';
 async function sha256Hex(text){
   const buf = new TextEncoder().encode(text);
   const digest = await crypto.subtle.digest('SHA-256', buf);
