@@ -81,8 +81,17 @@ with no dependencies, no build step and no network access needed. Just open
 
 - One click starts a 60-second round; every click drops the hook, which sinks until it
   touches something and then reels it back up.
-- Each target shows its point value: coin 10, small fish 20, medium 50, big 120,
-  fish king 250, treasure chest 400 and a rare 1000-point deep-sea monster.
+- **15 kinds of sea life**, each labelled on screen with its point value and living at
+  its own depth — shallow water has coins, clownfish, blue fish and jellyfish; the
+  middle layer has gold fish, pufferfish, sea turtles and squid; the deep has big red
+  fish, swordfish, the crowned fish king, treasure chests, a glowing deep-sea
+  anglerfish and a rare 1000-point sea monster. Crabs walk along the seabed.
 - Bigger catches are worth more but reel in much slower, so time is the real cost.
   Consecutive catches build a combo multiplier (up to ×2); an empty hook resets it.
+- Species behave differently: fish swim, squid jet forward in bursts, turtles paddle,
+  jellyfish pulse upwards, chests float up and crabs turn around at the walls.
 - Best score is kept in `localStorage`. Sound is generated with WebAudio (toggleable).
+
+To add or rebalance a species, edit the single `KINDS` table at the top of the script
+(score, reel speed, depth band, hit box, spawn weight) and give it a small drawing
+function in the `ART` map.
