@@ -72,3 +72,17 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+## Bonus — Fishing arcade game (`games/fishing.html`)
+
+An arcade-style fishing game, unrelated to the assessment: one standalone HTML file
+with no dependencies, no build step and no network access needed. Just open
+`games/fishing.html` (or link it from anywhere the folder is hosted).
+
+- One click starts a 60-second round; every click drops the hook, which sinks until it
+  touches something and then reels it back up.
+- Each target shows its point value: coin 10, small fish 20, medium 50, big 120,
+  fish king 250, treasure chest 400 and a rare 1000-point deep-sea monster.
+- Bigger catches are worth more but reel in much slower, so time is the real cost.
+  Consecutive catches build a combo multiplier (up to ×2); an empty hook resets it.
+- Best score is kept in `localStorage`. Sound is generated with WebAudio (toggleable).
