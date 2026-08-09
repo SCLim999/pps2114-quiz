@@ -17,6 +17,7 @@ No server needed — it is a static web page. Student C++ code is compiled by th
 | `js/questions.js` | **Question bank** — edit MCQs, coding tasks, test cases, feedback |
 | `js/app.js` | Application logic (no editing needed) |
 | `google-apps-script/Code.gs` | Script that writes marks into your Google Sheet |
+| `game/` | **恐龙时代 / Dinosaur Era** — a standalone arcade shooting game (see below) |
 
 ## Setup — Google Sheets recording (one time, ~5 minutes)
 
@@ -72,3 +73,38 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+---
+
+## 恐龙时代 / Dinosaur Era — arcade shooting game
+
+A standalone light-gun style shooter in `game/`, inspired by the "Dinosaur Era"
+arcade cabinet. It is completely separate from the assessment — nothing in
+`index.html` links to it, so students cannot wander into it during a test.
+
+Open `game/index.html` in a browser (or host the folder) and play. No build
+step, no assets, no dependencies: the jungle, the ruined skyline and all four
+dinosaurs are drawn with Canvas 2D paths, and every sound is synthesised with
+the Web Audio API at runtime.
+
+| File | Purpose |
+|---|---|
+| `game/index.html` | Cabinet frame, start / pause / game-over overlays |
+| `game/css/game.css` | Arcade styling, responsive layout |
+| `game/js/game.js` | The whole game — perspective, dinosaurs, waves, HUD, audio |
+
+**Controls** — mouse or touch to aim and fire, `R` to reload (auto-reloads when
+the magazine is empty), `Space` to fire at the crosshair, `P` / `Esc` to pause.
+
+**How it plays** — dinosaurs walk in from the horizon and grow as they get
+closer; let one reach you and it takes a chunk of your health. Headshots do
+double damage and score double, consecutive kills build a combo multiplier up
+to ×4, and a missed shot breaks the combo. Every 5th wave sends a Spinosaurus
+boss. The high score is kept in `localStorage`.
+
+**Tuning it** — the four species live in the `TYPES` table at the top of
+`game/js/game.js` (health, speed, size, score, damage, colours, hit boxes).
+Wave composition and pacing are in `nextWave()`; magazine size, reload time and
+starting health are the constants at the top of the file. While the page is
+open, `window.DinoEra.state` exposes the live game state for debugging from the
+browser console.

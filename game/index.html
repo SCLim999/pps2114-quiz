@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>恐龙时代 — Dinosaur Era</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+  <div id="cabinet">
+    <!-- ===================== MARQUEE ===================== -->
+    <div class="marquee">
+      <h1>恐龙时代 <span>DINOSAUR ERA</span></h1>
+      <p class="tagline">LET'S FIGHT THE DINOSAURS!</p>
+    </div>
+
+    <!-- ===================== SCREEN ===================== -->
+    <div id="screen">
+      <canvas id="game" width="1280" height="720"></canvas>
+
+      <!-- ---------- Start overlay ---------- -->
+      <div id="overlay-start" class="overlay">
+        <div class="panel">
+          <h2>恐龙时代</h2>
+          <p class="lead">远古巨兽冲破了封印，拿起枪，守住阵地！</p>
+          <ul class="howto">
+            <li><b>鼠标 / 触屏</b> — 瞄准并开火</li>
+            <li><b>R 键</b> — 换弹（子弹打空会自动换弹）</li>
+            <li><b>P / Esc</b> — 暂停　<b>M</b> — 静音</li>
+            <li>爆头伤害 <b>×2</b>，连击越高分数越高</li>
+            <li>放任恐龙冲到面前会 <b>扣血</b>，血量归零游戏结束</li>
+          </ul>
+          <button id="btn-start" class="btn">投币开始 &nbsp;INSERT COIN</button>
+          <p class="hi">最高分 HIGH SCORE：<span id="hi-start">0</span></p>
+        </div>
+      </div>
+
+      <!-- ---------- Pause overlay ---------- -->
+      <div id="overlay-pause" class="overlay hidden">
+        <div class="panel">
+          <h2>暂停 PAUSED</h2>
+          <button id="btn-resume" class="btn">继续 RESUME</button>
+          <button id="btn-quit" class="btn btn-ghost">放弃 QUIT</button>
+        </div>
+      </div>
+
+      <!-- ---------- Game over overlay ---------- -->
+      <div id="overlay-over" class="overlay hidden">
+        <div class="panel">
+          <h2 id="over-title">游戏结束 GAME OVER</h2>
+          <div class="stats">
+            <div><span id="st-score">0</span><em>得分 SCORE</em></div>
+            <div><span id="st-wave">1</span><em>波次 WAVE</em></div>
+            <div><span id="st-kills">0</span><em>击杀 KILLS</em></div>
+            <div><span id="st-acc">0%</span><em>命中率 ACC</em></div>
+          </div>
+          <p class="hi">最高分 HIGH SCORE：<span id="hi-over">0</span></p>
+          <button id="btn-again" class="btn">再来一局 CONTINUE?</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="rotate-hint">📱 横屏游玩视野更大 &mdash; rotate your phone for a bigger screen</p>
+    <p class="credits">Canvas 2D · 无外部素材 · 键鼠 / 触屏均可</p>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
