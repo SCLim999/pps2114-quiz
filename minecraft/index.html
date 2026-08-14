@@ -557,6 +557,7 @@ zh: {
   hostOnlyReset:'只有房主可以重置世界',
   confirmReset:'确定要清除你放置/破坏的所有方块，恢复原始园区吗？',
   congrats:'🎉 恭喜！你已探索完 ViTrox Campus 的全部 {n} 个建筑知识点！',
+  eggFound:'🥚 隐藏彩蛋已发现！你是个非常用心的探险家。',
   playerDefault:'玩家',
   mpLoadFail:'❌ 多人组件未能加载（检查网络后刷新页面）',
   mpCreating:'正在创建房间…',
@@ -650,6 +651,7 @@ en: {
   hostOnlyReset:'Only the host can reset the world',
   confirmReset:'Clear all blocks you placed/broke and restore the original campus?',
   congrats:'🎉 Congratulations! You have explored all {n} architecture lessons of ViTrox Campus!',
+  eggFound:'🥚 Hidden easter egg found! You are one thorough explorer.',
   playerDefault:'Player',
   mpLoadFail:'❌ Multiplayer module failed to load (check your network and refresh)',
   mpCreating:'Creating room…',
@@ -743,6 +745,7 @@ ms: {
   hostOnlyReset:'Hanya hos boleh set semula dunia',
   confirmReset:'Padam semua blok yang anda letak/pecah dan pulihkan kampus asal?',
   congrats:'🎉 Tahniah! Anda telah meneroka kesemua {n} pelajaran seni bina ViTrox Campus!',
+  eggFound:'🥚 Telur Easter tersembunyi dijumpai! Anda penjelajah yang sangat teliti.',
   playerDefault:'Pemain',
   mpLoadFail:'❌ Modul berbilang pemain gagal dimuatkan (semak rangkaian dan muat semula)',
   mpCreating:'Mencipta bilik…',
@@ -3144,6 +3147,15 @@ function markGmMet(){
   gmMet = true;
   try{ localStorage.setItem('vitroxcraft_gm_met','1'); }catch(e){}
 }
+// 隐藏彩蛋：不出现在任务清单里，藏在东北角螺旋小花园的神秘 NPC
+let eggFound = false;
+try{ eggFound = localStorage.getItem('vitroxcraft_egg')==='1'; }catch(e){}
+function markEggFound(){
+  if(eggFound) return;
+  eggFound = true;
+  try{ localStorage.setItem('vitroxcraft_egg','1'); }catch(e){}
+  setTimeout(()=>toast(t('eggFound')), 400);
+}
 const questList=document.getElementById('quest-list');
 function refreshQuests(){
   document.getElementById('chip-main').innerHTML =
@@ -4034,6 +4046,13 @@ const NPCS = [
       zh:'嘿，我是 Eng YK，教人工智能（AI）。你知道吗，隔壁实验楼里那些 ViTrox 检测设备，用的就是机器视觉这种 AI 技术，能一秒检查几十颗芯片，比人眼快得多。我在这间电脑室带学生做 AI 专题项目，从最简单的分类模型开始练手。不过再厉害的 AI 程序，最终都要靠操作系统（Operating System）把 CPU 轮流分配给每个任务才能跑起来——想看看 CPU 是怎么在多个程序之间切换的吗？欢迎常来找我们几位讲师聊聊！',
       en:"Hey, I'm Eng YK, and I teach Artificial Intelligence. Did you know those ViTrox inspection machines in the lab building next door use machine vision, a form of AI, to inspect dozens of chips a second — far faster than the human eye? I run AI project work with students in this computer room, starting from simple classification models. But even the smartest AI program only runs because the Operating System keeps sharing out the CPU between every task — want to see how the CPU switches between programs? Feel free to drop by and chat with any of us lecturers anytime!",
       ms:'Hei, saya Eng YK, dan saya mengajar Kecerdasan Buatan (AI). Tahukah anda mesin pemeriksaan ViTrox di bangunan makmal sebelah menggunakan penglihatan mesin, satu bentuk AI, untuk memeriksa berpuluh cip sesaat — jauh lebih pantas daripada mata manusia? Saya menjalankan kerja projek AI bersama pelajar di bilik komputer ini, bermula daripada model klasifikasi yang mudah. Tetapi program AI paling bijak sekalipun hanya boleh berjalan kerana Sistem Operasi (Operating System) sentiasa berkongsi CPU antara setiap tugasan — nak lihat bagaimana CPU bertukar antara program? Jemput singgah untuk berbual dengan mana-mana daripada kami pensyarah bila-bila masa!' } },
+  /* —— 隐藏彩蛋 NPC：不在任何任务清单里，藏在 Campus 3.0 东北角一座没人特意提起的螺旋小花园中央 —— */
+  { name:'???', color:0xffd700, expr:'happy', range:3, x:137, y:4, z:-44, baseYaw:-Math.PI/2,
+    role:{ zh:'🥚 隐藏彩蛋', en:'🥚 Hidden Easter Egg', ms:'🥚 Telur Easter Tersembunyi' },
+    dialog:{
+      zh:'恭喜你，找到隐藏彩蛋了！这里是庭院之外一座无人问津的螺旋小花园——不在任何任务清单里，只是留给愿意多走几步、四处看看的探险家。做游戏和做产品一样：真正打动人的细节，往往藏在没人要求你做的地方。谢谢你把 ViTrox Campus 逛得这么仔细！',
+      en:'Congratulations, you found the hidden easter egg! This little spiral garden sits far outside the courtyard, tucked away where nobody has to look — it is not on any quest list, just left here for explorers willing to wander a few extra steps. Making a game is a lot like building a product: the details that really move people are often the ones nobody asked you to make. Thanks for exploring ViTrox Campus this thoroughly!',
+      ms:'Tahniah, anda jumpa telur Easter tersembunyi! Taman kecil berbentuk lingkaran ini terletak jauh di luar laman, di tempat yang tiada siapa perlu pergi — ia tiada dalam senarai misi, cuma ditinggalkan untuk penjelajah yang sanggup berjalan beberapa langkah lagi. Membina permainan sama seperti membina produk: perincian yang benar-benar menyentuh hati selalunya perkara yang tiada siapa minta anda buat. Terima kasih kerana meneroka ViTrox Campus dengan begitu teliti!' } },
 ];
 const npcObjs = [];
 for(const n of NPCS){
@@ -4111,6 +4130,7 @@ function openNpc(i){
   const n = NPCS[i];
   if(n.name==='Game Master') markGmMet();
   else if(!gmMet){ toast(t('gmLockedMsg')); blip(220,0.1); return; }
+  if(n.name==='???') markEggFound();
   document.getElementById('modal-title').textContent = '💬 ' + n.name;
   document.getElementById('modal-en').textContent = n.role[lang];
   document.getElementById('modal-text').textContent = n.dialog[lang];
@@ -4936,6 +4956,7 @@ window.__test = {
   },
   openInfo, openNpc, closeInfo,
   gmMet: ()=>gmMet,
+  eggFound: ()=>eggFound,
   tts: ()=>({ supported:ttsSupported, auto:ttsAuto, gender:ttsGender, currentSpeech, currentGender, speaking: ttsSupported && window.speechSynthesis.speaking }),
   guessVoiceGender, pickVoice, ttsSanitize,
   COMPUTERS,

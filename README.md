@@ -266,6 +266,10 @@ with an opening at every one of the lab's four floors.
   (`minecraft/starlightstrut.mp3`), on either ending, and switches back to
   the regular background music on "Try Again" — following the same music
   checkbox and `M` mute state as everything else.
+- **Hidden easter egg**: a 22nd, unlisted NPC is tucked away off the beaten
+  path, with no quest marker pointing to it — finding it and talking to it
+  once triggers a one-time "hidden easter egg found" toast, remembered in
+  `localStorage`. Where exactly it's hiding is left for players to discover.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
