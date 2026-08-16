@@ -72,14 +72,3 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
-
----
-
-## Also in this repository: College Tycoon
-
-`college-tycoon/` is a separate, self-contained browser game — a five-year
-management simulation of a private college with Corporate Training, College,
-Marketing, Education STEM and Vocational Education departments. It shares no
-code with the assessment app; open `college-tycoon/index.html` to play, and see
-[`college-tycoon/README.md`](college-tycoon/README.md) for the rules and tuning
-notes.
