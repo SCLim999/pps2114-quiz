@@ -270,6 +270,18 @@ with an opening at every one of the lab's four floors.
   path, with no quest marker pointing to it — finding it and talking to it
   once triggers a one-time "hidden easter egg found" toast, remembered in
   `localStorage`. Where exactly it's hiding is left for players to discover.
+- **Ad Mode (auto demo)**: a second start-menu button, next to "Enter Campus,"
+  hands the camera to a virtual guide that flies itself around the campus for
+  about 5-10 minutes with no input needed — visiting the three founders, an
+  ViTrox core-value pillar, the Gallery, the computing lecturers, a DataMine
+  station (opening the Intro-to-Computing question and picking the correct
+  answer on its own), the ViTrox Education rebrand, the Principal, the
+  marketing officer, and a Diploma in Computer Science kiosk — auto-narrated
+  via the same text-to-speech engine used elsewhere. Meant for open days,
+  booths, or a classroom projector: HUD chrome is hidden, a "🛑 Exit Demo"
+  button (or E/Esc/Enter to skip ahead) returns to the menu any time, and
+  whatever it "visits" doesn't touch the real player's saved explore/DataMine
+  progress — that state is snapshotted before the demo and restored after.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 

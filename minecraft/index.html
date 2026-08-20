@@ -30,6 +30,18 @@
   body.photo-mode #compass, body.photo-mode #chip, body.photo-mode #prompt,
   body.photo-mode #quests, body.photo-mode #hotbar, body.photo-mode #touch-ui,
   body.photo-mode #mp-status { display:none !important; }
+  body.ad-mode #crosshair, body.ad-mode #pos, body.ad-mode #minimap,
+  body.ad-mode #compass, body.ad-mode #chip, body.ad-mode #prompt,
+  body.ad-mode #quests, body.ad-mode #hotbar, body.ad-mode #touch-ui,
+  body.ad-mode #mp-status { display:none !important; }
+  #ad-caption {
+    position:fixed; left:50%; top:16%; transform:translate(-50%,-50%);
+    z-index:8; text-align:center; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,.9);
+    pointer-events:none; max-width:80vw;
+  }
+  #ad-caption h2 { font-size:32px; margin:0 0 10px; }
+  #ad-caption p { font-size:18px; margin:0; opacity:.92; }
+  #btn-ad-exit { position:fixed; right:18px; top:18px; z-index:9; }
   #photo-controls {
     position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:7;
     display:flex; gap:18px;
@@ -294,6 +306,8 @@
 <div id="toast"></div>
 <div id="quests"><h3 id="quests-title"></h3><ul id="quest-list"></ul></div>
 <div id="hotbar"></div>
+<div id="ad-caption" class="hidden"><h2 id="ad-caption-title"></h2><p id="ad-caption-sub"></p></div>
+<button class="btn gray hidden" id="btn-ad-exit"></button>
 <div id="photo-hint" class="hidden"></div>
 
 <!-- 触屏操作层（仅触屏设备显示） -->
@@ -342,6 +356,7 @@
     <table id="ov-keys"></table>
     <div class="mp-line"><span id="lbl-name"></span><input id="player-name" maxlength="12" placeholder="Steve"></div>
     <button class="btn" id="btn-start"></button>
+    <button class="btn gray" id="btn-ad"></button>
     <button class="btn gray" id="btn-reset"></button>
     <label class="tts-toggle" id="music-toggle-row">
       <input type="checkbox" id="music-cb"><span id="music-toggle-lbl"></span>
@@ -495,7 +510,10 @@ zh: {
   lockTitle:'🔒 请输入密码', lockDesc:'输入正确的密码后才能开始游戏。',
   lockPlaceholder:'密码', lockBtn:'解锁', lockWrong:'❌ 密码错误，请重试',
   lockNoCrypto:'❌ 此浏览器不支持安全校验（需要 Web Crypto API），请改用较新版本的 Chrome / Edge / Firefox / Safari',
-  yourName:'你的名字：', btnStart:'▶ 进入园区', btnReset:'🔄 重置世界（清除我的改动）',
+  yourName:'你的名字：', btnStart:'▶ 进入园区（游戏模式）', btnReset:'🔄 重置世界（清除我的改动）',
+  btnAd:'📣 广告模式（自动演示）', adExit:'🛑 退出演示',
+  adIntroTitle:'📣 ViTrox Campus 教育宣传', adIntroSub:'接下来大约 5-10 分钟，让虚拟向导带你认识 ViTrox 学院、创办人理念，以及我们培养人才的软硬实力……',
+  adEndTitle:'🎉 演示结束', adEndSub:'感谢观看！欢迎亲自进入园区探索，或了解更多 ViTrox 学院的课程。',
   mpTitle:'🌐 多人连线（同学一起逛园区）', btnHost:'创建多人房间', mpOr:'— 或 —',
   roomPh:'房间代码', btnJoin:'加入房间',
   mpHint:'创建房间后会得到一个 5 位代码，发给同学即可加入；房主请保持页面打开。连线后点上方「进入园区」开始。',
@@ -589,7 +607,10 @@ en: {
   lockTitle:'🔒 Enter Password', lockDesc:'Enter the correct password to start the game.',
   lockPlaceholder:'Password', lockBtn:'Unlock', lockWrong:'❌ Wrong password, try again',
   lockNoCrypto:'❌ This browser lacks the Web Crypto API needed to check the password — please use a recent Chrome / Edge / Firefox / Safari',
-  yourName:'Your name: ', btnStart:'▶ Enter Campus', btnReset:'🔄 Reset World (clear my edits)',
+  yourName:'Your name: ', btnStart:'▶ Enter Campus (Game Mode)', btnReset:'🔄 Reset World (clear my edits)',
+  btnAd:'📣 Ad Mode (Auto Demo)', adExit:'🛑 Exit Demo',
+  adIntroTitle:'📣 ViTrox Campus Education Showcase', adIntroSub:'Over the next 5-10 minutes, let our virtual guide introduce ViTrox College, our founders\' philosophy, and the combined strengths behind how we develop talent...',
+  adEndTitle:'🎉 Demo Complete', adEndSub:'Thanks for watching! Feel free to explore the campus yourself, or learn more about ViTrox College\'s programmes.',
   mpTitle:'🌐 Multiplayer (explore with friends)', btnHost:'Create Room', mpOr:'— or —',
   roomPh:'Room code', btnJoin:'Join Room',
   mpHint:'Create a room to get a 5-letter code and share it with classmates; the host must keep this page open. Once connected, click "Enter Campus" above.',
@@ -683,7 +704,10 @@ ms: {
   lockTitle:'🔒 Masukkan Kata Laluan', lockDesc:'Masukkan kata laluan yang betul untuk mula bermain.',
   lockPlaceholder:'Kata laluan', lockBtn:'Buka Kunci', lockWrong:'❌ Kata laluan salah, cuba lagi',
   lockNoCrypto:'❌ Pelayar ini tiada Web Crypto API untuk menyemak kata laluan — sila guna Chrome / Edge / Firefox / Safari versi terkini',
-  yourName:'Nama anda: ', btnStart:'▶ Masuk Kampus', btnReset:'🔄 Set Semula Dunia (padam ubahan saya)',
+  yourName:'Nama anda: ', btnStart:'▶ Masuk Kampus (Mod Permainan)', btnReset:'🔄 Set Semula Dunia (padam ubahan saya)',
+  btnAd:'📣 Mod Iklan (Demo Automatik)', adExit:'🛑 Keluar Demo',
+  adIntroTitle:'📣 Pameran Pendidikan ViTrox Campus', adIntroSub:'Dalam 5-10 minit akan datang, biar panduan maya kami memperkenalkan ViTrox College, falsafah para pengasas, dan kekuatan menyeluruh di sebalik cara kami membangunkan bakat...',
+  adEndTitle:'🎉 Demo Selesai', adEndSub:'Terima kasih kerana menonton! Jemput teroka kampus sendiri, atau ketahui lebih lanjut tentang program ViTrox College.',
   mpTitle:'🌐 Berbilang Pemain (jelajah bersama rakan)', btnHost:'Cipta Bilik', mpOr:'— atau —',
   roomPh:'Kod bilik', btnJoin:'Sertai Bilik',
   mpHint:'Cipta bilik untuk mendapat kod 5 huruf dan kongsikannya dengan rakan; hos mesti membiarkan halaman ini terbuka. Selepas berhubung, klik "Masuk Kampus" di atas.',
@@ -3345,7 +3369,7 @@ function openInfo(i){
 // 有些浏览器按 Esc 关闭弹窗时会顺带强制解锁鼠标（浏览器行为，JS 无法阻止），
 // 如果不重新请求锁定，玩家就会被晾在开始菜单，需要再点一次「进入园区」才能继续。
 function resumeAfterModal(){
-  if(touchPlay || locked) return;
+  if(adMode || touchPlay || locked) return;
   const req = canvas.requestPointerLock();
   if(req && typeof req.catch==='function'){
     req.catch(()=>{ if(!locked && !modalOpen) overlayEl.classList.remove('hidden'); });
@@ -4457,6 +4481,199 @@ document.getElementById('btn-join').addEventListener('click', ()=>{
 ================================================================ */
 const overlayEl=document.getElementById('overlay');
 
+/* ================================================================
+   广告模式（自动演示）：虚拟角色自动飞行走访创办人、核心价值观、
+   ViTrox Gallery、电脑室讲师与 DataMine 编程任务、ViTrox Education
+   校长与市场专员、文凭课程展示牌，全程约 5-10 分钟，用于对外展示
+   ViTrox 学院、创办人理念与人才培养的软硬实力，播完自动回到开始菜单
+================================================================ */
+const adCaptionEl = document.getElementById('ad-caption');
+const adExitBtn = document.getElementById('btn-ad-exit');
+let adMode=false, adStopIdx=-1, adPhase='moving', adMoveT=0, adMoveDur=2;
+let adFrom=null, adTo=null, adLingerT=0, adLingerMin=0, adLingerMax=0;
+let adPrevTtsAuto=false;
+
+function adAngDiff(a,b){ let d=(b-a)%(Math.PI*2); if(d>Math.PI) d-=Math.PI*2; if(d<-Math.PI) d+=Math.PI*2; return d; }
+function adLookAt(px,py,pz, tx,ty,tz){
+  const dx=tx-px, dz=tz-pz;
+  const dist=Math.hypot(dx,dz);
+  const eyeY=py+player.EYE;
+  return {
+    yaw: Math.atan2(-dx,-dz),
+    pitch: clamp(Math.atan2(ty-eyeY, dist||0.001), -Math.PI/2+0.02, Math.PI/2-0.02),
+  };
+}
+function adTextDur(text, minMs, maxMs){
+  return { minMs: clamp((text||'').length*90, minMs, maxMs), maxMs };
+}
+function adSpeechDur(){
+  if(ttsSupported) return { minMs:4500, maxMs:22000 };
+  return adTextDur(currentSpeech, 5000, 18000);
+}
+
+const AD_TOUR = (()=>{
+  const stops = [];
+  const npcStop = (name, dx, dz)=>{
+    const idx = NPCS.findIndex(n=>n.name===name);
+    const n = NPCS[idx];
+    const sx=n.x+dx, sz=n.z+dz;
+    const look = adLookAt(sx,n.y,sz, n.x,n.y+1.4,n.z);
+    stops.push({ x:sx, y:n.y, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'npc', idx} });
+  };
+  const infoStop = (i, dx, dz)=>{
+    const p = INFO_POINTS[i];
+    const sx=p.x+0.5+dx, sz=p.z+0.5+dz;
+    const look = adLookAt(sx,p.y,sz, p.x+0.5,p.y+0.6,p.z+0.5);
+    stops.push({ x:sx, y:p.y, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'info', idx:i} });
+  };
+  const pillarStop = (label, dx, dz)=>{
+    const idx = IACTG_PILLARS.findIndex(p=>p.label===label);
+    const p = IACTG_PILLARS[idx];
+    const sx=p.x+dx, sz=p.z+dz;
+    const look = adLookAt(sx,p.floorY,sz, p.x,p.floorY+0.6,p.z);
+    stops.push({ x:sx, y:p.floorY, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'pillar', idx} });
+  };
+  const kioskStop = (id, dx, dz)=>{
+    const idx = DIPLOMA_KIOSKS.findIndex(k=>k.id===id);
+    const k = DIPLOMA_KIOSKS[idx];
+    const sx=k.x+dx, sz=k.z+dz;
+    const look = adLookAt(sx,k.floorY,sz, k.x,k.floorY+0.6,k.z);
+    stops.push({ x:sx, y:k.floorY, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'kiosk', idx} });
+  };
+  const cmStop = (terminalId, dx, dz)=>{
+    const idx = CM_TERMINALS.findIndex(s=>s.id===terminalId);
+    const s = CM_TERMINALS[idx];
+    const sx=s.x+dx, sz=s.z+dz;
+    const look = adLookAt(sx,s.floorY,sz, s.x,s.floorY+0.6,s.z);
+    stops.push({ x:sx, y:s.floorY, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'cm', idx} });
+  };
+
+  stops.push({ x:0.5, y:4, z:8, yaw:Math.PI, pitch:0, action:{type:'title'} });
+  npcStop('Chu Jenn Weng', 0, 3);
+  npcStop('Steven Siaw', 0, -3);
+  npcStop('Yeoh Shih Hoong', 0, -3);
+  infoStop(7, 0, 3);              // ⑧ 启发 ViTrox 的相机
+  pillarStop('I · Integrity', 3, 0);
+  npcStop('Grace', 0, 3);         // ViTrox Gallery · 公司历史
+  npcStop('Ts Dr Lim SC', 0, 3);  // 电脑室 · 软件工程 Programme Leader
+  cmStop('t1', 0, 3);             // DataMine 硬实力小展示：电脑入门（软件 vs 硬件）
+  infoStop(8, 0, 3);              // ⑨ ViTrox Education 品牌重塑
+  npcStop('Dr Janaka Low', 0, 3); // ViTrox Education 校长
+  npcStop('Cindy', 0, 3);         // 市场专员 · Diploma Programme
+  kioskStop('dk1', 0, 3);         // Diploma in Computer Science 课程展示牌
+  stops.push({ x:170, y:4, z:-2, yaw:0, pitch:0, action:{type:'end'} });
+  return stops;
+})();
+
+function adShowCaption(title, sub){
+  document.getElementById('ad-caption-title').textContent = title;
+  document.getElementById('ad-caption-sub').textContent = sub;
+  adCaptionEl.classList.remove('hidden');
+}
+function adHideCaption(){ adCaptionEl.classList.add('hidden'); }
+
+function adRunAction(action){
+  adHideCaption();
+  switch(action.type){
+    case 'title': adShowCaption(t('adIntroTitle'), t('adIntroSub')); return adTextDur(t('adIntroSub'), 4500, 9000);
+    case 'end':   adShowCaption(t('adEndTitle'), t('adEndSub'));     return adTextDur(t('adEndSub'), 4000, 8000);
+    case 'npc':   openNpc(action.idx); return adSpeechDur();
+    case 'info':  openInfo(action.idx); return adSpeechDur();
+    case 'pillar':openIactgPillar(action.idx); return adSpeechDur();
+    case 'kiosk': openDiplomaKiosk(action.idx); return adSpeechDur();
+    case 'cm': {
+      const term = CM_TERMINALS[action.idx];
+      openCMChapter(term.chapterIdx);
+      const q = CM_CHAPTERS[term.chapterIdx].questions[0];
+      setTimeout(()=>{ if(adMode && adPhase==='linger') answerCM(q.correct); }, 1800);
+      return { minMs:9000, maxMs:12000 };
+    }
+  }
+  return { minMs:5000, maxMs:9000 };
+}
+function adCloseCurrent(){
+  const type = adTo.action.type;
+  if(type==='cm') closeCM();
+  else if(type==='npc'||type==='info'||type==='pillar'||type==='kiosk') closeInfo();
+  else adHideCaption();
+}
+function adAdvance(){
+  adStopIdx++;
+  if(adStopIdx>=AD_TOUR.length){ stopAdMode(); return; }
+  adFrom = { x:player.pos.x, y:player.pos.y, z:player.pos.z, yaw:player.yaw, pitch:player.pitch };
+  adTo = AD_TOUR[adStopIdx];
+  adPhase='moving'; adMoveT=0;
+  adMoveDur = clamp(Math.hypot(adTo.x-adFrom.x, adTo.z-adFrom.z, adTo.y-adFrom.y)/6, 1.6, 6);
+}
+function tickAdMode(dt){
+  if(adPhase==='moving'){
+    adMoveT += dt;
+    const k = clamp(adMoveT/adMoveDur, 0, 1);
+    const e = k<0.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;
+    player.pos.x = adFrom.x + (adTo.x-adFrom.x)*e;
+    player.pos.y = adFrom.y + (adTo.y-adFrom.y)*e;
+    player.pos.z = adFrom.z + (adTo.z-adFrom.z)*e;
+    player.yaw   = adFrom.yaw + adAngDiff(adFrom.yaw, adTo.yaw)*e;
+    player.pitch = adFrom.pitch + (adTo.pitch-adFrom.pitch)*e;
+    camera.position.set(player.pos.x, player.pos.y+player.EYE, player.pos.z);
+    camera.rotation.y = player.yaw;
+    camera.rotation.x = player.pitch;
+    if(k>=1){
+      adPhase='linger'; adLingerT=0;
+      const dur = adRunAction(adTo.action);
+      adLingerMin = dur.minMs/1000; adLingerMax = dur.maxMs/1000;
+    }
+  }else{
+    adLingerT += dt;
+    const ttsDone = !ttsSupported || !window.speechSynthesis.speaking;
+    if((adLingerT>=adLingerMin && ttsDone) || adLingerT>=adLingerMax){
+      adCloseCurrent();
+      adAdvance();
+    }
+  }
+}
+let adSnapshot = null;
+function startAdMode(){
+  if(adMode) return;
+  overlayEl.classList.add('hidden');
+  document.body.classList.add('ad-mode');
+  adExitBtn.classList.remove('hidden');
+  gmMet = true;                          // 演示模式跳过教学关卡，直接展示全部内容
+  // 演示会走真实的 openInfo/answerCM，为免把演示当中「参观」的知识点/答对的题目
+  // 当成玩家自己的真实探索进度存进 localStorage，先把这几项存档状态备份，退出演示后原样还原
+  adSnapshot = { visited:new Set(visited), cmDone:new Set(cmDone), cmScore };
+  adPrevTtsAuto = ttsAuto; ttsAuto = true;
+  adMode = true;
+  player.fly = true; player.vel.set(0,0,0);
+  adStopIdx = -1;
+  adAdvance();
+}
+function stopAdMode(){
+  if(!adMode) return;
+  adHideCaption();
+  // 关闭弹窗时 adMode 必须还是 true——closeInfo()/closeCM() 会调用 resumeAfterModal()，
+  // 提前把 adMode 设为 false 会导致它误以为该重新锁定鼠标、抢在下面 remove('hidden') 之后又把开始菜单遮住
+  if(modalOpen){
+    if(!quizEl.classList.contains('hidden')) closeCM();
+    else closeInfo();
+  }
+  adMode = false;
+  if(adSnapshot){
+    visited.clear(); for(const i of adSnapshot.visited) visited.add(i);
+    cmDone.clear(); for(const id of adSnapshot.cmDone) cmDone.add(id);
+    cmScore = adSnapshot.cmScore;
+    saveVisited(); saveCM(); refreshQuests(); updateCMBoard();
+    adSnapshot = null;
+  }
+  ttsAuto = adPrevTtsAuto;
+  stopSpeak();
+  document.body.classList.remove('ad-mode');
+  adExitBtn.classList.add('hidden');
+  overlayEl.classList.remove('hidden');
+}
+document.getElementById('btn-ad').addEventListener('click', startAdMode);
+adExitBtn.addEventListener('click', stopAdMode);
+
 /* ---- 密码锁屏：必须先输入正确密码，才会显示开始菜单 ----
    密码本身不会以明文出现在源码里——这里只存了它的 SHA-256 哈希值，
    解锁时把用户输入也算一次哈希，两个哈希值相等才算对。*/
@@ -4628,6 +4845,7 @@ function applyLang(){
   put('ov-keys', rows);
   put('lbl-name', t('yourName'));
   put('btn-start', t('btnStart')); put('btn-reset', t('btnReset'));
+  put('btn-ad', t('btnAd')); put('btn-ad-exit', t('adExit'));
   put('mp-title', t('mpTitle')); put('btn-host', t('btnHost')); put('mp-or', t('mpOr'));
   document.getElementById('room-code').placeholder = t('roomPh');
   put('btn-join', t('btnJoin'));
@@ -4800,7 +5018,9 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
   elapsed+=dt;
-  if(playing() && !modalOpen && !gameEnded){
+  if(adMode){
+    tickAdMode(dt);
+  }else if(playing() && !modalOpen && !gameEnded){
     physics(dt); playTime+=dt;
     if(playTime>=GAME_TIME_LIMIT) endGame('timeout');
     else if(visited.size===INFO_POINTS.length && cmScore===cmTotalPoints()) endGame('complete');
@@ -4820,7 +5040,7 @@ function animate(){
   }else{
     lastTickSec = null;
   }
-  if(!gameEnded) checkInfoProximity();
+  if(!gameEnded && !adMode) checkInfoProximity();
   animateRemotes(dt);
   animateNpcs(dt);
   updateDayNight(elapsed);
@@ -4981,6 +5201,22 @@ window.__test = {
     quiz: document.getElementById('endgame-quiz-val').textContent,
   }),
   restartChallenge, GAME_TIME_LIMIT,
+  startAdMode, stopAdMode,
+  adState: ()=>({ adMode, stopIdx:adStopIdx, totalStops:AD_TOUR.length, phase:adPhase,
+    action: adTo ? adTo.action : null, pos:player.pos.toArray(), yaw:player.yaw, pitch:player.pitch,
+    captionVisible: !adCaptionEl.classList.contains('hidden') }),
+  adForceAdvance(){ if(adMode){ adCloseCurrent(); adAdvance(); } },
+  adJumpTo(i){                             // 调试用：瞬移到第 i 站并直接触发该站动作（跳过飞行过渡，仅供测试）
+    if(!adMode) return null;
+    adStopIdx = i; adTo = AD_TOUR[i];
+    player.pos.set(adTo.x, adTo.y, adTo.z);
+    player.yaw = adTo.yaw; player.pitch = adTo.pitch;
+    camera.position.set(adTo.x, adTo.y+player.EYE, adTo.z);
+    camera.rotation.y = adTo.yaw; camera.rotation.x = adTo.pitch;
+    adPhase = 'linger'; adLingerT = 0;
+    const dur = adRunAction(adTo.action);
+    adLingerMin = dur.minMs/1000; adLingerMax = dur.maxMs/1000;
+  },
   urgency: ()=>({ urgentActive:urgencyEl.classList.contains('urgent-active'),
     timerUrgentText:chipTimerEl.classList.contains('urgent-text'),
     timerColor:chipTimerEl.style.color, lastTickSec }),
