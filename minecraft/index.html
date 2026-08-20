@@ -34,6 +34,12 @@
   body.ad-mode #compass, body.ad-mode #chip, body.ad-mode #prompt,
   body.ad-mode #quests, body.ad-mode #hotbar, body.ad-mode #touch-ui,
   body.ad-mode #mp-status { display:none !important; }
+  /* 广告模式下弹窗只是自动播放的旁白，不需要也不应该邀请玩家点击——
+     隐藏所有操作按钮，弹窗本体也不接受点击，全靠计时器自动翻页 */
+  body.ad-mode #modal .panel, body.ad-mode #quiz .panel { pointer-events:none; }
+  body.ad-mode #btn-close, body.ad-mode #btn-tts, body.ad-mode #btn-anim,
+  body.ad-mode #btn-play-basket, body.ad-mode #btn-play-defect,
+  body.ad-mode #quiz-next, body.ad-mode #quiz-close { display:none !important; }
   #ad-caption {
     position:fixed; left:50%; top:16%; transform:translate(-50%,-50%);
     z-index:8; text-align:center; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,.9);
