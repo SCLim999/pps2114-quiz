@@ -63,6 +63,233 @@ Open `js/questions.js`:
   course website — and give students the link. (Running C++ code requires internet
   access to reach the Wandbox API.)
 
+## Bonus: VitroxCraft — ViTrox Campus 2.0 in a web Minecraft (`minecraft/`)
+
+`minecraft/index.html` is a standalone, Minecraft-Education-style voxel world that
+recreates the [ViTrox Campus 2.0 by CYC Architect](https://www.cycarch.com/vitrox-campus-20)
+(Batu Kawan, Penang) — central circular courtyard, radial layout, circular landscape
+ramp, doorless entrances on all four sides (E/S/W/N), a uniformly paved
+(no planters) roof terrace, and the rectangular production/office blocks
+punching through the
+circular form, including two computer rooms (~20 PCs total) on the 4th floor of
+the VITROX-lettered building, reached via a staircase next to the staff canteen —
+or via a wide door straight from the ring building's roof terrace to the
+VITROX building's 3rd floor (its ground/2nd-floor atrium opening and the
+ring's own 2nd-floor entrance skybridge were widened to match). The ring
+building's own internal corridor was widened by a full block too, uniformly
+on every floor from the 1st floor up through the roof terrace, and the radial
+support columns that used to stand in the middle of the 1st/2nd-floor walkway
+were removed so the corridor is unobstructed. The roof terrace's paving was
+also cleared across a wide band from the stair tower around to the
+northeast, dropping down to the slab below in those spots (only the
+southeast stretch facing the courtyard keeps its original paving). The
+ring's inner glass curtain wall is back to its original, fully continuous
+design (the gardener NPC Kumar was moved off the wall's boundary onto open
+terrace so he's no longer boxed in). The stair tower's own roof-level
+doorways (north and south) used to be only 3 blocks wide, narrower than
+the skybridge itself, making the tower feel like a wall blocking the
+terrace walkway — both were widened to match the skybridge's 5-block
+width, and a second door was cut straight through the skybridge's own side
+wall partway along, opening directly onto the ring's terrace so players
+don't have to walk all the way to the tower. Restoring the
+inner/outer curtain walls to their full original design had left their
+parapet caps sitting a block proud of the terrace wherever the paving was
+dropped (reading like scattered raised grey boxes) — the parapet is now
+dropped to match everywhere, so the terrace is one flat, uniform level
+all the way around. The terrace's ring corridor was later widened by
+another full block on both the inner and outer sides, with the entrance's
+2nd-floor skybridge moved out to match. A thin, single-block steel
+safety fence now runs both the inner and outer edges of the terrace,
+placed by stepping through angles and bridging the diagonal corners so
+it forms one unbroken loop, with gaps only at the stair tower, the
+skybridge's side door, the VITROX atrium connection, and around Kumar —
+the stair tower and VITROX atrium gaps were originally several blocks
+wider than the actual doorway, since tightened to match the real door
+width exactly, and the fence's outer ring was originally only excluded
+from the width of those two doors, so the rest of it cut straight
+through the skybridge corridor and the VITROX building's interior,
+leaving stray fence segments floating inside both — now excluded from
+each building's full footprint instead, so the fence no longer clips
+through walls. The stair tower's own exclusion zone had a similar
+one-block margin beyond its actual footprint, leaving a visible sliver
+gap between the fence and the tower wall; tightened to match the
+tower's exact bounds so the fence now runs flush against it on both
+sides. The four-storey skybridge used to open a
+door into the tower on its top floor too, but the tower doesn't reach
+that high — there was nothing on the other side — so that floor now
+dead-ends at the skybridge's own solid glass wall instead, connecting to
+the lab building only. A wide
+four-storey glass skybridge also connects the ring building's stair tower
+straight to the lab building (the one full of ViTrox inspection machines),
+with an opening at every one of the lab's four floors.
+
+- Open `minecraft/index.html` in a desktop browser (needs internet once, to load
+  Three.js from a CDN; everything else is generated procedurally — no assets).
+- **Password gate**: the page opens on a lock screen and won't reveal the start
+  menu until the correct password is entered (ask the maintainer for it) — re-checked
+  on every page load. Only a SHA-256 hash of the password ships in the source, not
+  the plaintext.
+- Walk (WASD), fly (F), break/place blocks (mouse), and visit the **10 golden info
+  blocks** to read architecture lessons about the building's design (including
+  one at the computer lab's blackboard).
+- **Tutorial gate with a hands-on practice**: a yellow-shirted **Game Master**
+  NPC waits just outside the basketball court's south gate and explains the
+  controls. Talking to him alone doesn't unlock the game, though — right next
+  to him is a yellow practice tile (place a block on it) and a plank block
+  (break it). Every other NPC and golden info block stays locked (both
+  the on-screen prompt and the reminder toast point you back to him) until
+  you complete both, at which point a "🎉 Practice complete" toast unlocks
+  everything. Progress is saved to `localStorage`, so it only has to happen
+  once per browser.
+- **Trilingual**: the whole UI and all lessons switch between 中文 / English /
+  Bahasa Melayu (top-right of the start menu; auto-detected on first load).
+- **Multiplayer**: host a room from the start menu, share the 5-letter code, and
+  classmates join over WebRTC (PeerJS) — positions and block edits sync live, no
+  server needed.
+- **Text-to-speech**: a 🔊 button on every lesson/dialogue reads the current text
+  aloud in the selected language via the browser's built-in speech engine, or turn
+  on "auto-read" in the start menu to have it read automatically every time. No
+  internet or account needed; hidden automatically if the browser doesn't support it.
+- **Male/female voices**: NPC dialogue automatically picks a voice matching the
+  character's look (male guards/engineers/founders/Dr Janaka Low vs. female Siti/
+  Mei Ling/Priya); a 👨/👩 picker in the start menu sets the narrator voice used
+  for the architecture lessons themselves.
+- **DataMine IT quiz stations**: all 10 computers are in the first computer
+  room — the one Ts Dr Lim SC is stationed in — 5 per row, facing each other
+  across the aisle he stands in. Each has a *different screen colour* and a
+  *single* multiple-choice question on a different computing topic —
+  Introduction to Computing, C++ Programming, Database, Information Technology,
+  Data Science, Artificial Intelligence, Networking & Internet, Operating
+  System, HTML, and Software Design. Questions are short and fun, aimed at
+  primary/secondary-school level. Walk up to a station and press E to answer;
+  correct answers earn points shown live in the HUD (1 point per question, 10
+  points total), saved to `localStorage` — get all 10 right and a congratulatory
+  toast calls you out as a future computer scientist. The second computer room is mostly
+  décor — two rows of plain computers with no quiz — except one desk with a
+  distinct dark-red screen: walk up and press E to reset the DataMine score
+  and progress (with a confirmation prompt first). A big blackboard mounted on
+  the wall between the two rooms (visible from both sides) shows live progress
+  per topic and total score — and if a multiplayer room is active, a second
+  column shows a live leaderboard of every connected player's score. The two
+  computer rooms are also staffed by 4 Computing School
+  lecturers you can talk to: Ts Dr Lim SC (Programme Leader · Software Engineering),
+  Ms Syira (Data Science — a Malay Muslim woman, shown wearing a hijab and
+  long dress), Ms Khor JY (Mobile App Dev · Flutter), and Mr Eng YK
+  (Artificial Intelligence). All four wander the aisles between the desks
+  rather than standing still, and pause to face you once you walk up. Two of
+  them have a "▶ Watch teaching animation"
+  button in their dialogue: Ms Syira's plays a data packet bouncing between
+  a client and a server (Request/Response) for the Networking & Internet
+  topic, and Mr Eng YK's plays a CPU box cycling round-robin through four
+  processes (P1–P4) for the Operating System topic. Scattered through the
+  ground-floor pilotis of the
+  ViTrox Education college building — well apart from each other and from Dr
+  Janaka Low (its Principal) — are 7 wooden mailbox-style kiosks — a post, a
+  crate and a coloured icon plaque, Minecraft-signpost style — grouped by
+  qualification type along the walkway: 4 diplomas first (💻 Computer Science,
+  📈 Business Studies, ⚙️ Mechatronics Engineering, ⚡ Electrical and Electronic
+  Engineering), then 3 bachelor's degrees (🎓 Mechatronics Engineering Hons
+  with UCSI University, 🔌 Electronic Engineering Hons and 🤖 Computer Science
+  (Intelligent Computing) Hons — both marked *Coming Soon* — with Universiti
+  Sains Malaysia). Marketing officer Cindy wanders that floor to point
+  visitors to them. Just south of the building, across a stretch of lawn, is
+  a small **sakura garden**: a cross-shaped stone path around a central
+  lantern, four benches, and a ring of 8 pink cherry-blossom trees with
+  fallen-petal tiles scattered underneath — pure scenery, free to wander
+  through. On the left side of the main entrance roundabout stand 5 stone
+  pillars capped in ViTrox blue, each labelled with one of the company's
+  I.A.C.T.G. core values — Integrity, Accountability, Courage, Trust &
+  Respect, and Gratitude & Care — per the official core-values page. Walk
+  up to one and press `E` to read (and hear, via text-to-speech) the
+  official story behind that value, in the selected language.
+- **Mini-game — Free Throw Challenge**: talk to Aina at the basketball court
+  and click "🏀 Shoot some hoops!" in her dialogue to start a 5-shot
+  free-throw challenge. A power meter oscillates left-right; click *Shoot!*
+  (or press it again) when the indicator is in the gold "sweet spot" for a
+  swish, the wider green zone for a rim-in, or outside both for an air ball.
+  After 5 shots a tiered message reacts to the final score, and *Play Again*
+  restarts the round on the same screen.
+- **Mini-game — Defect Spotter Challenge**: talk to Priya, the vision
+  algorithm engineer on the lab building's 3rd floor, and click "🔍 Try the
+  Defect Spotter!" to start it. Chips scroll across a conveyor belt; the ones
+  marked with a red X are defective and must be clicked before they scroll
+  off-screen, while clicking a good chip counts as a false alarm. 12 chips
+  pass through (5 of them defective); a tiered message reacts to how many
+  defects were caught vs. false alarms, and *Inspect Again* restarts the
+  round. Both mini-games advance their internal timers using real elapsed
+  time between frames rather than an assumed fixed frame rate, so they run
+  at the same speed regardless of the device's performance.
+- **Day/night cycle, ambient sound, photo mode**: the sky and fog colour drift
+  between day and night on a 5-minute loop, with a matching translucent overlay
+  darkening the screen at night (a cheap colour animation, since the world has
+  no dynamic lighting — every block's shading is baked into its vertex colours).
+  A soft ambient drone (two detuned tones plus a slow volume swell) starts once
+  you click "Start Exploring," respecting the same `M` mute toggle as the sound
+  effects. Press `P` to enter **photo mode**, which hides every HUD element for
+  a clean shot; press `Enter` to save the current view as a PNG download, and
+  `P` again to exit (on mobile/tablet, tap the 📷 button instead — a 📸 capture
+  and ✕ exit button appear in its place). The start-menu info page (shown
+  before you click "Start Exploring") now mentions all three, with a new
+  key-table row for `M`/`P`. Indoor ceiling lamps (20 of them, spread across the ring
+  corridor, both computer rooms, the canteen, the lab building, the entrance
+  hall/skybridge, and the ViTrox Gallery) switch on at night in a warm yellow
+  glow and back off by day, in sync with the sky. The 14 outdoor lamp posts
+  (the basketball court's 4 corner floodlights and the parking-lot streetlights)
+  get the same treatment — the lamp head itself doesn't change, but a soft
+  warm halo fades in around it at night and disappears by day.
+- **Cheerful background music**: a looping track (`minecraft/pixelrush.mp3`)
+  plays softly once you click "Start Exploring." It's on by default via a
+  checkbox in the start menu, independent from the `M` mute key — `M`
+  silences everything (sound effects, ambience, and music together), while
+  the checkbox lets you keep the ambience but turn off just the music. The
+  choice is remembered between visits.
+- **HUD minimap, compass and play timer**: a small top-down minimap (top-left)
+  shows the central courtyard as a reference circle, gold/green dots for
+  unvisited/visited info points, blue dots for NPCs, and a white arrow for
+  the player's position and facing. A scrolling compass tape (top-center)
+  shows N/E/S/W sliding past a fixed center pointer as you turn, so it's
+  always obvious which way you're facing and where to walk next.
+- **20-minute timed challenge**: the whole game is a race against a 20-minute
+  countdown shown next to the explore/DataMine chips (paused while a menu or
+  dialogue is open; turns red under a minute, with a pulsing red screen
+  vignette, a pulsing timer, and a once-a-second tick that speeds up to a
+  higher-pitched tick in the final 10 seconds). Finish both the exploration
+  quest and the DataMine quiz (20/20 combined) before time runs out for an
+  instant "Challenge Complete!" screen — otherwise the clock hits zero, play
+  freezes, and you get "⏰ Time's Up! Practice makes perfect — give it another
+  go!" Either way you're awarded a title based on your combined score and
+  time taken — 🧠 Geek Player, ⭐ Skilled Player, 🙂 Casual Player, 📘 Advanced
+  Player, 🌱 Novice Player, or 🔰 Beginner — with a "🔄 Try Again" button that
+  resets progress and the timer for a fresh run (world edits are untouched;
+  that's what the separate reset-world button is for). The result screen
+  swaps the background track for a dedicated end-of-challenge piece
+  (`minecraft/starlightstrut.mp3`), on either ending, and switches back to
+  the regular background music on "Try Again" — following the same music
+  checkbox and `M` mute state as everything else.
+- **Hidden easter egg**: a 22nd, unlisted NPC is tucked away off the beaten
+  path, with no quest marker pointing to it — finding it and talking to it
+  once triggers a one-time "hidden easter egg found" toast, remembered in
+  `localStorage`. Where exactly it's hiding is left for players to discover.
+- **Ad Mode (auto demo)**: a second start-menu button, next to "Enter Campus,"
+  hands the camera to a virtual guide that flies itself around the campus for
+  about 5-10 minutes with no input needed — visiting the three founders, an
+  ViTrox core-value pillar, the Gallery, the computing lecturers, a DataMine
+  station (opening the Intro-to-Computing question and picking the correct
+  answer on its own), the ViTrox Education rebrand, the Principal, the
+  marketing officer, and a Diploma in Computer Science kiosk — auto-narrated
+  via the same text-to-speech engine used elsewhere. Meant for open days,
+  booths, or a classroom projector: HUD chrome is hidden, a "🛑 Exit Demo"
+  button (or E/Esc/Enter to skip ahead) returns to the menu any time, and
+  whatever it "visits" doesn't touch the real player's saved explore/DataMine
+  progress — that state is snapshotted before the demo and restored after.
+  Which stops it visits, aside from a fixed intro/outro card, is reshuffled
+  into a fresh random order every run. A "♾️ Loop playback" checkbox next to
+  the Ad Mode button (remembered in `localStorage`) makes it reshuffle and
+  restart automatically after the outro instead of returning to the menu —
+  handy for an unattended booth screen; "🛑 Exit Demo" still stops it any time.
+- Player edits are saved to `localStorage`; the start menu has a world-reset button.
+- Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
+
 ## How feedback works
 
 - **Theory:** immediately after checking an answer, the option is marked right/wrong
