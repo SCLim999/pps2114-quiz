@@ -363,6 +363,9 @@
     <div class="mp-line"><span id="lbl-name"></span><input id="player-name" maxlength="12" placeholder="Steve"></div>
     <button class="btn" id="btn-start"></button>
     <button class="btn gray" id="btn-ad"></button>
+    <label class="tts-toggle" id="ad-loop-row">
+      <input type="checkbox" id="ad-loop-cb"><span id="ad-loop-lbl"></span>
+    </label>
     <button class="btn gray" id="btn-reset"></button>
     <label class="tts-toggle" id="music-toggle-row">
       <input type="checkbox" id="music-cb"><span id="music-toggle-lbl"></span>
@@ -518,6 +521,7 @@ zh: {
   lockNoCrypto:'❌ 此浏览器不支持安全校验（需要 Web Crypto API），请改用较新版本的 Chrome / Edge / Firefox / Safari',
   yourName:'你的名字：', btnStart:'▶ 进入园区（游戏模式）', btnReset:'🔄 重置世界（清除我的改动）',
   btnAd:'📣 广告模式（自动演示）', adExit:'🛑 退出演示',
+  adLoopLbl:'♾️ 循环播放（自动重播，随机顺序）',
   adIntroTitle:'📣 ViTrox Campus 教育宣传', adIntroSub:'接下来大约 5-10 分钟，让虚拟向导带你认识 ViTrox 学院、创办人理念，以及我们培养人才的软硬实力……',
   adEndTitle:'🎉 演示结束', adEndSub:'感谢观看！欢迎亲自进入园区探索，或了解更多 ViTrox 学院的课程。',
   mpTitle:'🌐 多人连线（同学一起逛园区）', btnHost:'创建多人房间', mpOr:'— 或 —',
@@ -615,6 +619,7 @@ en: {
   lockNoCrypto:'❌ This browser lacks the Web Crypto API needed to check the password — please use a recent Chrome / Edge / Firefox / Safari',
   yourName:'Your name: ', btnStart:'▶ Enter Campus (Game Mode)', btnReset:'🔄 Reset World (clear my edits)',
   btnAd:'📣 Ad Mode (Auto Demo)', adExit:'🛑 Exit Demo',
+  adLoopLbl:'♾️ Loop playback (auto-replay, random order)',
   adIntroTitle:'📣 ViTrox Campus Education Showcase', adIntroSub:'Over the next 5-10 minutes, let our virtual guide introduce ViTrox College, our founders\' philosophy, and the combined strengths behind how we develop talent...',
   adEndTitle:'🎉 Demo Complete', adEndSub:'Thanks for watching! Feel free to explore the campus yourself, or learn more about ViTrox College\'s programmes.',
   mpTitle:'🌐 Multiplayer (explore with friends)', btnHost:'Create Room', mpOr:'— or —',
@@ -712,6 +717,7 @@ ms: {
   lockNoCrypto:'❌ Pelayar ini tiada Web Crypto API untuk menyemak kata laluan — sila guna Chrome / Edge / Firefox / Safari versi terkini',
   yourName:'Nama anda: ', btnStart:'▶ Masuk Kampus (Mod Permainan)', btnReset:'🔄 Set Semula Dunia (padam ubahan saya)',
   btnAd:'📣 Mod Iklan (Demo Automatik)', adExit:'🛑 Keluar Demo',
+  adLoopLbl:'♾️ Main berulang (main semula automatik, susunan rawak)',
   adIntroTitle:'📣 Pameran Pendidikan ViTrox Campus', adIntroSub:'Dalam 5-10 minit akan datang, biar panduan maya kami memperkenalkan ViTrox College, falsafah para pengasas, dan kekuatan menyeluruh di sebalik cara kami membangunkan bakat...',
   adEndTitle:'🎉 Demo Selesai', adEndSub:'Terima kasih kerana menonton! Jemput teroka kampus sendiri, atau ketahui lebih lanjut tentang program ViTrox College.',
   mpTitle:'🌐 Berbilang Pemain (jelajah bersama rakan)', btnHost:'Cipta Bilik', mpOr:'— atau —',
@@ -2678,6 +2684,16 @@ musicCb.addEventListener('change',()=>{
   toast(musicOn ? t('musicOn') : t('musicOff'));
 });
 
+/* ---- 广告模式的「循环播放」开关：勾选后演示放完最后一站会重新洗牌、从头再播一轮，不会自动回到开始菜单 ---- */
+let adLoop = false;
+try{ adLoop = localStorage.getItem('vitroxcraft_ad_loop')==='1'; }catch(e){}
+const adLoopCb = document.getElementById('ad-loop-cb');
+adLoopCb.checked = adLoop;
+adLoopCb.addEventListener('change',()=>{
+  adLoop = adLoopCb.checked;
+  try{ localStorage.setItem('vitroxcraft_ad_loop', adLoop?'1':'0'); }catch(e){}
+});
+
 /* ---- 结算音乐：20 分钟挑战结束时播放（starlightstrut.mp3），沿用同一套 M / 背景音乐开关 ---- */
 const endgameBgmEl = document.getElementById('endgame-bgm');
 endgameBgmEl.volume = 0.4;
@@ -4517,7 +4533,9 @@ function adSpeechDur(){
   return adTextDur(currentSpeech, 5000, 18000);
 }
 
-const AD_TOUR = (()=>{
+const AD_TITLE_STOP = { x:0.5, y:4, z:8, yaw:Math.PI, pitch:0, action:{type:'title'} };
+const AD_END_STOP   = { x:170, y:4, z:-2, yaw:0, pitch:0, action:{type:'end'} };
+const AD_MIDDLE_STOPS = (()=>{
   const stops = [];
   const npcStop = (name, dx, dz)=>{
     const idx = NPCS.findIndex(n=>n.name===name);
@@ -4554,7 +4572,6 @@ const AD_TOUR = (()=>{
     stops.push({ x:sx, y:s.floorY, z:sz, yaw:look.yaw, pitch:look.pitch, action:{type:'cm', idx} });
   };
 
-  stops.push({ x:0.5, y:4, z:8, yaw:Math.PI, pitch:0, action:{type:'title'} });
   npcStop('Chu Jenn Weng', 0, 3);
   npcStop('Steven Siaw', 0, -3);
   npcStop('Yeoh Shih Hoong', 0, -3);
@@ -4567,9 +4584,22 @@ const AD_TOUR = (()=>{
   npcStop('Dr Janaka Low', 0, 3); // ViTrox Education 校长
   npcStop('Cindy', 0, 3);         // 市场专员 · Diploma Programme
   kioskStop('dk1', 0, 3);         // Diploma in Computer Science 课程展示牌
-  stops.push({ x:170, y:4, z:-2, yaw:0, pitch:0, action:{type:'end'} });
   return stops;
 })();
+// 每次开始/循环播放都重新洗牌中间站点的顺序（开场白和结尾语固定在头尾），
+// 让每一轮演示走的场景顺序都不一样
+function adShuffled(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function adBuildTour(){
+  return [AD_TITLE_STOP, ...adShuffled(AD_MIDDLE_STOPS), AD_END_STOP];
+}
+let AD_TOUR = adBuildTour();
 
 function adShowCaption(title, sub){
   document.getElementById('ad-caption-title').textContent = title;
@@ -4605,7 +4635,10 @@ function adCloseCurrent(){
 }
 function adAdvance(){
   adStopIdx++;
-  if(adStopIdx>=AD_TOUR.length){ stopAdMode(); return; }
+  if(adStopIdx>=AD_TOUR.length){
+    if(adLoop){ AD_TOUR = adBuildTour(); adStopIdx = -1; adAdvance(); return; }
+    stopAdMode(); return;
+  }
   adFrom = { x:player.pos.x, y:player.pos.y, z:player.pos.z, yaw:player.yaw, pitch:player.pitch };
   adTo = AD_TOUR[adStopIdx];
   adPhase='moving'; adMoveT=0;
@@ -4651,6 +4684,7 @@ function startAdMode(){
   adPrevTtsAuto = ttsAuto; ttsAuto = true;
   adMode = true;
   player.fly = true; player.vel.set(0,0,0);
+  AD_TOUR = adBuildTour();
   adStopIdx = -1;
   adAdvance();
 }
@@ -4852,6 +4886,7 @@ function applyLang(){
   put('lbl-name', t('yourName'));
   put('btn-start', t('btnStart')); put('btn-reset', t('btnReset'));
   put('btn-ad', t('btnAd')); put('btn-ad-exit', t('adExit'));
+  put('ad-loop-lbl', t('adLoopLbl'));
   put('mp-title', t('mpTitle')); put('btn-host', t('btnHost')); put('mp-or', t('mpOr'));
   document.getElementById('room-code').placeholder = t('roomPh');
   put('btn-join', t('btnJoin'));
@@ -5210,8 +5245,10 @@ window.__test = {
   startAdMode, stopAdMode,
   adState: ()=>({ adMode, stopIdx:adStopIdx, totalStops:AD_TOUR.length, phase:adPhase,
     action: adTo ? adTo.action : null, pos:player.pos.toArray(), yaw:player.yaw, pitch:player.pitch,
-    captionVisible: !adCaptionEl.classList.contains('hidden') }),
+    captionVisible: !adCaptionEl.classList.contains('hidden'), loop:adLoop,
+    tourOrder: AD_TOUR.map(s=>s.action.type + (s.action.idx!==undefined?':'+s.action.idx:'')) }),
   adForceAdvance(){ if(adMode){ adCloseCurrent(); adAdvance(); } },
+  setAdLoop(v){ adLoop = !!v; adLoopCb.checked = adLoop; },
   adJumpTo(i){                             // 调试用：瞬移到第 i 站并直接触发该站动作（跳过飞行过渡，仅供测试）
     if(!adMode) return null;
     adStopIdx = i; adTo = AD_TOUR[i];

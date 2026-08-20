@@ -282,6 +282,11 @@ with an opening at every one of the lab's four floors.
   button (or E/Esc/Enter to skip ahead) returns to the menu any time, and
   whatever it "visits" doesn't touch the real player's saved explore/DataMine
   progress — that state is snapshotted before the demo and restored after.
+  Which stops it visits, aside from a fixed intro/outro card, is reshuffled
+  into a fresh random order every run. A "♾️ Loop playback" checkbox next to
+  the Ad Mode button (remembered in `localStorage`) makes it reshuffle and
+  restart automatically after the outro instead of returning to the menu —
+  handy for an unattended booth screen; "🛑 Exit Demo" still stops it any time.
 - Player edits are saved to `localStorage`; the start menu has a world-reset button.
 - Full user guide (Chinese): [`minecraft/MANUAL.md`](minecraft/MANUAL.md)
 
