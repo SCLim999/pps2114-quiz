@@ -93,6 +93,7 @@
       reportSending: "Sending…", reportOk: "Sent — %s / %s stars recorded.",
       reportErr: "Could not send: ", cheatTitle: "Commands this simulator understands",
       progressLabel: "%s / %s levels · %s / %s stars",
+      confirmYes: "Yes, do it", cancel: "Cancel",
       fillerNote: "+ %s placeholder file(s) written by plain `git commit`.",
       emptyTree: "The working tree is empty."
     },
@@ -127,6 +128,7 @@
       reportSending: "正在发送……", reportOk: "已发送 —— 记录了 %s / %s 星。",
       reportErr: "发送失败：", cheatTitle: "本模拟器支持的命令",
       progressLabel: "%s / %s 关 · %s / %s 星",
+      confirmYes: "确定", cancel: "取消",
       fillerNote: "另有 %s 个由 `git commit` 自动生成的占位文件。",
       emptyTree: "工作区是空的。"
     }
@@ -630,7 +632,7 @@
   async function playSolution() {
     const lv = currentLevel();
     if (!lv || state.busy) return;
-    if (!window.confirm(t("confirmSolution"))) return;
+    if (!(await askConfirm(t("confirmSolution")))) return;
     loadLevel(lv.index, { keepFocus: true });
     state.usedSolution = true;
     log(t("playing"), "sys");
@@ -658,6 +660,34 @@
     ["resolve <file> --ours|--theirs|--both", { en: "resolve a conflict quickly", zh: "快速解决冲突" }],
     ["cat <file> / ls", { en: "inspect the working tree", zh: "查看工作区" }]
   ];
+
+  /** In-page confirm: sandboxed frames may block window.confirm entirely. */
+  function askConfirm(message) {
+    return new Promise((resolve) => {
+      const root = $("#gq-modal-root");
+      root.innerHTML =
+        '<div class="gq-modal-back"><div class="gq-modal">' +
+        "<p>" + mono(message) + "</p>" +
+        '<div class="gq-modal-actions">' +
+        '<button class="gq-btn primary" id="gq-yes">' + esc(t("confirmYes")) + "</button>" +
+        '<button class="gq-btn ghost" id="gq-no">' + esc(t("cancel")) + "</button>" +
+        "</div></div></div>";
+      const done = (answer) => {
+        document.removeEventListener("keydown", onKey);
+        root.innerHTML = "";
+        $("#gq-input").focus({ preventScroll: true });
+        resolve(answer);
+      };
+      const onKey = (e) => {
+        if (e.key === "Escape") done(false);
+        else if (e.key === "Enter") done(true);
+      };
+      document.addEventListener("keydown", onKey);
+      $("#gq-yes").addEventListener("click", () => done(true));
+      $("#gq-no").addEventListener("click", () => done(false));
+      $("#gq-yes").focus({ preventScroll: true });
+    });
+  }
 
   function showCheats() {
     const root = $("#gq-modal-root");
@@ -745,10 +775,12 @@
     viz = new GitViz($("#gq-viz"));
     goalViz = new GitViz($("#gq-goal-viz"), { r: 15, dx: 84, dy: 76, pad: 34, minW: 470, minH: 250, messages: false, duration: 0 });
 
+    // The report panel is optional: a build without it must still boot.
     const st = progress.student || {};
-    if (st.name) $("#gq-name").value = st.name;
-    if (st.id) $("#gq-id").value = st.id;
-    if (st.klass) $("#gq-class").value = st.klass;
+    const fill = (sel, val) => { const el = $(sel); if (el && val) el.value = val; };
+    fill("#gq-name", st.name);
+    fill("#gq-id", st.id);
+    fill("#gq-class", st.klass);
 
     $("#gq-run").addEventListener("click", () => {
       const input = $("#gq-input");
@@ -774,15 +806,15 @@
     $("#gq-solution").addEventListener("click", playSolution);
     $("#gq-cheats").addEventListener("click", showCheats);
     $("#gq-sandbox").addEventListener("click", () => loadLevel("sandbox"));
-    $("#gq-report-btn").addEventListener("click", sendReport);
+    if ($("#gq-report-btn")) $("#gq-report-btn").addEventListener("click", sendReport);
     $("#gq-lang").addEventListener("click", () => {
       state.lang = state.lang === "en" ? "zh" : "en";
       progress.lang = state.lang;
       saveProgress();
       applyLang();
     });
-    $("#gq-wipe").addEventListener("click", () => {
-      if (!window.confirm(t("confirmWipe"))) return;
+    $("#gq-wipe").addEventListener("click", async () => {
+      if (!(await askConfirm(t("confirmWipe")))) return;
       progress = { xp: 0, levels: {}, badges: [], lang: state.lang, student: progress.student, lastLevel: 0 };
       saveProgress();
       renderHeader(); renderBadges(); loadLevel(0);

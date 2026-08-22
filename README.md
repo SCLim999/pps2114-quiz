@@ -118,6 +118,18 @@ Open the file in a browser — no build step, no server, no network.
 | `js/git-viz.js` | Animated SVG commit-graph renderer |
 | `js/git-levels.js` | **Level pack — edit this to add or change puzzles** |
 | `js/git-portal.js` | Game loop: XP, stars, badges, terminal, hints |
+| `tools/build-standalone.py` | Bundles all of the above into one HTML file |
+
+## Handing it out as one file
+
+```
+python3 tools/build-standalone.py git-quest.html
+```
+
+Everything is inlined, so the result runs from a USB stick, an e-mail
+attachment or `file://` with no server and no network. The *Report to lecturer*
+panel is left out by default (sandboxed hosts block the Apps Script request) —
+add `--keep-report` when you are publishing to a normal web host.
 
 ## Adding a level
 
