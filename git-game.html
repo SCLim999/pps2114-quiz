@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Quest — Learn Branching, Merging &amp; Rebasing by Playing</title>
+  <link rel="stylesheet" href="css/git-game.css">
+</head>
+<body class="gq">
+
+  <header class="gq-header">
+    <div class="gq-brand">
+      <h1>Git&nbsp;Quest</h1>
+      <span class="gq-branch-tag">merge · rebase · conflicts</span>
+    </div>
+
+    <div class="gq-xp">
+      <div class="gq-xp-top">
+        <span><strong id="gq-rank">Intern</strong> <span id="gq-rank-zh"></span></span>
+        <span><span id="gq-xp-now">0</span> / <span id="gq-xp-next">100</span> XP</span>
+      </div>
+      <div class="gq-bar"><span id="gq-xp-bar"></span></div>
+    </div>
+
+    <div class="gq-header-actions">
+      <button class="gq-btn ghost tiny" id="gq-lang">中文</button>
+      <button class="gq-btn ghost tiny" id="gq-sandbox" data-i18n="sandbox">Sandbox</button>
+      <button class="gq-btn ghost tiny" id="gq-wipe" data-i18n="wipe">Reset progress</button>
+    </div>
+  </header>
+
+  <main class="gq-layout">
+
+    <!-- ============ LEFT: level map ============ -->
+    <aside>
+      <section class="gq-panel">
+        <h2 data-i18n="mapTitle">Level map</h2>
+        <div id="gq-map"></div>
+        <p class="gq-world-blurb" id="gq-map-summary"></p>
+      </section>
+
+      <section class="gq-panel">
+        <h2 data-i18n="badgesTitle">Badges</h2>
+        <div class="gq-badges" id="gq-badges"></div>
+      </section>
+
+      <section class="gq-panel gq-report">
+        <h2 data-i18n="reportTitle">Report to lecturer</h2>
+        <p class="gq-world-blurb" data-i18n="reportBlurb">Optional: send your stars to the course spreadsheet.</p>
+        <label for="gq-name" data-i18n="fieldName">Full name</label>
+        <input type="text" id="gq-name" autocomplete="name">
+        <label for="gq-id" data-i18n="fieldId">Student ID</label>
+        <input type="text" id="gq-id" autocomplete="off">
+        <label for="gq-class" data-i18n="fieldClass">Class / group</label>
+        <input type="text" id="gq-class" autocomplete="off">
+        <div class="gq-file-actions">
+          <button class="gq-btn tiny" id="gq-report-btn" data-i18n="sendReport">Send progress</button>
+        </div>
+        <p class="gq-report-status" id="gq-report-status"></p>
+      </section>
+    </aside>
+
+    <!-- ============ CENTER: mission, graphs, terminal ============ -->
+    <section>
+      <section class="gq-panel gq-mission">
+        <span class="gq-kicker" id="gq-kicker">World 1 · Level 1</span>
+        <h2 id="gq-level-name">…</h2>
+        <p class="gq-brief" id="gq-brief"></p>
+        <div class="gq-goal"><b data-i18n="goalLabel">Goal:</b> <span id="gq-goal"></span></div>
+        <div class="gq-meta">
+          <span><span data-i18n="parLabel">par</span>: <b id="gq-par">–</b></span>
+          <span><span data-i18n="usedLabel">commands used</span>: <b id="gq-used">0</b></span>
+          <span><span data-i18n="bestLabel">best</span>: <b id="gq-best">–</b></span>
+        </div>
+        <div class="gq-mission-actions">
+          <button class="gq-btn tiny" id="gq-hint" data-i18n="hintBtn">Hint</button>
+          <button class="gq-btn tiny" id="gq-restart" data-i18n="restartBtn">Restart level</button>
+          <button class="gq-btn tiny ghost" id="gq-solution" data-i18n="solutionBtn">Show solution</button>
+          <button class="gq-btn tiny ghost" id="gq-cheats" data-i18n="cheatBtn">Command reference</button>
+        </div>
+        <div class="gq-hintbox gq-hidden" id="gq-hintbox"></div>
+      </section>
+
+      <section class="gq-panel">
+        <div class="gq-graphs">
+          <div class="gq-graph">
+            <div class="gq-graph-title">
+              <span data-i18n="yourRepo">Your repository</span>
+              <span id="gq-status-chip"></span>
+            </div>
+            <svg class="gq-canvas" id="gq-viz" preserveAspectRatio="xMinYMin meet"></svg>
+          </div>
+          <div class="gq-graph">
+            <div class="gq-graph-title"><span data-i18n="target">Target</span></div>
+            <svg class="gq-canvas mini" id="gq-goal-viz" preserveAspectRatio="xMinYMin meet"></svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="gq-panel">
+        <h2 data-i18n="terminal">Terminal</h2>
+        <div class="gq-term-log" id="gq-log"></div>
+        <div class="gq-term-input">
+          <span class="gq-prompt">$</span>
+          <input type="text" id="gq-input" spellcheck="false" autocomplete="off"
+                 placeholder="git status">
+          <button class="gq-btn primary tiny" id="gq-run" data-i18n="runBtn">Run</button>
+        </div>
+        <div class="gq-palette" id="gq-palette"></div>
+      </section>
+    </section>
+
+    <!-- ============ RIGHT: working tree ============ -->
+    <aside>
+      <section class="gq-panel">
+        <h2 data-i18n="worktree">Working tree</h2>
+        <div id="gq-conflict-note"></div>
+        <div id="gq-files"></div>
+      </section>
+    </aside>
+  </main>
+
+  <p class="gq-footer">
+    Git Quest &middot; part of the PPS2114 teaching toolkit &middot;
+    <a href="index.html">back to the C++ assessment</a>
+  </p>
+
+  <div id="gq-modal-root"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/git-engine.js"></script>
+  <script src="js/git-viz.js"></script>
+  <script src="js/git-levels.js"></script>
+  <script src="js/git-portal.js"></script>
+</body>
+</html>
