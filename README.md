@@ -72,3 +72,10 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+## Bonus: 虚拟人生（Virtual Life）小游戏
+
+`game/` 目录里另外放了一个与测验无关的纯前端小游戏 —— **虚拟人生**：从中学毕业开始，
+选升学路线与主修、每学期分配时间修课考试，毕业后就业或创业，50 岁给出人生结局
+（大企业家、登顶高管、一份不错的工作……）。打开 `game/index.html` 即可玩，
+玩法与调整方式见 [`game/README.md`](game/README.md)。

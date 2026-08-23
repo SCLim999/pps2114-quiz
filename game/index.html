@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>虚拟人生 — 从中学毕业到人生赢家</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🎓</text></svg>">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-left">
+      <h1>虚拟人生 <span class="en">Virtual Life</span></h1>
+      <p class="tagline">中学毕业 → 升学 → 修课 → 就业或创业 → 人生赢家</p>
+    </div>
+    <div class="top-right">
+      <button class="btn ghost" id="btn-save">保存</button>
+      <button class="btn ghost" id="btn-load">读取</button>
+      <button class="btn ghost" id="btn-reset">重开</button>
+    </div>
+  </header>
+
+  <div id="hud"></div>
+
+  <div class="layout">
+    <main id="stage"></main>
+    <aside class="logbox">
+      <h3>人生日志</h3>
+      <div id="log"></div>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    纯前端游戏，进度存在你自己的浏览器里（localStorage）。数值与内容可在
+    <code>js/data.js</code> 调整。
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
