@@ -33,8 +33,7 @@
   function toast(msg) {
     const n = document.createElement("div");
     n.textContent = msg;
-    n.style.cssText = "position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#26314a;" +
-      "border:1px solid #4f8cff;color:#e8edf7;padding:9px 16px;border-radius:9px;z-index:99;font-size:14px";
+    n.className = "toast";
     document.body.appendChild(n);
     setTimeout(() => n.remove(), 2200);
   }
@@ -44,6 +43,26 @@
     const pct = Math.max(0, Math.min(100, (val / (max || 100)) * 100));
     return `<div class="bar ${cls}"><div class="lab"><span>${label}</span><span>${Math.round(val)}</span></div>
       <div class="track"><div class="fill" style="width:${pct}%"></div></div></div>`;
+  }
+
+  /** 需求条（健康 / 幸福感等）按数值变色：绿 → 黄 → 红 */
+  function need(label, val, extra) {
+    const lv = val >= 60 ? "lv-hi" : (val >= 30 ? "lv-mid" : "lv-low");
+    return bar(`${lv} ${extra || ""}`, label, val);
+  }
+
+  /** 压力相反：越高越糟 */
+  function pressure(label, val) {
+    const lv = val <= 40 ? "lv-hi" : (val <= 70 ? "lv-mid" : "lv-low");
+    return bar(lv, label, val);
+  }
+
+  /** 头顶的 Plumbob，颜色跟着心情（幸福感 / 健康 / 压力）走 */
+  function plumbob() {
+    const mood = (S.s.happiness + S.s.health + (100 - S.s.stress)) / 3;
+    const cls = mood >= 60 ? "" : (mood >= 38 ? "mid" : "low");
+    return `<svg class="plumbob ${cls}" viewBox="0 0 24 32" aria-hidden="true">
+      <path class="top" d="M12 0 24 12 12 16 0 12z"/><path class="bot" d="M0 12 12 16 24 12 12 32z"/></svg>`;
   }
 
   function renderHud() {
@@ -64,18 +83,18 @@
     if (S.company) chips.push(`<span class="chip">${esc(S.company.name)} · 估值 <b>${M(S.company.valuation)}</b></span>`);
 
     $("hud").innerHTML = `<div class="hudwrap">
-      <div class="hudtop"><span class="who">${esc(S.name)}</span><span class="chip">${S.age} 岁</span>${chips.join("")}</div>
+      <div class="hudtop">${plumbob()}<span class="who">${esc(S.name)}</span><span class="chip">${S.age} 岁</span>${chips.join("")}</div>
       <div class="bars">
-        ${bar("", star("knowledge") + "知识", st.knowledge)}
-        ${bar("", star("skillTech") + "技术能力", st.skillTech)}
-        ${bar("", star("skillBiz") + "商业能力", st.skillBiz)}
-        ${bar("", star("skillComm") + "沟通能力", st.skillComm)}
-        ${bar("", "人脉", st.network)}
-        ${bar("", "声望", st.reputation)}
-        ${bar("energy", "精力", st.energy)}
-        ${bar("health", "健康", st.health)}
-        ${bar("stress", "压力", st.stress)}
-        ${bar("happy", "幸福感", st.happiness)}
+        ${bar("", star("knowledge") + "📚 知识", st.knowledge)}
+        ${bar("", star("skillTech") + "🛠️ 技术能力", st.skillTech)}
+        ${bar("", star("skillBiz") + "💰 商业能力", st.skillBiz)}
+        ${bar("", star("skillComm") + "💬 沟通能力", st.skillComm)}
+        ${bar("", "🤝 人脉", st.network)}
+        ${bar("", "⭐ 声望", st.reputation)}
+        ${need("⚡ 精力", st.energy, "energy")}
+        ${need("❤️ 健康", st.health)}
+        ${pressure("😖 压力", st.stress)}
+        ${need("😊 幸福感", st.happiness)}
       </div></div>`;
   }
 
@@ -150,7 +169,7 @@
       if (a.cost.energy) cost.push(`精力 −${a.cost.energy}`);
       if (a.cost.money) cost.push(`${M(a.cost.money)}`);
       return `<button class="pick" data-do="study" data-id="${a.id}" ${chk.ok ? "" : "disabled"}>
-        <span class="nm">${a.icon} ${esc(a.name)}${used ? ` <span style="color:#93a0b8">×${used}</span>` : ""}</span>
+        <span class="nm">${a.icon} ${esc(a.name)}${used ? ` <span class="times">×${used}</span>` : ""}</span>
         <span class="ds">${esc(a.desc)}</span>
         <span class="cost">${cost.join(" · ")}</span>
         ${chk.ok ? "" : `<span class="no">✗ ${esc(chk.why)}</span>`}</button>`;
@@ -166,7 +185,7 @@
       ${acts}
       <div class="rowline">
         <button class="btn big green" data-do="exam">${sem.ap > 0 ? "提前进入期末考" : "参加期末考"}</button>
-        <span style="color:#93a0b8;font-size:13px">上课出席会加考试分；重复同一个行动效果会打折。</span>
+        <span class="hint">上课出席会加考试分；重复同一个行动效果会打折。</span>
       </div></div>`;
   }
 
@@ -178,8 +197,8 @@
       body = `<table><thead><tr><th>科目</th><th class="num">分数</th><th>等级</th><th class="num">绩点</th></tr></thead>
         <tbody>${r.results.map(x => `<tr><td>${esc(x.name)}</td><td class="num">${x.score}</td>
           <td class="${cls(x.grade)}">${x.grade}</td><td class="num">${x.gp.toFixed(1)}</td></tr>`).join("")}</tbody></table>
-        <p class="sub" style="margin-top:12px">平均 ${r.avg} 分 · 累计 GPA <b>${S.gpa.value.toFixed(2)}</b>
-          ${r.failed ? ` · <span style="color:#f2666f">${r.failed} 科不及格</span>` : " · 全科通过"}</p>`;
+        <p class="sub examline">平均 ${r.avg} 分 · 累计 GPA <b>${S.gpa.value.toFixed(2)}</b>
+          ${r.failed ? ` · <span class="bad-text">${r.failed} 科不及格</span>` : " · 全科通过"}</p>`;
     }
     body += (r.notes || []).map(n => `<div class="note">${esc(n)}</div>`).join("");
     return `<div class="card"><h2>${esc(r.title)}</h2>${body}
@@ -260,7 +279,7 @@
       ${alarms()}
       <div class="grid">${acts}</div>
       <div class="rowline"><button class="btn big green" data-do="endyear">结束这一年</button>
-        <span style="color:#93a0b8;font-size:13px">${S.retireAge} 岁做人生总结。</span></div></div>`;
+        <span class="hint">${S.retireAge} 岁做人生总结。</span></div></div>`;
   }
 
   function screenStartup() {
@@ -274,7 +293,7 @@
     return `<div class="card">
       <h2>${esc(c.name)} · 创业第 ${c.years + 1} 年${c.listed ? " · 已上市 🔔" : ""}</h2>
       <p class="sub">产品力 <b>${Math.round(c.product)}</b> · 营销力 <b>${Math.round(c.marketing)}</b> ·
-        团队 <b>${c.team}</b> 人 · 年营收 <b>${M(c.revenue)}</b> · 公司现金 <b style="color:${c.cash < 0 ? "#f2666f" : "#35c98a"}">${M(c.cash)}</b><br>
+        团队 <b>${c.team}</b> 人 · 年营收 <b>${M(c.revenue)}</b> · 公司现金 <b class="${c.cash < 0 ? "neg" : "pos"}">${M(c.cash)}</b><br>
         估值 <b>${M(c.valuation)}</b> · 你持股 <b>${(c.equity * 100).toFixed(1)}%</b>（约 ${M(c.valuation * c.equity)}）·
         今年剩 <b>${S.year.ap}</b> 个行动</p>
       ${alarms()}
@@ -299,7 +318,7 @@
       </div>
       ${e.achievements.length ? `<div class="tags">${e.achievements.map(a => `<span class="tag">${esc(a)}</span>`).join("")}</div>` : ""}
       <div class="timeline">${S.history.map(h => `<div class="t"><b>${h.age} 岁</b>${esc(h.text)}</div>`).join("")}</div>
-      <div class="rowline" style="justify-content:center"><button class="btn big" data-do="again">再来一局</button></div>
+      <div class="rowline center"><button class="btn big" data-do="again">再来一局</button></div>
       </div>`;
   }
 
@@ -319,6 +338,7 @@
 
   /* ------------------------------------------------------ 主渲染 */
   function render() {
+    document.body.classList.toggle("no-game", !S);
     renderHud(); renderLog();
     let html;
     if (!S) html = screenCreate();
