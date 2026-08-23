@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microsoft Windows 1.01 — 虚拟机模拟</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b0b0b;overflow:hidden;
+  font-family:"MS Sans Serif",Tahoma,Geneva,Verdana,sans-serif;font-size:12px;
+  -webkit-font-smoothing:none;user-select:none;-webkit-user-select:none;color:#000}
+#crt{position:fixed;inset:0;background:#000;overflow:hidden}
+#crt.scan::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.20) 0 1px,transparent 1px 3px)}
+.layer{position:absolute;inset:0;display:none}
+.layer.on{display:block}
+
+/* ---------- 电源 ---------- */
+#power{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+  color:#6f6;font-family:"VT323","Courier New",monospace;font-size:20px;letter-spacing:1px;text-align:center}
+#powerBtn{width:92px;height:92px;border-radius:50%;background:#151515;border:3px solid #3a3a3a;
+  color:#4f4;font-size:36px;cursor:pointer;transition:.15s}
+#powerBtn:hover{border-color:#7f7;box-shadow:0 0 30px rgba(0,255,0,.25);color:#8f8}
+#power .sub{color:#4a4;font-size:16px;max-width:520px;line-height:1.5}
+
+/* ---------- DOS 文字画面 ---------- */
+#dos{background:#000;padding:10px 14px;overflow:hidden}
+#dosText{color:#cfcfcf;font-family:"VT323","Courier New",monospace;font-size:19px;line-height:1.18;
+  white-space:pre-wrap;word-break:break-word;text-shadow:0 0 4px rgba(200,200,200,.25)}
+.cur{display:inline-block;width:9px;height:15px;background:#cfcfcf;vertical-align:-3px;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+
+/* ---------- 桌面 ---------- */
+#desktop{background:#fff}
+#desk{position:absolute;inset:0;display:flex;flex-direction:column}
+.dither{background-color:#fff;
+  background-image:linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),
+                   linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);
+  background-size:2px 2px;background-position:0 0,1px 1px}
+.dither.p2{background-image:radial-gradient(#000 32%,transparent 33%);background-size:4px 4px;background-position:0 0}
+.dither.p3{background-image:none;background-color:#e8e8e8}
+.dither.p4{background-image:repeating-linear-gradient(90deg,#000 0 1px,transparent 1px 4px);background-size:auto}
+#tiles{position:relative;flex:1;overflow:hidden}
+#icons{height:58px;flex:none;border-top:2px solid #000;display:flex;gap:6px;align-items:center;padding:4px 8px;overflow-x:auto}
+.dicon{width:74px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;background:#fff;border:1px solid #000;cursor:pointer;flex:none}
+.dicon .g{font-size:18px;line-height:18px}
+.dicon .n{font-size:10px;white-space:nowrap;overflow:hidden;max-width:70px;text-align:center}
+.dicon:hover{background:#000;color:#fff}
+
+/* ---------- 窗口 ---------- */
+.win{position:absolute;background:#fff;border:var(--bw,2px) solid #000;display:flex;flex-direction:column;overflow:hidden}
+.tbar{height:19px;flex:none;display:flex;align-items:stretch;border-bottom:1px solid #000;background:#fff;color:#000}
+.win.act .tbar{background:#000;color:#fff}
+.tbar .title{flex:1;text-align:center;line-height:19px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:default}
+.cbox{width:17px;flex:none;border-right:1px solid currentColor;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cbox i{display:block;width:11px;height:3px;background:currentColor}
+.sz{width:15px;flex:none;border-left:1px solid currentColor;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:8px;line-height:1}
+.cbox:hover,.sz:hover{background:currentColor}
+.cbox:hover i{background:#fff}
+.win.act .cbox:hover i{background:#000}
+.sz:hover{color:#fff}
+.win.act .sz:hover{color:#000}
+.mbar{height:18px;flex:none;display:flex;align-items:stretch;border-bottom:1px solid #000;background:#fff}
+.mbar>div{padding:0 8px;line-height:17px;cursor:pointer}
+.mbar>div.open{background:#000;color:#fff}
+.client{flex:1;position:relative;overflow:hidden;background:#fff}
+.rzC{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:ew-resize;z-index:20}
+.rzR{position:absolute;left:0;bottom:-3px;height:7px;width:100%;cursor:ns-resize;z-index:20}
+#ghost{position:absolute;border:2px dashed #000;background:rgba(255,255,255,.35);display:none;z-index:700;pointer-events:none}
+
+/* ---------- 菜单 ---------- */
+.menu{position:fixed;z-index:900;background:#fff;border:1px solid #000;padding:2px 0;min-width:150px;box-shadow:2px 2px 0 rgba(0,0,0,.55)}
+.mi{padding:2px 14px 2px 12px;white-space:nowrap;cursor:pointer;display:flex;justify-content:space-between;gap:26px}
+.mi:hover{background:#000;color:#fff}
+.mi.dis{color:#999}
+.mi.dis:hover{background:#fff;color:#999;cursor:default}
+.msep{border-top:1px solid #000;margin:2px 0}
+
+/* ---------- 对话框 ---------- */
+#modal{position:absolute;inset:0;z-index:800;display:none}
+#modal.on{display:block}
+.dlg{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:#fff;
+  border:1px solid #000;outline:3px solid #000;outline-offset:2px;min-width:300px;max-width:86%}
+.dlg .dt{background:#000;color:#fff;height:19px;line-height:19px;text-align:center}
+.dlg .db{padding:14px 16px;line-height:1.6}
+.dlg .dbtn{padding:0 16px 14px;display:flex;gap:12px;justify-content:center}
+button.w1{font:inherit;background:#fff;border:1px solid #000;padding:3px 16px;cursor:pointer;min-width:72px}
+button.w1:hover{background:#000;color:#fff}
+button.w1.def{box-shadow:2px 2px 0 #000}
+input.w1,select.w1{font:inherit;border:1px solid #000;background:#fff;padding:2px 4px;user-select:text}
+input,select,textarea{accent-color:#000}
+.lst{border:1px solid #000;background:#fff;height:150px;overflow:auto}
+.lst div{padding:1px 6px;cursor:pointer}
+.lst div.sel,.lst div:hover{background:#000;color:#fff}
+
+/* ---------- 滚动条 ---------- */
+::-webkit-scrollbar{width:16px;height:16px}
+::-webkit-scrollbar-track{background-color:#fff;
+  background-image:linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),
+                   linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);
+  background-size:2px 2px;background-position:0 0,1px 1px;border-left:1px solid #000}
+::-webkit-scrollbar-thumb{background:#fff;border:1px solid #000}
+::-webkit-scrollbar-button{background:#fff;border:1px solid #000;height:16px;width:16px}
+
+/* ---------- MS-DOS Executive ---------- */
+.exec{display:flex;flex-direction:column;height:100%}
+.exec .drv{display:flex;gap:14px;padding:4px 8px;border-bottom:1px solid #000;align-items:center}
+.exec .drv span{cursor:pointer;padding:1px 5px;border:1px solid transparent}
+.exec .drv span.on{background:#000;color:#fff}
+.exec .drv span:hover{border-color:#000}
+.exec .pth{padding:2px 8px;border-bottom:1px solid #000;font-family:"VT323",monospace;font-size:16px}
+.exec .list{flex:1;overflow:auto;padding:4px 8px;column-width:132px;column-gap:12px;column-rule:none}
+.exec .it{padding:0 4px;cursor:default;white-space:nowrap;line-height:16px;break-inside:avoid}
+.exec .it.sel{background:#000;color:#fff}
+.exec .it b{font-weight:bold}
+.exec .sb{border-top:1px solid #000;padding:2px 8px;font-size:11px}
+
+/* ---------- 记事本 ---------- */
+textarea.np{width:100%;height:100%;border:0;outline:0;resize:none;padding:3px 5px;
+  font-family:"MS Sans Serif",Tahoma,sans-serif;font-size:13px;line-height:1.35;user-select:text;background:#fff;color:#000}
+
+/* ---------- 计算器 ---------- */
+.calc{padding:6px;display:flex;flex-direction:column;height:100%;gap:6px}
+.calc .disp{border:1px solid #000;text-align:right;padding:4px 8px;font-family:"VT323",monospace;font-size:26px;
+  line-height:1;overflow:hidden;background:#fff}
+.calc .mem{font-size:10px;height:12px;padding-left:2px}
+.calc .grid{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(22px,30px);gap:4px}
+.calc .pad{flex:1}
+.calc button{font:inherit;background:#fff;border:1px solid #000;cursor:pointer;min-height:22px}
+.calc button:hover{background:#000;color:#fff}
+.calc button.op{box-shadow:1px 1px 0 #000}
+
+/* ---------- 时钟/黑白棋/画笔 ---------- */
+canvas{display:block;image-rendering:pixelated}
+.center{display:flex;align-items:center;justify-content:center;height:100%}
+.rev{display:flex;flex-direction:column;height:100%}
+.rev .st{border-bottom:1px solid #000;padding:2px 8px;display:flex;justify-content:space-between;gap:10px}
+.paint{display:flex;height:100%}
+.paint .tools{width:68px;flex:none;border-right:1px solid #000;display:flex;flex-wrap:wrap;align-content:flex-start;padding:2px}
+.paint .tools button{width:28px;height:24px;font:inherit;font-size:13px;background:#fff;border:1px solid #000;margin:1px;cursor:pointer;line-height:1}
+.paint .tools button.on{background:#000;color:#fff}
+.paint .cv{flex:1;overflow:auto;background:#fff;display:block}
+
+/* ---------- 日历 ---------- */
+.cal{display:flex;flex-direction:column;height:100%}
+.cal .hd{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;border-bottom:1px solid #000}
+.cal .hd button{font:inherit;border:1px solid #000;background:#fff;cursor:pointer;padding:0 8px}
+.cal table{width:100%;border-collapse:collapse;table-layout:fixed}
+.cal th{border:1px solid #000;font-weight:normal;background:#fff}
+.cal td{border:1px solid #000;height:26px;text-align:center;cursor:pointer;vertical-align:middle}
+.cal td.today{box-shadow:inset 0 0 0 2px #000}
+.cal td.sel{background:#000;color:#fff}
+.cal td.dot::after{content:"•";margin-left:2px}
+.cal .day{flex:1;display:flex;flex-direction:column;border-top:1px solid #000}
+.cal .day textarea{flex:1;border:0;outline:0;resize:none;padding:4px;font:inherit;user-select:text}
+
+/* ---------- 控制面板 ---------- */
+.cp{display:flex;height:100%}
+.cp .nav{width:120px;flex:none;border-right:1px solid #000;overflow:auto}
+.cp .nav div{padding:3px 8px;cursor:pointer}
+.cp .nav div.on,.cp .nav div:hover{background:#000;color:#fff}
+.cp .pane{flex:1;padding:10px 12px;overflow:auto;line-height:1.9}
+.cp .pane label{display:block}
+.cp input[type=range]{vertical-align:middle;width:150px}
+.about{padding:14px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="crt" class="scan">
+
+  <div id="power" class="layer on">
+    <button id="powerBtn" title="Power">⏻</button>
+    <div>MICROSOFT WINDOWS 1.01 &nbsp;·&nbsp; VIRTUAL MACHINE</div>
+    <div class="sub">点击电源按钮开机 &nbsp;/&nbsp; Click the power button to boot<br>
+      IBM PC/AT · 640K RAM · EGA · MS-DOS 3.20</div>
+  </div>
+
+  <div id="dos" class="layer"><div id="dosText"></div></div>
+
+  <div id="desktop" class="layer">
+    <div id="desk">
+      <div id="tiles" class="dither">
+        <div id="ghost"></div>
+      </div>
+      <div id="icons" class="dither"></div>
+    </div>
+    <div id="modal"></div>
+  </div>
+
+</div>
+<script>
+/* =====================================================================
+   Microsoft Windows 1.01 — 虚拟机模拟 (single page, no dependencies)
+   开机自检 → MS-DOS → WIN → MS-DOS Executive 图形界面
+   ===================================================================== */
+"use strict";
+
+/* ---------------------------------------------------------------- 工具 */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const pad2 = n => String(n).padStart(2, "0");
+
+function mk(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+
+/* 简易 PC 蜂鸣器 */
+let AC = null;
+function beep(freq, dur, type) {
+  if (typeof PREFS !== "undefined" && PREFS && PREFS.beep === false) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "square";
+    o.frequency.value = freq || 800;
+    g.gain.value = 0.05;
+    o.connect(g); g.connect(AC.destination);
+    o.start();
+    o.stop(AC.currentTime + (dur || 90) / 1000);
+  } catch (e) { /* 静音环境忽略 */ }
+}
+
+const layers = { power: $("#power"), dos: $("#dos"), desktop: $("#desktop") };
+function showLayer(name) {
+  Object.keys(layers).forEach(k => layers[k].classList.toggle("on", k === name));
+}
+
+/* ---------------------------------------------------- 虚拟磁盘文件系统 */
+const README = [
+  "                    虚拟 MICROSOFT WINDOWS 1.01",
+  "                    ============================",
+  "",
+  "欢迎使用本模拟器 / Welcome to this simulation.",
+  "",
+  "【怎么用 · How to use】",
+  "  * 双击 MS-DOS Executive 里的 .EXE 文件即可运行程序。",
+  "    Double-click an .EXE in the MS-DOS Executive to run it.",
+  "  * 双击 .TXT 文件会用记事本 (NOTEPAD) 打开。",
+  "  * 标题栏左边的小方块 = 关闭窗口 (Close)。",
+  "  * 标题栏右边 ▲ = 放大到全屏 (Zoom)，▼ = 缩成图标 (Icon)。",
+  "  * Windows 1.0 的窗口是平铺的，不会重叠。",
+  "    拖动标题栏放到另一个窗口上可以交换位置；",
+  "    拖到底部图标区则缩成图标。",
+  "  * 拖动窗口之间的边界可以调整大小。",
+  "  * Special 菜单 -> End Session 结束 Windows 回到 DOS 提示符,",
+  "    在 C:\\> 后输入 WIN 可再次进入 Windows。",
+  "",
+  "【内附程序 · Programs】",
+  "  MSDOS.EXE     MS-DOS Executive  文件管理器",
+  "  NOTEPAD.EXE   Notepad           纯文本编辑器",
+  "  CALC.EXE      Calculator        计算器",
+  "  CLOCK.EXE     Clock             模拟时钟",
+  "  CALENDAR.EXE  Calendar          日历/记事",
+  "  REVERSI.EXE   Reversi           黑白棋 (Windows 1.0 的招牌游戏)",
+  "  PAINT.EXE     Paint             单色画图",
+  "  CONTROL.EXE   Control Panel     控制面板 (边框宽度/桌面底纹/CRT)",
+  "",
+  "                       (C) 1985 Microsoft Corporation",
+  "                       Simulation built for the web, 2026"
+].join("\n");
+
+const ABC_TXT = [
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  "abcdefghijklmnopqrstuvwxyz",
+  "0123456789 !@#$%^&*()_+-=",
+  "",
+  "This file ships with Microsoft Windows 1.01 as a font sample."
+].join("\n");
+
+const WIN_INI = [
+  "[windows]",
+  "spooler=yes",
+  "load=clock.exe",
+  "run=",
+  "Beep=yes",
+  "BorderWidth=2",
+  "CursorBlinkRate=530",
+  "DoubleClickSpeed=452",
+  "Programs=com exe bat",
+  "Documents=txt",
+  "",
+  "[extensions]",
+  "txt=notepad.exe ^.txt",
+  "",
+  "[devices]",
+  "IBM Graphics=IBMGRX,LPT1:"
+].join("\n");
+
+const F = (data) => ({ type: "txt", data: data });
+const D = (children) => ({ type: "dir", children: children });
+const X = (app) => ({ type: "exe", app: app });
+
+const DISK = {
+  "C:": D({
+    "WINDOWS": D({
+      "CALC.EXE":     X("calc"),
+      "CALENDAR.EXE": X("calendar"),
+      "CLOCK.EXE":    X("clock"),
+      "CONTROL.EXE":  X("control"),
+      "MSDOS.EXE":    X("exec"),
+      "NOTEPAD.EXE":  X("notepad"),
+      "PAINT.EXE":    X("paint"),
+      "REVERSI.EXE":  X("reversi"),
+      "WIN.COM":      { type: "sys" },
+      "GDI.EXE":      { type: "sys" },
+      "USER.EXE":     { type: "sys" },
+      "KERNEL.EXE":   { type: "sys" },
+      "EGAHIRES.DRV": { type: "sys" },
+      "MOUSE.DRV":    { type: "sys" },
+      "WIN.INI":      F(WIN_INI),
+      "ABC.TXT":      F(ABC_TXT),
+      "README.TXT":   F(README)
+    }),
+    "DOS": D({
+      "COMMAND.COM": { type: "sys" },
+      "FORMAT.COM":  { type: "sys" },
+      "CHKDSK.COM":  { type: "sys" },
+      "EDLIN.COM":   { type: "sys" },
+      "MORE.COM":    { type: "sys" }
+    }),
+    "AUTOEXEC.BAT": F("@ECHO OFF\nPATH C:\\DOS;C:\\WINDOWS\nPROMPT $P$G\nMOUSE\nWIN\n"),
+    "CONFIG.SYS":   F("FILES=20\nBUFFERS=20\nDEVICE=C:\\DOS\\ANSI.SYS\n"),
+    "README.TXT":   F(README)
+  }),
+  "A:": D({}),
+  "B:": D({})
+};
+
+function fsGet(drive, parts) {
+  let node = DISK[drive];
+  for (const p of parts) {
+    if (!node || node.type !== "dir") return null;
+    node = node.children[p];
+  }
+  return node || null;
+}
+
+/* ------------------------------------------------------ 开机 / DOS 层 */
+const dosText = $("#dosText");
+let skipBoot = false;
+
+function dosPrint(s) { dosText.appendChild(document.createTextNode(s)); }
+function dosCursor() {
+  const c = mk("span", "cur");
+  dosText.appendChild(c);
+  return c;
+}
+function dosClear() { dosText.textContent = ""; }
+
+async function typeLine(text, speed) {
+  if (skipBoot) { dosPrint(text + "\n"); return; }
+  for (const ch of text) {
+    dosPrint(ch);
+    if (speed) await wait(speed);
+  }
+  dosPrint("\n");
+}
+async function pause(ms) { if (!skipBoot) await wait(ms); }
+
+async function bootSequence() {
+  showLayer("dos");
+  dosClear();
+  beep(880, 120);
+  await pause(400);
+
+  await typeLine("Phoenix ROM BIOS PLUS Version 1.10 A0");
+  await typeLine("Copyright (C) 1985 Phoenix Technologies Ltd.");
+  await typeLine("All Rights Reserved");
+  await typeLine("");
+  await typeLine("IBM PC/AT Compatible  80286 @ 8 MHz");
+  await pause(260);
+
+  /* 内存计数动画 */
+  dosPrint("Memory Test : ");
+  const memNode = document.createTextNode("");
+  dosText.appendChild(memNode);
+  for (let k = 64; k <= 640; k += 64) {
+    memNode.nodeValue = k + "K";
+    if (!skipBoot) await wait(55);
+  }
+  memNode.nodeValue = "640K OK";
+  dosPrint("\n\n");
+  await pause(250);
+
+  await typeLine("Diskette Drive A: 1.2 MB, 5.25 in.");
+  await typeLine("Diskette Drive B: None");
+  await typeLine("Fixed Disk C:     20 MB");
+  await typeLine("Display Adapter:  EGA (640 x 350, 16 colour)");
+  await typeLine("Pointing Device:  Microsoft Serial Mouse on COM1");
+  await typeLine("");
+  await pause(400);
+  await typeLine("Starting MS-DOS...");
+  await pause(700);
+
+  dosClear();
+  await typeLine("Microsoft(R) MS-DOS(R)  Version 3.20");
+  await typeLine("             (C)Copyright Microsoft Corp 1981-1986");
+  await typeLine("");
+  await pause(400);
+  await typeLine("C:\\>PATH C:\\DOS;C:\\WINDOWS");
+  await pause(180);
+  await typeLine("C:\\>MOUSE");
+  await typeLine("Microsoft Mouse Driver Version 6.24 installed.");
+  await typeLine("");
+  await pause(300);
+  dosPrint("C:\\>");
+  await typeLine("WIN", 70);
+  await pause(500);
+  await startWindows();
+}
+
+/* Windows 启动画面 */
+async function startWindows() {
+  dosClear();
+  dosPrint("\n\n\n");
+  await typeLine("                        Microsoft Windows");
+  await typeLine("                           Version 1.01");
+  await typeLine("");
+  await typeLine("              (C) Copyright Microsoft Corp. 1985");
+  await typeLine("                      All Rights Reserved");
+  await typeLine("");
+  await typeLine("");
+  await typeLine("                    MS-DOS Executive loading . . .");
+  beep(1200, 60);
+  await wait(skipBoot ? 500 : 1300);
+  enterDesktop();
+}
+
+/* --------------------------------------------- End Session 后的 DOS 壳 */
+let shellBuf = "", shellCursor = null, shellActive = false;
+
+function shellPrompt() {
+  dosPrint("\nC:\\>");
+  shellCursor = dosCursor();
+  shellBuf = "";
+}
+
+function shellStart(firstMessage) {
+  showLayer("dos");
+  dosClear();
+  if (firstMessage) dosPrint(firstMessage + "\n");
+  dosPrint("Microsoft(R) MS-DOS(R)  Version 3.20\n");
+  dosPrint("             (C)Copyright Microsoft Corp 1981-1986\n");
+  dosPrint("\n输入 WIN 并按 Enter 重新进入 Windows。  (Type WIN to restart Windows, HELP for commands)\n");
+  shellActive = true;
+  shellPrompt();
+}
+
+function shellEcho(s) {
+  if (shellCursor) shellCursor.remove();
+  dosPrint(s);
+  shellCursor = dosCursor();
+}
+
+function shellRun(cmdLine) {
+  const line = cmdLine.trim();
+  const cmd = line.split(/\s+/)[0].toUpperCase();
+  const arg = line.slice(cmd.length).trim();
+  if (shellCursor) shellCursor.remove();
+  dosPrint("\n");
+
+  switch (cmd) {
+    case "": break;
+    case "WIN":
+      shellActive = false;
+      startWindows();
+      return;
+    case "VER":
+      dosPrint("\nMS-DOS Version 3.20\n");
+      break;
+    case "CLS":
+      dosClear();
+      break;
+    case "DIR": {
+      const dirName = arg.replace(/^[A-Za-z]:\\?/, "").replace(/\\$/, "").toUpperCase();
+      const node = dirName ? fsGet("C:", dirName.split("\\")) : DISK["C:"];
+      if (!node || node.type !== "dir") { dosPrint("File not found\n"); break; }
+      dosPrint("\n Volume in drive C is WINDOWS\n Directory of  C:\\" + dirName + "\n\n");
+      let count = 0;
+      for (const name of Object.keys(node.children)) {
+        const it = node.children[name];
+        const base = name.split(".")[0].padEnd(9, " ");
+        const ext = (name.split(".")[1] || "").padEnd(4, " ");
+        const size = it.type === "dir" ? "<DIR>  " :
+          String((it.data ? it.data.length : 4096 + name.length * 37)).padStart(7, " ");
+        dosPrint(base + ext + size + "   1-01-86  12:00p\n");
+        count++;
+      }
+      dosPrint("     " + count + " File(s)   10493952 bytes free\n");
+      break;
+    }
+    case "TYPE": {
+      const p = arg.toUpperCase().replace(/^C:\\?/, "");
+      const node = fsGet("C:", p ? p.split("\\") : []);
+      if (node && node.data) dosPrint("\n" + node.data + "\n");
+      else dosPrint("File not found\n");
+      break;
+    }
+    case "DATE":
+      dosPrint("Current date is " + new Date().toDateString() + "\n");
+      break;
+    case "TIME": {
+      const d = new Date();
+      dosPrint("Current time is " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds()) + "\n");
+      break;
+    }
+    case "ECHO":
+      dosPrint(arg + "\n");
+      break;
+    case "HELP":
+      dosPrint("\nWIN    启动 Windows        DIR   列出文件\n" +
+               "TYPE   显示文件内容        CLS   清屏\n" +
+               "VER    版本                DATE  日期\n" +
+               "TIME   时间                ECHO  回显\n");
+      break;
+    case "EXIT":
+      dosPrint("Cannot exit COMMAND.COM - this is the primary shell.\n");
+      break;
+    default:
+      dosPrint("Bad command or file name\n");
+      beep(220, 150);
+  }
+  shellPrompt();
+}
+
+document.addEventListener("keydown", e => {
+  if (!shellActive) return;
+  if (e.key === "Enter") { e.preventDefault(); shellRun(shellBuf); }
+  else if (e.key === "Backspace") {
+    e.preventDefault();
+    if (shellBuf.length) { shellBuf = shellBuf.slice(0, -1); redrawShellLine(); }
+  } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    shellBuf += e.key;
+    shellEcho(e.key);
+  }
+});
+
+/* Backspace 需要重画当前行 —— 简单做法：整行重写 */
+function redrawShellLine() {
+  if (shellCursor) shellCursor.remove();
+  const txt = dosText.textContent;
+  const idx = txt.lastIndexOf("C:\\>");
+  dosText.textContent = txt.slice(0, idx) + "C:\\>" + shellBuf;
+  shellCursor = dosCursor();
+}
+
+/* =====================================================================
+   窗口管理器 —— Windows 1.0 是「平铺式」的：窗口不重叠
+   ===================================================================== */
+const tiles  = $("#tiles");
+const iconBar = $("#icons");
+const ghost  = $("#ghost");
+
+let WINS  = {};      /* id -> win 对象 */
+let COLS  = [];      /* [{w:0.5, items:[{h:1,id:3}]}] 列 -> 行 */
+let SEQ   = 1;
+let ZOOM  = null;    /* 被放大的窗口 id */
+let ACTIVE = null;
+
+function findSlot(id) {
+  for (let c = 0; c < COLS.length; c++)
+    for (let r = 0; r < COLS[c].items.length; r++)
+      if (COLS[c].items[r].id === id) return { c: c, r: r };
+  return null;
+}
+
+function placeNew(id) {
+  if (COLS.length === 0) { COLS.push({ w: 1, items: [{ h: 1, id: id }] }); return; }
+  if (COLS.length < 3 && COLS.every(c => c.items.length === 1)) {
+    const w = 1 / (COLS.length + 1);
+    COLS.forEach(c => c.w = w);
+    COLS.push({ w: w, items: [{ h: 1, id: id }] });
+    return;
+  }
+  /* 加入行数最少的一列 */
+  let best = 0;
+  COLS.forEach((c, i) => { if (c.items.length < COLS[best].items.length) best = i; });
+  const col = COLS[best];
+  col.items.push({ h: 0, id: id });
+  col.items.forEach(it => it.h = 1 / col.items.length);
+}
+
+function removeSlot(id) {
+  const s = findSlot(id);
+  if (!s) return;
+  const col = COLS[s.c];
+  col.items.splice(s.r, 1);
+  if (col.items.length === 0) {
+    COLS.splice(s.c, 1);
+    const total = COLS.reduce((a, c) => a + c.w, 0) || 1;
+    COLS.forEach(c => c.w = c.w / total);
+  } else {
+    const total = col.items.reduce((a, i) => a + i.h, 0) || 1;
+    col.items.forEach(i => i.h = i.h / total);
+  }
+}
+
+function relayout() {
+  const W = tiles.clientWidth, H = tiles.clientHeight;
+  Object.values(WINS).forEach(w => { if (w.state !== "icon") w.el.style.display = "none"; });
+
+  if (ZOOM && WINS[ZOOM]) {
+    const w = WINS[ZOOM];
+    w.el.style.display = "flex";
+    setRect(w, 0, 0, W, H);
+    w.onResize && w.onResize();
+    return;
+  }
+  let x = 0;
+  COLS.forEach((col, ci) => {
+    const cw = (ci === COLS.length - 1) ? (W - x) : Math.round(W * col.w);
+    let y = 0;
+    col.items.forEach((it, ri) => {
+      const ih = (ri === col.items.length - 1) ? (H - y) : Math.round(H * it.h);
+      const w = WINS[it.id];
+      if (w) {
+        w.el.style.display = "flex";
+        setRect(w, x, y, cw, ih);
+        w.onResize && w.onResize();
+      }
+      y += ih;
+    });
+    x += cw;
+  });
+}
+
+function setRect(w, x, y, cw, ch) {
+  w.el.style.left = x + "px";
+  w.el.style.top = y + "px";
+  w.el.style.width = cw + "px";
+  w.el.style.height = ch + "px";
+}
+
+function focusWin(id) {
+  ACTIVE = id;
+  Object.values(WINS).forEach(w => w.el.classList.toggle("act", w.id === id));
+}
+
+/* ---------------------------------------------------------- 建立窗口 */
+function createWindow(opts) {
+  const id = SEQ++;
+  const el = mk("div", "win");
+  el.dataset.id = id;
+
+  const tbar = mk("div", "tbar");
+  const cbox = mk("div", "cbox"); cbox.appendChild(mk("i"));
+  cbox.title = "Close";
+  const title = mk("div", "title", opts.title);
+  const up = mk("div", "sz", "▲"); up.title = "Zoom";
+  const dn = mk("div", "sz", "▼"); dn.title = "Icon";
+  tbar.append(cbox, title, up, dn);
+
+  const mbar = mk("div", "mbar");
+  const client = mk("div", "client");
+  el.append(tbar, mbar, client);
+  el.appendChild(mk("div", "rzC"));
+  el.appendChild(mk("div", "rzR"));
+  tiles.appendChild(el);
+
+  const win = {
+    id: id, el: el, client: client, mbar: mbar, titleEl: title,
+    app: opts.app, name: opts.title, glyph: opts.glyph || "▤",
+    state: "tiled", onClose: null, onResize: null,
+    setTitle: function (t) { title.textContent = t; win.name = t; },
+    setMenus: function (menus) { buildMenuBar(win, menus); },
+    close: function () { closeWindow(id); }
+  };
+  WINS[id] = win;
+
+  cbox.addEventListener("mousedown", e => e.stopPropagation());
+  cbox.addEventListener("click", e => { e.stopPropagation(); closeWindow(id); });
+  up.addEventListener("click", e => { e.stopPropagation(); toggleZoom(id); });
+  dn.addEventListener("click", e => { e.stopPropagation(); iconize(id); });
+  el.addEventListener("mousedown", () => focusWin(id));
+
+  dragTitle(win, tbar);
+  dragEdges(win);
+
+  placeNew(id);
+  if (ZOOM) ZOOM = null;
+  focusWin(id);
+  if (opts.menus) buildMenuBar(win, opts.menus);
+  if (opts.mount) opts.mount(win);
+  relayout();
+  return win;
+}
+
+function closeWindow(id) {
+  const w = WINS[id];
+  if (!w) return;
+  if (w.onClose && w.onClose() === false) return;
+  if (w.timer) clearInterval(w.timer);
+  if (ZOOM === id) ZOOM = null;
+  removeSlot(id);
+  w.el.remove();
+  if (w.iconEl) w.iconEl.remove();
+  delete WINS[id];
+  const rest = Object.keys(WINS).filter(k => WINS[k].state !== "icon");
+  ACTIVE = rest.length ? Number(rest[rest.length - 1]) : null;
+  if (ACTIVE) focusWin(ACTIVE);
+  relayout();
+}
+
+function toggleZoom(id) {
+  ZOOM = (ZOOM === id) ? null : id;
+  focusWin(id);
+  relayout();
+}
+
+function iconize(id) {
+  const w = WINS[id];
+  if (!w || w.state === "icon") return;
+  if (ZOOM === id) ZOOM = null;
+  removeSlot(id);
+  w.state = "icon";
+  w.el.style.display = "none";
+  const ic = mk("div", "dicon");
+  ic.append(mk("div", "g", w.glyph), mk("div", "n", w.name));
+  ic.title = w.name;
+  ic.addEventListener("dblclick", () => restore(id));
+  ic.addEventListener("click", () => restore(id));
+  iconBar.appendChild(ic);
+  w.iconEl = ic;
+  relayout();
+}
+
+function restore(id) {
+  const w = WINS[id];
+  if (!w || w.state !== "icon") return;
+  w.state = "tiled";
+  if (w.iconEl) { w.iconEl.remove(); w.iconEl = null; }
+  placeNew(id);
+  focusWin(id);
+  relayout();
+}
+
+/* --------------------------- 拖动标题栏：交换窗口位置 / 拖到底部变图标 */
+function dragTitle(win, tbar) {
+  tbar.addEventListener("mousedown", e => {
+    if (e.target.closest(".cbox") || e.target.closest(".sz")) return;
+    focusWin(win.id);
+    const startX = e.clientX, startY = e.clientY;
+    let dragging = false;
+    const move = ev => {
+      if (!dragging && Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) < 5) return;
+      dragging = true;
+      ghost.style.display = "block";
+      const r = tiles.getBoundingClientRect();
+      ghost.style.left = (ev.clientX - r.left - 60) + "px";
+      ghost.style.top = (ev.clientY - r.top - 10) + "px";
+      ghost.style.width = "120px";
+      ghost.style.height = "20px";
+    };
+    const up = ev => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+      ghost.style.display = "none";
+      if (!dragging) return;
+      const overIcons = iconBar.getBoundingClientRect();
+      if (ev.clientY >= overIcons.top) { iconize(win.id); return; }
+      const target = document.elementFromPoint(ev.clientX, ev.clientY);
+      const tw = target && target.closest(".win");
+      if (tw && Number(tw.dataset.id) !== win.id) swapWins(win.id, Number(tw.dataset.id));
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+}
+
+function swapWins(a, b) {
+  const sa = findSlot(a), sb = findSlot(b);
+  if (!sa || !sb) return;
+  COLS[sa.c].items[sa.r].id = b;
+  COLS[sb.c].items[sb.r].id = a;
+  relayout();
+}
+
+/* ----------------------------------------- 拖动窗口边界：调整平铺比例 */
+function dragEdges(win) {
+  const colHandle = win.el.querySelector(".rzC");
+  const rowHandle = win.el.querySelector(".rzR");
+
+  colHandle.addEventListener("mousedown", e => {
+    const s = findSlot(win.id);
+    if (!s || s.c >= COLS.length - 1 || ZOOM) return;
+    e.preventDefault(); e.stopPropagation();
+    const W = tiles.clientWidth, x0 = e.clientX;
+    const w0 = COLS[s.c].w, w1 = COLS[s.c + 1].w;
+    const move = ev => {
+      let d = (ev.clientX - x0) / W;
+      d = Math.max(-w0 + 0.12, Math.min(w1 - 0.12, d));
+      COLS[s.c].w = w0 + d;
+      COLS[s.c + 1].w = w1 - d;
+      relayout();
+    };
+    const up = () => { document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+
+  rowHandle.addEventListener("mousedown", e => {
+    const s = findSlot(win.id);
+    if (!s || ZOOM) return;
+    const col = COLS[s.c];
+    if (s.r >= col.items.length - 1) return;
+    e.preventDefault(); e.stopPropagation();
+    const H = tiles.clientHeight, y0 = e.clientY;
+    const h0 = col.items[s.r].h, h1 = col.items[s.r + 1].h;
+    const move = ev => {
+      let d = (ev.clientY - y0) / H;
+      d = Math.max(-h0 + 0.12, Math.min(h1 - 0.12, d));
+      col.items[s.r].h = h0 + d;
+      col.items[s.r + 1].h = h1 - d;
+      relayout();
+    };
+    const up = () => { document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+}
+
+window.addEventListener("resize", relayout);
+
+/* =====================================================================
+   菜单
+   ===================================================================== */
+let openMenu = null;
+
+function closeMenu() {
+  if (openMenu) {
+    openMenu.el.remove();
+    openMenu.label.classList.remove("open");
+    openMenu = null;
+  }
+}
+document.addEventListener("mousedown", e => {
+  if (openMenu && !e.target.closest(".menu") && !e.target.closest(".mbar")) closeMenu();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+
+function buildMenuBar(win, menus) {
+  win.mbar.innerHTML = "";
+  win.mbar.style.display = menus && menus.length ? "flex" : "none";
+  (menus || []).forEach(m => {
+    const lab = mk("div", null, m.label);
+    lab.addEventListener("mousedown", e => {
+      e.stopPropagation();
+      focusWin(win.id);
+      if (openMenu && openMenu.label === lab) { closeMenu(); return; }
+      closeMenu();
+      dropMenu(lab, typeof m.items === "function" ? m.items() : m.items);
+    });
+    lab.addEventListener("mouseenter", () => {
+      if (openMenu && openMenu.label !== lab && openMenu.label.parentElement === win.mbar) {
+        closeMenu();
+        dropMenu(lab, typeof m.items === "function" ? m.items() : m.items);
+      }
+    });
+    win.mbar.appendChild(lab);
+  });
+}
+
+function dropMenu(lab, items) {
+  const el = mk("div", "menu");
+  items.forEach(it => {
+    if (it === "-" || it.sep) { el.appendChild(mk("div", "msep")); return; }
+    const d = mk("div", "mi" + (it.disabled ? " dis" : ""));
+    d.appendChild(mk("span", null, (it.checked ? "√ " : "") + it.label));
+    if (it.hint) d.appendChild(mk("span", null, it.hint));
+    if (!it.disabled) d.addEventListener("click", () => { closeMenu(); it.action && it.action(); });
+    el.appendChild(d);
+  });
+  document.body.appendChild(el);
+  const r = lab.getBoundingClientRect();
+  el.style.left = Math.min(r.left, window.innerWidth - el.offsetWidth - 4) + "px";
+  el.style.top = r.bottom + "px";
+  lab.classList.add("open");
+  openMenu = { el: el, label: lab };
+}
+
+/* =====================================================================
+   对话框
+   ===================================================================== */
+const modal = $("#modal");
+
+function dialog(opts) {
+  return new Promise(resolve => {
+    modal.classList.add("on");
+    modal.innerHTML = "";
+    const d = mk("div", "dlg");
+    d.append(mk("div", "dt", opts.title || "Microsoft Windows"));
+    const body = mk("div", "db");
+    if (typeof opts.body === "string") body.innerHTML = opts.body;
+    else if (opts.body) body.appendChild(opts.body);
+    d.appendChild(body);
+    const row = mk("div", "dbtn");
+    (opts.buttons || ["OK"]).forEach((b, i) => {
+      const btn = mk("button", "w1" + (i === 0 ? " def" : ""), b);
+      btn.addEventListener("click", () => {
+        modal.classList.remove("on");
+        modal.innerHTML = "";
+        resolve({ button: b, dialog: d });
+      });
+      row.appendChild(btn);
+    });
+    d.appendChild(row);
+    modal.appendChild(d);
+    if (opts.beep !== false) beep(760, 60);
+    const f = d.querySelector("input,select");
+    if (f) setTimeout(() => f.focus(), 30);
+    d.addEventListener("keydown", e => {
+      if (e.key === "Enter") { const b = d.querySelector("button.def"); b && b.click(); }
+    });
+  });
+}
+
+function messageBox(text, title) {
+  return dialog({ title: title || "Microsoft Windows", body: text, buttons: ["OK"] });
+}
+
+/* =====================================================================
+   应用程序
+   ===================================================================== */
+const APPS = {};
+
+function launch(key, arg) {
+  const app = APPS[key];
+  if (!app) { messageBox("Cannot run this program.", "MS-DOS Executive"); return; }
+  const visible = Object.values(WINS).filter(w => w.state !== "icon").length;
+  if (visible >= 6) {
+    messageBox("屏幕上的窗口太多了。<br>Too many windows — close or iconize one first.", "Microsoft Windows");
+    return;
+  }
+  return createWindow({
+    title: app.title, app: key, glyph: app.glyph,
+    mount: w => app.mount(w, arg || {})
+  });
+}
+
+/* ----------------------------------------------- MS-DOS Executive ---- */
+APPS.exec = {
+  title: "MS-DOS Executive", glyph: "▤",
+  mount: function (win) {
+    const st = { drive: "C:", path: ["WINDOWS"], sel: null, view: "all" };
+    const root = mk("div", "exec");
+    const drv = mk("div", "drv");
+    const pth = mk("div", "pth");
+    const list = mk("div", "list");
+    const sb = mk("div", "sb");
+    root.append(drv, pth, list, sb);
+    win.client.appendChild(root);
+
+    ["A:", "B:", "C:"].forEach(d => {
+      const s = mk("span", null, "▤ " + d);
+      s.addEventListener("click", () => {
+        if (d !== "C:" && Object.keys(DISK[d].children).length === 0) {
+          messageBox("Cannot read from drive " + d + "<br>驱动器 " + d + " 里没有磁盘。", "MS-DOS Executive");
+          return;
+        }
+        st.drive = d; st.path = []; render();
+      });
+      drv.appendChild(s);
+    });
+
+    function node() { return fsGet(st.drive, st.path); }
+
+    function open(name) {
+      const n = node();
+      if (name === "..") { st.path.pop(); render(); return; }
+      const item = n.children[name];
+      if (!item) return;
+      if (item.type === "dir") { st.path.push(name); render(); return; }
+      if (item.type === "exe") { launch(item.app); return; }
+      if (item.type === "txt") { launch("notepad", { name: name, data: item.data }); return; }
+      messageBox("This file cannot be run by MS-DOS Executive.<br>" + name + " 不是可执行程序。", "MS-DOS Executive");
+    }
+
+    function render() {
+      $$(".drv span", root).forEach(s => s.classList.toggle("on", s.textContent.indexOf(st.drive) >= 0));
+      pth.textContent = st.drive + "\\" + st.path.join("\\");
+      list.innerHTML = "";
+      const n = node();
+      const names = [];
+      if (st.path.length) names.push("..");
+      const kids = n && n.type === "dir" ? Object.keys(n.children) : [];
+      kids.filter(k => n.children[k].type === "dir").sort().forEach(k => names.push(k));
+      kids.filter(k => n.children[k].type !== "dir").sort().forEach(k => {
+        if (st.view === "programs" && !/\.(EXE|COM|BAT)$/.test(k)) return;
+        names.push(k);
+      });
+      names.forEach(name => {
+        const isDir = name === ".." || (n.children[name] && n.children[name].type === "dir");
+        const it = mk("div", "it");
+        it.innerHTML = (isDir ? "<b>" + name + "</b>" : name);
+        it.addEventListener("click", () => {
+          $$(".it", list).forEach(x => x.classList.remove("sel"));
+          it.classList.add("sel"); st.sel = name;
+          sb.textContent = describe(name);
+        });
+        it.addEventListener("dblclick", () => open(name));
+        list.appendChild(it);
+      });
+      sb.textContent = names.length + " 个项目 · " + kids.length + " files · 10,493,952 bytes free";
+    }
+
+    function describe(name) {
+      const n = node();
+      const item = name === ".." ? null : n.children[name];
+      if (!item) return "上层目录 / Parent directory";
+      if (item.type === "dir") return name + "  <DIR>";
+      if (item.type === "exe") return name + "  可执行程序 — 双击运行 / double-click to run";
+      if (item.type === "txt") return name + "  " + item.data.length + " bytes — 双击用记事本打开";
+      return name + "  系统文件 / system file";
+    }
+
+    win.setMenus([
+      { label: "File", items: () => [
+        { label: "Run...", action: runDialog },
+        { label: "Open", action: () => st.sel && open(st.sel) },
+        "-",
+        { label: "Copy...", action: () => notImpl("Copy") },
+        { label: "Delete", action: () => deleteSel() },
+        { label: "Rename...", action: () => notImpl("Rename") },
+        { label: "Print", action: () => notImpl("Print") },
+        "-",
+        { label: "Get Info", action: () => messageBox(describe(st.sel || ".."), "File Information") }
+      ]},
+      { label: "View", items: () => [
+        { label: "Short", checked: st.view === "all", action: () => { st.view = "all"; render(); } },
+        { label: "Programs", checked: st.view === "programs", action: () => { st.view = "programs"; render(); } },
+        "-",
+        { label: "Refresh", action: render }
+      ]},
+      { label: "Special", items: () => [
+        { label: "End Session...", action: endSession },
+        { label: "Set Volume Name...", action: () => notImpl("Set Volume Name") },
+        { label: "Format Data Disk...", action: () => notImpl("Format Data Disk") },
+        "-",
+        { label: "About MS-DOS Executive...", action: aboutBox }
+      ]}
+    ]);
+
+    function notImpl(what) {
+      messageBox(what + " 在本模拟器中未实现。<br><i>" + what + " is not implemented in this simulation.</i>", "MS-DOS Executive");
+    }
+    async function deleteSel() {
+      if (!st.sel || st.sel === "..") return;
+      const r = await dialog({ title: "MS-DOS Executive",
+        body: "确定要删除 <b>" + st.sel + "</b> 吗？<br>Erase file " + st.sel + "?", buttons: ["OK", "Cancel"] });
+      if (r.button === "OK") { delete node().children[st.sel]; st.sel = null; render(); }
+    }
+    async function runDialog() {
+      const box = mk("div");
+      box.innerHTML = "Run Command Line:<br><br>";
+      const inp = mk("input", "w1"); inp.size = 30; inp.value = "";
+      box.appendChild(inp);
+      const r = await dialog({ title: "Run", body: box, buttons: ["OK", "Cancel"] });
+      if (r.button !== "OK") return;
+      const cmd = inp.value.trim().toUpperCase();
+      if (!cmd) return;
+      const n = fsGet("C:", ["WINDOWS"]);
+      const hit = Object.keys(n.children).find(k => k === cmd || k === cmd + ".EXE");
+      if (hit && n.children[hit].type === "exe") launch(n.children[hit].app);
+      else messageBox("Cannot find file " + cmd + ".<br>找不到程序 " + cmd + "。", "MS-DOS Executive");
+    }
+
+    render();
+  }
+};
+
+/* ------------------------------------------------------------ 记事本 */
+APPS.notepad = {
+  title: "Notepad", glyph: "▤",
+  mount: function (win, arg) {
+    const ta = mk("textarea", "np");
+    ta.value = arg.data || "";
+    ta.spellcheck = false;
+    win.client.appendChild(ta);
+    let fileName = arg.name || "(untitled)";
+    win.setTitle("Notepad - " + fileName);
+
+    async function openFile() {
+      const box = mk("div");
+      box.innerHTML = "C:\\WINDOWS\\*.TXT<br><br>";
+      const lst = mk("div", "lst");
+      const files = [];
+      ["C:"].forEach(() => {
+        const w = fsGet("C:", ["WINDOWS"]).children, r = DISK["C:"].children;
+        Object.keys(w).forEach(k => { if (w[k].type === "txt") files.push(["C:\\WINDOWS\\" + k, w[k]]); });
+        Object.keys(r).forEach(k => { if (r[k].type === "txt") files.push(["C:\\" + k, r[k]]); });
+      });
+      let chosen = null;
+      files.forEach(([label, f]) => {
+        const d = mk("div", null, label);
+        d.addEventListener("click", () => {
+          $$("div", lst).forEach(x => x.classList.remove("sel"));
+          d.classList.add("sel"); chosen = [label, f];
+        });
+        d.addEventListener("dblclick", () => { chosen = [label, f]; $$("button.def", modal)[0].click(); });
+        lst.appendChild(d);
+      });
+      box.appendChild(lst);
+      const r = await dialog({ title: "Open", body: box, buttons: ["OK", "Cancel"] });
+      if (r.button === "OK" && chosen) {
+        ta.value = chosen[1].data;
+        fileName = chosen[0].split("\\").pop();
+        win.setTitle("Notepad - " + fileName);
+      }
+    }
+
+    async function saveFile() {
+      const box = mk("div");
+      box.innerHTML = "Save file as:<br><br>";
+      const inp = mk("input", "w1"); inp.size = 24; inp.value = fileName === "(untitled)" ? "NONAME.TXT" : fileName;
+      box.appendChild(inp);
+      const r = await dialog({ title: "Save As", body: box, buttons: ["OK", "Cancel"] });
+      if (r.button !== "OK") return;
+      const nm = inp.value.trim().toUpperCase() || "NONAME.TXT";
+      fsGet("C:", ["WINDOWS"]).children[nm] = { type: "txt", data: ta.value };
+      fileName = nm;
+      win.setTitle("Notepad - " + nm);
+      messageBox("已保存到 C:\\WINDOWS\\" + nm + "<br>Saved to the virtual disk.", "Notepad");
+    }
+
+    win.setMenus([
+      { label: "File", items: [
+        { label: "New", action: () => { ta.value = ""; fileName = "(untitled)"; win.setTitle("Notepad - (untitled)"); } },
+        { label: "Open...", action: openFile },
+        { label: "Save As...", action: saveFile },
+        "-",
+        { label: "Exit", action: () => win.close() }
+      ]},
+      { label: "Edit", items: [
+        { label: "Undo", hint: "Alt+BkSp", action: () => document.execCommand("undo") },
+        "-",
+        { label: "Cut", hint: "Shift+Del", action: () => document.execCommand("cut") },
+        { label: "Copy", hint: "Ctrl+Ins", action: () => document.execCommand("copy") },
+        { label: "Paste", hint: "Shift+Ins", action: () => ta.focus() },
+        "-",
+        { label: "Select All", action: () => ta.select() },
+        { label: "Time/Date", action: () => { const d = new Date();
+            ta.value += (ta.value.endsWith("\n") || !ta.value ? "" : "\n") +
+              pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + " " + d.toLocaleDateString() + "\n"; } }
+      ]},
+      { label: "Search", items: [
+        { label: "Find...", action: async () => {
+          const box = mk("div"); box.innerHTML = "Find what:<br><br>";
+          const inp = mk("input", "w1"); inp.size = 22; box.appendChild(inp);
+          const r = await dialog({ title: "Find", body: box, buttons: ["OK", "Cancel"] });
+          if (r.button !== "OK" || !inp.value) return;
+          const i = ta.value.indexOf(inp.value);
+          if (i < 0) { messageBox("Cannot find \"" + inp.value + "\"", "Notepad"); return; }
+          ta.focus(); ta.setSelectionRange(i, i + inp.value.length);
+        } }
+      ]}
+    ]);
+  }
+};
+
+/* ------------------------------------------------------------ 计算器 */
+APPS.calc = {
+  title: "Calculator", glyph: "▦",
+  mount: function (win) {
+    const root = mk("div", "calc");
+    const memLbl = mk("div", "mem", "");
+    const disp = mk("div", "disp", "0");
+    const grid = mk("div", "grid");
+    root.append(disp, memLbl, grid, mk("div", "pad"));
+    win.client.appendChild(root);
+
+    let acc = 0, cur = "0", op = null, fresh = true, mem = 0;
+    const show = () => { disp.textContent = cur.length > 16 ? Number(cur).toExponential(9) : cur; };
+    const num = () => parseFloat(cur) || 0;
+
+    function digit(d) {
+      if (fresh) { cur = (d === ".") ? "0." : d; fresh = false; }
+      else if (d === "." && cur.indexOf(".") >= 0) { /* ignore */ }
+      else cur = (cur === "0" && d !== ".") ? d : cur + d;
+      show();
+    }
+    function calcOp(a, b, o) {
+      switch (o) { case "+": return a + b; case "-": return a - b;
+        case "*": return a * b; case "/": return b === 0 ? NaN : a / b; }
+      return b;
+    }
+    function setOp(o) {
+      if (op && !fresh) acc = calcOp(acc, num(), op); else acc = num();
+      cur = String(acc); op = o; fresh = true; show();
+    }
+    function equals() {
+      if (op) { acc = calcOp(acc, num(), op); op = null; }
+      else acc = num();
+      if (isNaN(acc)) { cur = "错误 / Error"; beep(200, 200); } else cur = String(+acc.toPrecision(12));
+      fresh = true; show();
+    }
+    const keys = [
+      ["MC", () => { mem = 0; memLbl.textContent = ""; }],
+      ["7", () => digit("7")], ["8", () => digit("8")], ["9", () => digit("9")], ["/", () => setOp("/")],
+      ["MR", () => { cur = String(mem); fresh = true; show(); }],
+      ["4", () => digit("4")], ["5", () => digit("5")], ["6", () => digit("6")], ["*", () => setOp("*")],
+      ["M+", () => { mem += num(); memLbl.textContent = "M"; fresh = true; }],
+      ["1", () => digit("1")], ["2", () => digit("2")], ["3", () => digit("3")], ["-", () => setOp("-")],
+      ["M-", () => { mem -= num(); memLbl.textContent = "M"; fresh = true; }],
+      ["0", () => digit("0")], [".", () => digit(".")], ["+/-", () => { cur = String(-num()); show(); }], ["+", () => setOp("+")],
+      ["C", () => { acc = 0; cur = "0"; op = null; fresh = true; show(); }],
+      ["CE", () => { cur = "0"; fresh = true; show(); }],
+      ["√", () => { cur = String(Math.sqrt(num())); fresh = true; show(); }],
+      ["%", () => { cur = String(num() / 100); fresh = true; show(); }],
+      ["=", equals]
+    ];
+    keys.forEach(([label, fn]) => {
+      const b = mk("button", /[0-9.]/.test(label) ? "" : "op", label);
+      b.addEventListener("click", () => { fn(); beep(1400, 20); });
+      grid.appendChild(b);
+    });
+
+    win.setMenus([
+      { label: "Edit", items: [
+        { label: "Copy", action: () => { navigator.clipboard && navigator.clipboard.writeText(disp.textContent); } },
+        { label: "Clear", action: () => { acc = 0; cur = "0"; op = null; fresh = true; show(); } }
+      ]},
+      { label: "Help", items: [{ label: "About Calculator...", action: () => messageBox(
+        "<b>Calculator</b><br>Microsoft Windows Version 1.01<br>(C) Copyright Microsoft Corp. 1985", "About Calculator") }] }
+    ]);
+    show();
+  }
+};
+
+/* -------------------------------------------------------------- 时钟 */
+APPS.clock = {
+  title: "Clock", glyph: "◷",
+  mount: function (win) {
+    const wrap = mk("div", "center");
+    const cv = mk("canvas");
+    wrap.appendChild(cv);
+    win.client.appendChild(wrap);
+    const ctx = cv.getContext("2d");
+
+    function draw() {
+      const size = Math.max(60, Math.min(win.client.clientWidth, win.client.clientHeight) - 12);
+      if (cv.width !== size) { cv.width = size; cv.height = size; }
+      const R = size / 2, r = R - 3;
+      ctx.clearRect(0, 0, size, size);
+      ctx.strokeStyle = "#000"; ctx.fillStyle = "#000"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(R, R, r, 0, Math.PI * 2); ctx.stroke();
+      for (let i = 0; i < 12; i++) {
+        const a = i * Math.PI / 6;
+        const L = (i % 3 === 0) ? 8 : 4;
+        ctx.beginPath();
+        ctx.moveTo(R + Math.sin(a) * (r - L), R - Math.cos(a) * (r - L));
+        ctx.lineTo(R + Math.sin(a) * (r - 1), R - Math.cos(a) * (r - 1));
+        ctx.lineWidth = (i % 3 === 0) ? 3 : 1;
+        ctx.stroke();
+      }
+      const d = new Date();
+      const hand = (angle, len, wdt) => {
+        ctx.lineWidth = wdt;
+        ctx.beginPath(); ctx.moveTo(R, R);
+        ctx.lineTo(R + Math.sin(angle) * len, R - Math.cos(angle) * len);
+        ctx.stroke();
+      };
+      const sec = d.getSeconds(), min = d.getMinutes() + sec / 60, hr = (d.getHours() % 12) + min / 60;
+      hand(hr * Math.PI / 6, r * 0.5, 4);
+      hand(min * Math.PI / 30, r * 0.72, 2);
+      hand(sec * Math.PI / 30, r * 0.8, 1);
+      ctx.beginPath(); ctx.arc(R, R, 3, 0, Math.PI * 2); ctx.fill();
+      win.setTitle("Clock — " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds()));
+    }
+    win.onResize = draw;
+    win.timer = setInterval(draw, 1000);
+    win.setMenus([]);
+    draw();
+  }
+};
+
+/* -------------------------------------------------------------- 日历 */
+APPS.calendar = {
+  title: "Calendar", glyph: "▩",
+  mount: function (win) {
+    const notes = {};
+    const root = mk("div", "cal");
+    const hd = mk("div", "hd");
+    const prev = mk("button", null, "◀"), next = mk("button", null, "▶");
+    const lbl = mk("div");
+    hd.append(prev, lbl, next);
+    const tblWrap = mk("div"); tblWrap.style.padding = "4px";
+    const day = mk("div", "day");
+    const dayLbl = mk("div"); dayLbl.style.padding = "2px 6px"; dayLbl.style.borderBottom = "1px solid #000";
+    const ta = mk("textarea");
+    ta.placeholder = "在这里记下当天的事情… / appointments for this day";
+    day.append(dayLbl, ta);
+    root.append(hd, tblWrap, day);
+    win.client.appendChild(root);
+
+    const today = new Date();
+    let y = today.getFullYear(), m = today.getMonth(), selDay = today.getDate();
+    const key = () => y + "-" + m + "-" + selDay;
+
+    ta.addEventListener("input", () => { notes[key()] = ta.value; render(); });
+    prev.addEventListener("click", () => { m--; if (m < 0) { m = 11; y--; } render(); });
+    next.addEventListener("click", () => { m++; if (m > 11) { m = 0; y++; } render(); });
+
+    function render() {
+      const MN = ["January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"];
+      lbl.textContent = MN[m] + " " + y;
+      const first = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      let html = "<table><tr>";
+      ["S", "M", "T", "W", "T", "F", "S"].forEach(d => html += "<th>" + d + "</th>");
+      html += "</tr><tr>";
+      for (let i = 0; i < first; i++) html += "<td></td>";
+      for (let d = 1; d <= days; d++) {
+        if ((first + d - 1) % 7 === 0 && d !== 1) html += "</tr><tr>";
+        const cls = [];
+        if (d === selDay) cls.push("sel");
+        if (y === today.getFullYear() && m === today.getMonth() && d === today.getDate()) cls.push("today");
+        if (notes[y + "-" + m + "-" + d]) cls.push("dot");
+        html += '<td class="' + cls.join(" ") + '" data-d="' + d + '">' + d + "</td>";
+      }
+      html += "</tr></table>";
+      tblWrap.innerHTML = html;
+      $$("td[data-d]", tblWrap).forEach(td => td.addEventListener("click", () => {
+        selDay = Number(td.dataset.d); render();
+      }));
+      dayLbl.textContent = MN[m] + " " + selDay + ", " + y;
+      ta.value = notes[key()] || "";
+      win.setTitle("Calendar — " + MN[m] + " " + y);
+    }
+
+    win.setMenus([
+      { label: "File", items: [{ label: "Exit", action: () => win.close() }] },
+      { label: "View", items: [
+        { label: "Today", action: () => { y = today.getFullYear(); m = today.getMonth(); selDay = today.getDate(); render(); } },
+        { label: "Previous Month", action: () => prev.click() },
+        { label: "Next Month", action: () => next.click() }
+      ]},
+      { label: "Help", items: [{ label: "About Calendar...", action: () => messageBox(
+        "<b>Calendar</b><br>Microsoft Windows Version 1.01<br>点日期可写备忘。", "About Calendar") }] }
+    ]);
+    render();
+  }
+};
+
+/* ------------------------------------------------ 黑白棋 REVERSI ---- */
+APPS.reversi = {
+  title: "Reversi", glyph: "◍",
+  mount: function (win) {
+    const root = mk("div", "rev");
+    const st = mk("div", "st");
+    const you = mk("div", null, ""), him = mk("div", null, ""), turn = mk("div", null, "");
+    st.append(you, turn, him);
+    const wrap = mk("div", "center");
+    const cv = mk("canvas");
+    wrap.appendChild(cv);
+    root.append(st, wrap);
+    win.client.appendChild(root);
+    const ctx = cv.getContext("2d");
+
+    const HUMAN = 1, CPU = 2;
+    let board, skill = 2, busy = false, hint = null;
+    const W = [
+      120, -20, 20, 5, 5, 20, -20, 120,
+      -20, -40, -5, -5, -5, -5, -40, -20,
+      20, -5, 15, 3, 3, 15, -5, 20,
+      5, -5, 3, 3, 3, 3, -5, 5,
+      5, -5, 3, 3, 3, 3, -5, 5,
+      20, -5, 15, 3, 3, 15, -5, 20,
+      -20, -40, -5, -5, -5, -5, -40, -20,
+      120, -20, 20, 5, 5, 20, -20, 120
+    ];
+    const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+    function newGame() {
+      board = new Array(64).fill(0);
+      board[27] = board[36] = 2;
+      board[28] = board[35] = 1;
+      busy = false; hint = null;
+      draw();
+    }
+
+    function flips(b, idx, p) {
+      const res = [];
+      const r0 = Math.floor(idx / 8), c0 = idx % 8;
+      if (b[idx] !== 0) return res;
+      for (const [dr, dc] of DIRS) {
+        let r = r0 + dr, c = c0 + dc;
+        const line = [];
+        while (r >= 0 && r < 8 && c >= 0 && c < 8 && b[r * 8 + c] === 3 - p) { line.push(r * 8 + c); r += dr; c += dc; }
+        if (line.length && r >= 0 && r < 8 && c >= 0 && c < 8 && b[r * 8 + c] === p) res.push(...line);
+      }
+      return res;
+    }
+    function moves(b, p) {
+      const out = [];
+      for (let i = 0; i < 64; i++) if (b[i] === 0 && flips(b, i, p).length) out.push(i);
+      return out;
+    }
+    function apply(b, idx, p) {
+      const nb = b.slice();
+      nb[idx] = p;
+      flips(b, idx, p).forEach(i => nb[i] = p);
+      return nb;
+    }
+    function score(b, p) {
+      let s = 0;
+      for (let i = 0; i < 64; i++) { if (b[i] === p) s += W[i]; else if (b[i] === 3 - p) s -= W[i]; }
+      return s + (moves(b, p).length - moves(b, 3 - p).length) * 6;
+    }
+    function negamax(b, p, depth, alpha, beta) {
+      const ms = moves(b, p);
+      if (depth === 0) return { v: score(b, p), m: null };
+      if (!ms.length) {
+        if (!moves(b, 3 - p).length) {
+          const c = count(b);
+          const mine = p === 1 ? c[1] : c[2], other = p === 1 ? c[2] : c[1];
+          return { v: (mine - other) * 1000, m: null };
+        }
+        return { v: -negamax(b, 3 - p, depth - 1, -beta, -alpha).v, m: null };
+      }
+      let best = null, bv = -Infinity;
+      for (const m of ms) {
+        const v = -negamax(apply(b, m, p), 3 - p, depth - 1, -beta, -alpha).v;
+        if (v > bv) { bv = v; best = m; }
+        alpha = Math.max(alpha, v);
+        if (alpha >= beta) break;
+      }
+      return { v: bv, m: best };
+    }
+    function count(b) {
+      const c = { 1: 0, 2: 0 };
+      b.forEach(v => { if (v) c[v]++; });
+      return c;
+    }
+
+    function cellSize() {
+      const s = Math.max(120, Math.min(win.client.clientWidth - 8, win.client.clientHeight - 30));
+      return Math.floor(s / 8);
+    }
+
+    function draw() {
+      const cs = cellSize(), size = cs * 8;
+      if (cv.width !== size) { cv.width = size; cv.height = size; }
+      /* 网点底纹的棋盘 —— 单色 EGA 风格 */
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = "#000";
+      for (let y = 0; y < size; y += 4) for (let x = 0; x < size; x += 4) ctx.fillRect(x, y, 1, 1);
+      ctx.strokeStyle = "#000"; ctx.lineWidth = 1;
+      for (let i = 0; i <= 8; i++) {
+        ctx.beginPath(); ctx.moveTo(i * cs + .5, 0); ctx.lineTo(i * cs + .5, size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * cs + .5); ctx.lineTo(size, i * cs + .5); ctx.stroke();
+      }
+      for (let i = 0; i < 64; i++) {
+        if (!board[i]) continue;
+        const x = (i % 8) * cs + cs / 2, y = Math.floor(i / 8) * cs + cs / 2, r = cs * 0.38;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = board[i] === 1 ? "#000" : "#fff";
+        ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = "#000"; ctx.stroke();
+      }
+      if (hint != null) {
+        const x = (hint % 8) * cs, y = Math.floor(hint / 8) * cs;
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+        ctx.strokeRect(x + 3, y + 3, cs - 6, cs - 6);
+      }
+      const c = count(board);
+      you.textContent = "● You: " + c[1];
+      him.textContent = "○ Computer: " + c[2];
+      turn.textContent = busy ? "Computer thinking…" : "Your move";
+      win.setTitle("Reversi — " + c[1] + " : " + c[2]);
+    }
+
+    async function cpuMove() {
+      busy = true; draw();
+      await wait(320);
+      const depth = skill === 1 ? 1 : skill === 2 ? 3 : 5;
+      const ms = moves(board, CPU);
+      if (ms.length) {
+        const best = negamax(board, CPU, depth, -Infinity, Infinity).m;
+        board = apply(board, best == null ? ms[0] : best, CPU);
+        beep(500, 40);
+      }
+      busy = false;
+      hint = null;
+      draw();
+      afterMove(true);
+    }
+
+    function afterMove(cpuJustPlayed) {
+      const hm = moves(board, HUMAN), cm = moves(board, CPU);
+      if (!hm.length && !cm.length) { gameOver(); return; }
+      if (!hm.length) {
+        messageBox("你没有合法着法，轮到电脑。<br>You must pass.", "Reversi").then(cpuMove);
+        return;
+      }
+      if (cpuJustPlayed) return;
+      if (!cm.length) { messageBox("电脑没有合法着法，请继续。<br>Computer must pass.", "Reversi"); return; }
+      cpuMove();
+    }
+
+    function gameOver() {
+      const c = count(board);
+      const msg = c[1] > c[2] ? "你赢了！ / You win!" : c[1] < c[2] ? "电脑赢了。 / Computer wins." : "平局 / Draw.";
+      beep(c[1] > c[2] ? 1200 : 300, 250);
+      messageBox("Game over — " + c[1] + " : " + c[2] + "<br><b>" + msg + "</b>", "Reversi");
+    }
+
+    cv.addEventListener("click", e => {
+      if (busy) return;
+      const cs = cellSize(), r = cv.getBoundingClientRect();
+      const cx = Math.floor((e.clientX - r.left) / cs), cy = Math.floor((e.clientY - r.top) / cs);
+      if (cx < 0 || cx > 7 || cy < 0 || cy > 7) return;
+      const idx = cy * 8 + cx;
+      if (!flips(board, idx, HUMAN).length) { beep(200, 120); return; }
+      board = apply(board, idx, HUMAN);
+      hint = null;
+      beep(900, 40);
+      draw();
+      afterMove(false);
+    });
+
+    win.onResize = draw;
+    win.setMenus([
+      { label: "Game", items: () => [
+        { label: "New", action: newGame },
+        { label: "Hint", action: () => {
+          const m = negamax(board, HUMAN, 3, -Infinity, Infinity).m;
+          if (m == null) { messageBox("没有可下的位置。 / No legal move.", "Reversi"); return; }
+          hint = m; draw();
+        } },
+        { label: "Pass", action: () => {
+          if (moves(board, HUMAN).length) { messageBox("你还有合法着法，不能停一手。", "Reversi"); return; }
+          cpuMove();
+        } },
+        "-",
+        { label: "Exit", action: () => win.close() }
+      ]},
+      { label: "Skill", items: () => [
+        { label: "Beginner", checked: skill === 1, action: () => { skill = 1; } },
+        { label: "Novice", checked: skill === 2, action: () => { skill = 2; } },
+        { label: "Expert", checked: skill === 3, action: () => { skill = 3; } }
+      ]},
+      { label: "Help", items: [{ label: "About Reversi...", action: () => messageBox(
+        "<b>Reversi</b><br>Microsoft Windows Version 1.01<br>(C) Copyright Microsoft Corp. 1985<br><br>" +
+        "你执黑先行，点击棋盘落子。<br>You are black and move first.", "About Reversi") }] }
+    ]);
+    newGame();
+  }
+};
+
+/* -------------------------------------------------------------- 画图 */
+APPS.paint = {
+  title: "Paint", glyph: "✎",
+  mount: function (win) {
+    const root = mk("div", "paint");
+    const tools = mk("div", "tools");
+    const holder = mk("div", "cv");
+    const cv = mk("canvas");
+    cv.width = 640; cv.height = 400;
+    holder.appendChild(cv);
+    root.append(tools, holder);
+    win.client.appendChild(root);
+    const ctx = cv.getContext("2d", { willReadFrequently: true });
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+
+    let tool = "pencil", size = 1, drawing = false, sx = 0, sy = 0, snapshot = null;
+    const TOOLS = [["pencil", "✎"], ["line", "／"], ["rect", "▭"], ["frect", "▮"],
+                   ["ellipse", "○"], ["fellipse", "●"], ["eraser", "⌫"], ["fill", "▩"]];
+    TOOLS.forEach(([t, g]) => {
+      const b = mk("button", t === tool ? "on" : "", g);
+      b.title = t;
+      b.addEventListener("click", () => {
+        tool = t;
+        $$("button", tools).forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+      });
+      tools.appendChild(b);
+    });
+    [1, 2, 4, 8].forEach(s => {
+      const b = mk("button", s === size ? "on sz" : "sz", String(s));
+      b.title = "line width " + s;
+      b.addEventListener("click", () => {
+        size = s;
+        $$("button.sz", tools).forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+      });
+      tools.appendChild(b);
+    });
+
+    const pos = e => {
+      const r = cv.getBoundingClientRect();
+      return [Math.round(e.clientX - r.left), Math.round(e.clientY - r.top)];
+    };
+    function stroke(x0, y0, x1, y1, colour) {
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = size;
+      ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+    function shape(x0, y0, x1, y1) {
+      ctx.strokeStyle = "#000"; ctx.fillStyle = "#000"; ctx.lineWidth = size;
+      const w = x1 - x0, h = y1 - y0;
+      if (tool === "line") { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); }
+      if (tool === "rect") ctx.strokeRect(x0, y0, w, h);
+      if (tool === "frect") ctx.fillRect(x0, y0, w, h);
+      if (tool === "ellipse" || tool === "fellipse") {
+        ctx.beginPath();
+        ctx.ellipse(x0 + w / 2, y0 + h / 2, Math.abs(w / 2), Math.abs(h / 2), 0, 0, Math.PI * 2);
+        tool === "ellipse" ? ctx.stroke() : ctx.fill();
+      }
+    }
+    function floodFill(x, y) {
+      const img = ctx.getImageData(0, 0, cv.width, cv.height), d = img.data;
+      const at = (px, py) => (py * cv.width + px) * 4;
+      const start = at(x, y);
+      if (d[start] < 128) return;                      /* 已是黑色 */
+      const stack = [[x, y]];
+      while (stack.length) {
+        const [px, py] = stack.pop();
+        if (px < 0 || py < 0 || px >= cv.width || py >= cv.height) continue;
+        const i = at(px, py);
+        if (d[i] < 128) continue;
+        d[i] = d[i + 1] = d[i + 2] = 0; d[i + 3] = 255;
+        stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    cv.addEventListener("mousedown", e => {
+      const [x, y] = pos(e);
+      if (tool === "fill") { floodFill(x, y); return; }
+      drawing = true; sx = x; sy = y;
+      snapshot = ctx.getImageData(0, 0, cv.width, cv.height);
+      if (tool === "pencil" || tool === "eraser") stroke(x, y, x, y, tool === "eraser" ? "#fff" : "#000");
+    });
+    window.addEventListener("mousemove", e => {
+      if (!drawing) return;
+      const [x, y] = pos(e);
+      if (tool === "pencil" || tool === "eraser") {
+        stroke(sx, sy, x, y, tool === "eraser" ? "#fff" : "#000");
+        sx = x; sy = y;
+      } else {
+        ctx.putImageData(snapshot, 0, 0);
+        shape(sx, sy, x, y);
+      }
+    });
+    window.addEventListener("mouseup", e => {
+      if (!drawing) return;
+      drawing = false;
+      if (tool !== "pencil" && tool !== "eraser") {
+        const [x, y] = pos(e);
+        ctx.putImageData(snapshot, 0, 0);
+        shape(sx, sy, x, y);
+      }
+    });
+
+    win.setMenus([
+      { label: "File", items: [
+        { label: "New", action: () => { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); } },
+        { label: "Exit", action: () => win.close() }
+      ]},
+      { label: "Edit", items: [
+        { label: "Undo", action: () => { if (snapshot) ctx.putImageData(snapshot, 0, 0); } },
+        { label: "Clear All", action: () => { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); } }
+      ]},
+      { label: "Help", items: [{ label: "About Paint...", action: () => messageBox(
+        "<b>Paint</b><br>Microsoft Windows Version 1.01<br>单色点阵绘图 (640 x 400)。<br>" +
+        "左边选工具与线宽，在画布上拖动即可。", "About Paint") }] }
+    ]);
+  }
+};
+
+/* ---------------------------------------------------------- 控制面板 */
+const PREFS = { border: 2, pattern: 1, crt: true, beep: true };
+
+function applyPrefs() {
+  document.documentElement.style.setProperty("--bw", PREFS.border + "px");
+  ["p1", "p2", "p3", "p4"].forEach((c, i) => {
+    tiles.classList.toggle(c, PREFS.pattern === i + 1);
+    iconBar.classList.toggle(c, PREFS.pattern === i + 1);
+  });
+  $("#crt").classList.toggle("scan", PREFS.crt);
+  relayout();
+}
+
+APPS.control = {
+  title: "Control Panel", glyph: "⚙",
+  mount: function (win) {
+    const root = mk("div", "cp");
+    const nav = mk("div", "nav");
+    const pane = mk("div", "pane");
+    root.append(nav, pane);
+    win.client.appendChild(root);
+
+    const pages = {
+      "Preferences": () => {
+        pane.innerHTML = "<b>Preferences 首选项</b><br>";
+        const bw = mk("label");
+        bw.innerHTML = "Border Width 窗口边框宽度: <b id='bwv'>" + PREFS.border + "</b> ";
+        const r1 = mk("input"); r1.type = "range"; r1.min = 1; r1.max = 8; r1.value = PREFS.border;
+        r1.addEventListener("input", () => {
+          PREFS.border = Number(r1.value);
+          $("#bwv", pane).textContent = r1.value;
+          applyPrefs();
+        });
+        bw.appendChild(r1);
+        const pat = mk("label");
+        pat.innerHTML = "Desktop Pattern 桌面底纹: ";
+        const sel = mk("select", "w1");
+        ["50% Dither (default)", "Dots", "Solid Grey", "Vertical Lines"].forEach((n, i) => {
+          const o = mk("option", null, n); o.value = i + 1; sel.appendChild(o);
+        });
+        sel.value = PREFS.pattern;
+        sel.addEventListener("change", () => { PREFS.pattern = Number(sel.value); applyPrefs(); });
+        pat.appendChild(sel);
+        const crt = mk("label");
+        const cb = mk("input"); cb.type = "checkbox"; cb.checked = PREFS.crt;
+        cb.addEventListener("change", () => { PREFS.crt = cb.checked; applyPrefs(); });
+        crt.append(cb, document.createTextNode(" CRT 扫描线效果 / scan-line effect"));
+        const bp = mk("label");
+        const cb2 = mk("input"); cb2.type = "checkbox"; cb2.checked = PREFS.beep;
+        cb2.addEventListener("change", () => { PREFS.beep = cb2.checked; });
+        bp.append(cb2, document.createTextNode(" Warning Beep 提示音"));
+        pane.append(bw, pat, crt, bp);
+      },
+      "Date & Time": () => {
+        const d = new Date();
+        pane.innerHTML = "<b>Date / Time 日期时间</b><br>" +
+          "系统日期 System date: " + d.toDateString() + "<br>" +
+          "系统时间 System time: " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds()) + "<br><br>" +
+          "<i>时间取自宿主机，无法在模拟器中修改。<br>The clock is read from the host machine.</i>";
+      },
+      "Printer": () => {
+        pane.innerHTML = "<b>Printer 打印机</b><br>IBM Graphics Printer on LPT1:<br>" +
+          "Epson FX-80 on LPT1:<br><br><i>没有连接真实打印机。 / No printer attached.</i>";
+      },
+      "Mouse": () => {
+        pane.innerHTML = "<b>Mouse 鼠标</b><br>Microsoft Serial Mouse, COM1:<br>" +
+          "Double-click speed: <input class='w1' type='range' min='1' max='5' value='3'><br>" +
+          "Swap left/right button: <input type='checkbox'>";
+      },
+      "About": () => {
+        pane.innerHTML = "<div class='about'><b>Microsoft Windows</b><br>Version 1.01<br>" +
+          "(C) Copyright Microsoft Corp. 1985<br><br>Memory Free: 384 KB<br>" +
+          "本页面为网页模拟，非真实 Windows。<br><i>A web simulation, not real Windows.</i></div>";
+      }
+    };
+
+    Object.keys(pages).forEach((name, i) => {
+      const d = mk("div", i === 0 ? "on" : "", name);
+      d.addEventListener("click", () => {
+        $$("div", nav).forEach(x => x.classList.remove("on"));
+        d.classList.add("on");
+        pages[name]();
+      });
+      nav.appendChild(d);
+    });
+    win.setMenus([
+      { label: "Installation", items: [{ label: "Add New Printer...", action: () => messageBox("No installation disk in drive A:", "Control Panel") }] },
+      { label: "Setup", items: [{ label: "Connections...", action: () => messageBox("COM1: Microsoft Serial Mouse", "Control Panel") }] },
+      { label: "Preferences", items: [{ label: "Preferences...", action: () => { $$("div", nav)[0].click(); } }] }
+    ]);
+    pages["Preferences"]();
+  }
+};
+
+/* =====================================================================
+   会话：进入桌面 / 结束会话 / 关于
+   ===================================================================== */
+function aboutBox() {
+  return messageBox(
+    "<div style='text-align:center'><b>MS-DOS Executive</b><br>Microsoft Windows<br>Version 1.01<br><br>" +
+    "(C) Copyright Microsoft Corp. 1985<br><br>Memory Free: 384 KB<br>Disk Space Free: 10,493,952 bytes</div>",
+    "About MS-DOS Executive");
+}
+
+async function endSession() {
+  const r = await dialog({
+    title: "MS-DOS Executive",
+    body: "这将结束你的 Windows 会话。<br>This will end your Windows session.",
+    buttons: ["OK", "Cancel"]
+  });
+  if (r.button !== "OK") return;
+  Object.keys(WINS).forEach(id => {
+    const w = WINS[id];
+    if (w.timer) clearInterval(w.timer);
+    w.el.remove();
+    if (w.iconEl) w.iconEl.remove();
+  });
+  WINS = {}; COLS = []; ZOOM = null; ACTIVE = null;
+  iconBar.innerHTML = "";
+  beep(400, 120);
+  shellStart("");
+}
+
+function enterDesktop() {
+  shellActive = false;
+  showLayer("desktop");
+  applyPrefs();
+  launch("exec");
+}
+
+/* -------------------------------------------------------------- 启动 */
+$("#powerBtn").addEventListener("click", () => {
+  skipBoot = false;
+  bootSequence();
+});
+document.addEventListener("keydown", e => {
+  /* 开机自检时按任意键可快进 */
+  if (layers.dos.classList.contains("on") && !shellActive && (e.key === "Escape" || e.key === " " || e.key === "Enter")) skipBoot = true;
+});
+layers.dos.addEventListener("click", () => { if (!shellActive) skipBoot = true; });
+</script>
+</body>
+</html>

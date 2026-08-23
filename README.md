@@ -72,3 +72,37 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+---
+
+## 附加：虚拟 Microsoft Windows 1.01 (`win1/index.html`)
+
+一个与测验程序无关的独立网页小玩具 —— 用纯 HTML/CSS/JavaScript 模拟
+**从开机自检到图形界面**的完整 Windows 1.0 体验，不需要任何依赖或服务器，
+双击 `win1/index.html` 就能运行。
+
+**流程**：电源按钮 → BIOS 自检（640K 内存计数）→ MS-DOS 3.20 启动 →
+自动执行 `WIN` → Windows 1.01 启动画面 → MS-DOS Executive 图形界面。
+（自检过程中点击画面或按空格可快进。）
+
+**界面**：忠实还原 Windows 1.0 的**平铺式**窗口 —— 窗口不重叠，
+标题栏左边的小方块是关闭键，右边 `▲` 放大到全屏、`▼` 缩成底部图标；
+拖动标题栏放到另一个窗口上可交换位置，拖到底部图标区即缩成图标；
+拖动窗口之间的边界可以调整平铺比例。
+
+**内附程序**
+
+| 程序 | 说明 |
+|---|---|
+| MS-DOS Executive | 虚拟磁盘的文件管理器，双击 `.EXE` 运行、双击 `.TXT` 用记事本打开 |
+| Notepad | 文本编辑器，可打开/保存到虚拟磁盘，含查找功能 |
+| Calculator | 计算器（含 M+ / M- / MR / MC 与开方、百分比） |
+| Clock | 模拟指针时钟 |
+| Calendar | 月历，可为每天写备忘 |
+| Reversi | 黑白棋，含合法着法判定、提示与三档 AI（α-β 搜索） |
+| Paint | 单色画图：铅笔、直线、矩形、椭圆、橡皮、油漆桶、四档线宽 |
+| Control Panel | 控制面板：窗口边框宽度、桌面底纹、CRT 扫描线、提示音 |
+
+`Special → End Session` 会结束 Windows 回到 `C:\>` 提示符，
+该提示符支持 `WIN`、`DIR`、`TYPE`、`CLS`、`VER`、`DATE`、`TIME`、`ECHO`、`HELP`，
+输入 `WIN` 可再次进入 Windows。
