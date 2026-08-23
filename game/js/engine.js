@@ -239,6 +239,7 @@ const VL = {
 
     s.sem.used[id] = times + 1;
     s.sem.ap--;
+    s.lastIcon = a.icon;                                  // 想法气泡显示你刚做的事
     if (a.tag === "attend") s.sem.attend++;
     if (a.tag === "intern") { s.record.internships++; }
     if (a.tag === "contest" && Math.random() < 0.35 + s.s.luck / 300) {
@@ -325,7 +326,7 @@ const VL = {
     this.mark(s, `${tr.edu}毕业 · ${m.name}（GPA ${s.gpa.value.toFixed(2)}）`);
     if (s.gpa.value >= 3.7) { this.chg(s, { reputation: 10 }); this.addAward(s, "院长嘉许名单"); }
     s.stage = null; s.sem = null;
-    s.phase = "crossroads";
+    s.phase = "crossroads"; s.lastIcon = null;
   },
 
   rollEvent(s, table) {
@@ -395,7 +396,7 @@ const VL = {
     const j = offer.job;
     s.job = { id: j.id, name: j.name, level: 0, title: j.levels[0], salary: offer.salary, perf: 0, years: 0 };
     s.record.jobs.push(`${j.levels[0]}（${j.name}）`);
-    s.phase = "career";
+    s.phase = "career"; s.lastIcon = null;
     s.company = null;
     this.startCareerYear(s);
     this.log(s, `✅ 你入职【${j.name}】，职位 ${j.levels[0]}，年薪 ${this.money(offer.salary)}。`, "good");
@@ -458,6 +459,7 @@ const VL = {
     }
     s.year.ap--;
     s.year.used[id] = (s.year.used[id] || 0) + 1;
+    s.lastIcon = a.icon;
     this.log(s, msg, "act");
     return { ok: true, msg: msg };
   },
@@ -562,7 +564,7 @@ const VL = {
       team: 1, traction: 1, revenue: 0, valuation: 0, equity: 1, years: 0, listed: false, redYears: 0
     };
     s.job = null;
-    s.phase = "startup";
+    s.phase = "startup"; s.lastIcon = null;
     this.startCareerYear(s);
     this.log(s, `🚀 你成立了【${s.company.name}】，投入 ${this.money(cash)} 启动资金。`, "good");
     this.mark(s, `创业：成立 ${s.company.name}`);
@@ -624,6 +626,7 @@ const VL = {
       msg = `🌴 你终于休了几天假。`;
     }
     s.year.ap--;
+    s.lastIcon = a.icon;
     this.log(s, msg, "act");
     return { ok: true, msg: msg };
   },

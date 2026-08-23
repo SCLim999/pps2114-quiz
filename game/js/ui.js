@@ -8,7 +8,7 @@
   const SAVE_KEY = "vlife_save_v1";
   let S = null;          // 游戏状态
   let REPORT = null;     // 待显示的结算报告（学期 / 年度）
-  let DRAFT = { talentId: null, originId: null, trackId: null };
+  let DRAFT = { talentId: null, originId: null, trackId: null, look: {} };
 
   const $ = id => document.getElementById(id);
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -117,6 +117,19 @@
       <div class="grid">${TALENTS.map(x => `
         <button class="pick ${t === x.id ? "on" : ""}" data-pick="talent" data-id="${x.id}">
           <span class="nm">${x.icon} ${esc(x.name)}</span><span class="ds">${esc(x.desc)}</span></button>`).join("")}</div>
+      <h3>捏个人：肤色 · 发型 · 发色</h3>
+      <div class="looks">
+        <div class="swatches">${SCENE.SKINS.map((c, i) => `
+          <button class="sw ${(DRAFT.look.skin || SCENE.SKINS[1]) === c ? "on" : ""}"
+            data-pick="skin" data-id="${i}" style="background:${c}" title="肤色"></button>`).join("")}</div>
+        <div class="swatches">${SCENE.STYLES.map(s => `
+          <button class="sw txt ${(DRAFT.look.style || "short") === s ? "on" : ""}"
+            data-pick="style" data-id="${s}">${{ short: "短发", bob: "波波", long: "长发",
+              buzz: "板寸", curly: "卷发", pony: "马尾" }[s]}</button>`).join("")}</div>
+        <div class="swatches">${SCENE.HAIRS.map((c, i) => `
+          <button class="sw ${(DRAFT.look.hair || SCENE.HAIRS[0]) === c ? "on" : ""}"
+            data-pick="hair" data-id="${i}" style="background:${c}" title="发色"></button>`).join("")}</div>
+      </div>
       <h3>选一个家庭背景</h3>
       <div class="grid">${ORIGINS.map(x => `
         <button class="pick ${o === x.id ? "on" : ""}" data-pick="origin" data-id="${x.id}">
@@ -339,6 +352,7 @@
   /* ------------------------------------------------------ 主渲染 */
   function render() {
     document.body.classList.toggle("no-game", !S);
+    $("scene").innerHTML = SCENE.render(S, DRAFT);
     renderHud(); renderLog();
     let html;
     if (!S) html = screenCreate();
@@ -365,6 +379,9 @@
       if (kind === "talent") DRAFT.talentId = id;
       if (kind === "origin") DRAFT.originId = id;
       if (kind === "track") DRAFT.trackId = id;
+      if (kind === "skin") DRAFT.look.skin = SCENE.SKINS[+id];
+      if (kind === "hair") DRAFT.look.hair = SCENE.HAIRS[+id];
+      if (kind === "style") DRAFT.look.style = id;
       const nameBox = $("in-name"); if (nameBox) DRAFT.name = nameBox.value;
       render(); return;
     }
@@ -380,6 +397,11 @@
       case "start": {
         const name = ($("in-name").value || "").trim() || "无名氏";
         S = VL.newGame(name, DRAFT.talentId, DRAFT.originId);
+        S.look = {
+          skin: DRAFT.look.skin || SCENE.SKINS[1],
+          hair: DRAFT.look.hair || SCENE.HAIRS[0],
+          style: DRAFT.look.style || "short"
+        };
         DRAFT.trackId = null;
         break;
       }
@@ -459,7 +481,7 @@
       }
 
       case "again": {
-        S = null; REPORT = null; DRAFT = { talentId: null, originId: null, trackId: null };
+        S = null; REPORT = null; DRAFT = { talentId: null, originId: null, trackId: null, look: {} };
         localStorage.removeItem(SAVE_KEY);
         break;
       }
@@ -473,7 +495,7 @@
   $("btn-load").onclick = load;
   $("btn-reset").onclick = () => {
     if (!confirm("重开一局？当前进度会被清掉。")) return;
-    S = null; REPORT = null; DRAFT = { talentId: null, originId: null, trackId: null };
+    S = null; REPORT = null; DRAFT = { talentId: null, originId: null, trackId: null, look: {} };
     localStorage.removeItem(SAVE_KEY); render();
   };
 

@@ -69,6 +69,47 @@ body {
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 .plumbob { animation: bob 2.6s ease-in-out infinite; }
 
+/* ---------------- 场景层（SVG 画面） ---------------- */
+.scene {
+  /* 比例跟着 SVG 的 viewBox，宽屏也不会把头顶裁掉 */
+  margin: 16px 26px 0; aspect-ratio: 900 / 244; max-height: 320px;
+  border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line-soft);
+  background: #cfeaf6;
+}
+@media (max-width: 700px) { .scene { margin: 12px 14px 0; max-height: 220px; } }
+.scenesvg { display: block; width: 100%; height: 100%; }
+
+/* 想法气泡：白色云朵 */
+.bub { fill: #fdfefe; stroke: #cfe0e8; stroke-width: 1.2; }
+.bubicon { font-size: 21px; }
+.sim.far { opacity: .96; }
+.sim.far .bubicon { font-size: 19px; }
+
+/* 场景里的 Plumbob，跟着心情变色，并轻轻浮动 */
+.pbob { animation: bob 2.6s ease-in-out infinite; }
+.pb-hi  .pb-t { fill: #b6f79a; } .pb-hi  .pb-b { fill: var(--plumb); }
+.pb-mid .pb-t { fill: #ffe08a; } .pb-mid .pb-b { fill: var(--amber); }
+.pb-low .pb-t { fill: #ffb3b8; } .pb-low .pb-b { fill: var(--red); }
+.thought { animation: bob 3.4s ease-in-out infinite; }
+
+/* ---------------- 捏人：色板 ---------------- */
+.looks { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+.sw {
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer; padding: 0;
+  border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px var(--line), 0 2px 5px rgba(20, 70, 90, .12);
+  transition: transform .1s, box-shadow .15s;
+}
+.sw:hover { transform: translateY(-2px); }
+.sw.on { box-shadow: 0 0 0 3px var(--plumb), 0 3px 8px rgba(87, 201, 58, .35); }
+.sw.txt {
+  width: auto; height: 32px; border-radius: 999px; padding: 0 14px;
+  font: inherit; font-size: 13px; font-weight: 800; color: var(--ink-2);
+  background: linear-gradient(180deg, #fff, var(--panel-2));
+}
+.sw.txt.on { color: var(--plumb-d); }
+
 /* ---------------- 顶栏 ---------------- */
 .top {
   display: flex; align-items: center; justify-content: space-between;
@@ -162,6 +203,7 @@ body {
 /* 还没建立角色时，日志栏没内容就不占位 */
 body.no-game .layout { grid-template-columns: 1fr; max-width: 940px; margin: 0 auto; }
 body.no-game .logbox, body.no-game #hud { display: none; }
+body.no-game .scene { max-width: 940px; margin-left: auto; margin-right: auto; }
 
 .card {
   background: var(--panel); border: 1px solid var(--line-soft);
