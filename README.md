@@ -72,3 +72,17 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+## Bonus: Bit Builder (puzzle game)
+
+The `game/` folder holds **Bit Builder**, a standalone tile-based puzzle game in
+the style of *Chip's Challenge*: collect every computer **hardware** part
+(CPU, RAM, GPU, SSD, PSU, fan, NIC, motherboard) and **software** part
+(OS, drivers, compiler, antivirus, database, browser) on the map, open the
+assembly socket, and hit the power button before the clock runs out — dodging
+coolant spills, overheat zones, cryo ice, data buses and malware along the way.
+
+Ten levels, keyboard or touch, no build step and no dependencies. Open
+`game/index.html`, or link students to `<your-site>/game/`.
+See [`game/README.md`](game/README.md) for the tile legend and for how to edit
+or add levels.
