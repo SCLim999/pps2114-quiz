@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turbo C++ 3.0</title>
+  <link rel="stylesheet" href="css/turbo.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%230000a8'/><text x='8' y='12' font-size='11' font-family='monospace' fill='%23fcfc54' text-anchor='middle'>C</text></svg>">
+</head>
+<body class="tc-page">
+  <div class="tc-wrap">
+    <div id="ide"></div>
+    <p class="tc-note">
+      <strong>Turbo C++ 3.0</strong> — web emulation of the Borland DOS IDE.
+      <kbd>F10</kbd> menu · <kbd>F2</kbd> save · <kbd>F3</kbd> open ·
+      <kbd>Alt+F9</kbd> compile · <kbd>Ctrl+F9</kbd> run · <kbd>Alt+F5</kbd> user screen ·
+      <kbd>Alt+X</kbd> quit to DOS. Click the screen first so it receives the keyboard.
+      Source in <code>&lt;iostream.h&gt;</code> / <code>void main()</code> style is accepted —
+      it is translated for a modern compiler before it is built.
+    </p>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/turbo.js"></script>
+  <script>
+    (function () {
+      var cfg = (typeof CONFIG !== "undefined") ? CONFIG : {};
+      var ide = TurboIDE.mount("#ide", {
+        code: TurboIDE.DEFAULT_SOURCE,
+        fileName: "HELLO.CPP",
+        fitHeight: true,
+        heightPad: 96,
+        maxFontSize: 22,
+        runner: TurboIDE.wandboxRunner({
+          url: cfg.WANDBOX_URL,
+          compiler: cfg.WANDBOX_COMPILER,
+          timeout: cfg.RUN_TIMEOUT_MS
+        })
+      });
+      ide.focus();
+      window.ide = ide;
+    })();
+  </script>
+</body>
+</html>
