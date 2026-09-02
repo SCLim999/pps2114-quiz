@@ -1,0 +1,106 @@
+/* ============================================================
+   Borland Turbo C++ 3.0 — DOS text-mode look (80x25 char grid)
+   Used by js/turbo.js. Every colour comes from the 16-colour
+   EGA palette written inline by the renderer; this file only
+   provides the character grid, cursor and scaling.
+   ============================================================ */
+
+.tc-shell {
+  position: relative;
+  background: #000;
+  padding: 6px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.tc-screen {
+  font-family: "Px437 IBM VGA 8x16", "Perfect DOS VGA 437", "IBM Plex Mono",
+               "Consolas", "Lucida Console", "DejaVu Sans Mono", monospace;
+  font-size: 16px;
+  line-height: 1.18;
+  /* vertical padding on an *inline* span paints the background over the
+     leading without changing the layout, so character cells touch */
+  letter-spacing: 0;
+  white-space: pre;
+  cursor: default;
+  outline: none;
+  user-select: none;
+  -webkit-font-smoothing: none;
+  font-variant-ligatures: none;
+  text-rendering: optimizeSpeed;
+  margin: 0 auto;
+}
+
+.tc-row { display: block; height: 1.18em; }
+.tc-row span { padding: 0.06em 0; }
+
+/* text cursor — thin underline in insert mode, half block when overwriting */
+.tc-cur { position: relative; display: inline-block; }
+.tc-cur::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: currentColor;
+  animation: tc-blink 1.06s steps(1, end) infinite;
+}
+.tc-screen.tc-overwrite .tc-cur::after { height: 50%; }
+.tc-screen.tc-nofocus .tc-cur::after { display: none; }
+
+@keyframes tc-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-cur::after { animation: none; }
+}
+
+/* off-screen textarea: captures the keyboard, clipboard and mobile IME */
+.tc-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; border: 0;
+  opacity: 0;
+  left: -9999px; top: 0;
+  resize: none;
+}
+
+/* ---- embedded (inside a quiz question card) ---- */
+.tc-embed { margin: 12px 0; }
+.tc-hint {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 6px 0 0;
+}
+.tc-hint kbd {
+  font-family: var(--mono, monospace);
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/* ---- standalone page (turbo.html) ---- */
+body.tc-page {
+  margin: 0;
+  background: #101010;
+  color: #c8c8c8;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+body.tc-page .tc-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+body.tc-page .tc-shell { width: 100%; max-width: 1120px; }
+body.tc-page .tc-note {
+  max-width: 1120px;
+  font-size: 0.82rem;
+  color: #8a8a8a;
+  margin: 10px auto 0;
+  text-align: center;
+}
+body.tc-page .tc-note a { color: #b0b0b0; }

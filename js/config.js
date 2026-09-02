@@ -20,5 +20,13 @@ const CONFIG = {
   WANDBOX_COMPILER: "gcc-head",
 
   /** Seconds to wait for a compile/run request before giving up. */
-  RUN_TIMEOUT_MS: 20000
+  RUN_TIMEOUT_MS: 20000,
+
+  /**
+   * Use the Borland Turbo C++ 3.0 emulation (js/turbo.js) as the code
+   * editor for the coding questions. Set to false for a plain textarea.
+   * Either way, source written in the Turbo dialect (<iostream.h>,
+   * void main(), conio.h) is accepted and translated before compiling.
+   */
+  TURBO_IDE: true
 };
