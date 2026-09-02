@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lemmings-like &mdash; Save the Little Fellows</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <header class="game-header">
+    <h1>Save the Little Fellows</h1>
+    <p class="subtitle">A Lemmings-like puzzle game &mdash; assign skills, dig through the ground, get them to the exit.</p>
+  </header>
+
+  <main class="wrap">
+
+    <div class="stage">
+      <div class="stage-bar">
+        <span id="level-name">Level</span>
+        <span class="stats">
+          <span>OUT <b id="stat-out">0</b></span>
+          <span>SAVED <b id="stat-saved">0/0</b></span>
+          <span>TIME <b id="stat-time">0:00</b></span>
+        </span>
+      </div>
+
+      <div class="screen-holder">
+        <canvas id="screen" width="640" height="360"></canvas>
+
+        <!-- ============ LEVEL MENU ============ -->
+        <div id="menu" class="overlay">
+          <div class="panel">
+            <h2>Choose a level</h2>
+            <div id="level-list" class="level-list"></div>
+            <details class="how">
+              <summary>How to play</summary>
+              <ul>
+                <li>Lemmings drop out of the hatch and walk until something stops them. They never take
+                    orders as a group &mdash; you assign a skill to <em>one</em> lemming at a time.</li>
+                <li>Pick a skill in the bar below (or press <kbd>1</kbd>&ndash;<kbd>8</kbd>), then click a lemming.
+                    A green box means the skill can be given; a red box means it cannot.</li>
+                <li><b>Climber</b> and <b>Floater</b> are permanent abilities. <b>Bomber</b> blows the lemming
+                    up after 5 seconds (it also blows a hole in the ground). <b>Blocker</b> stands still and
+                    turns everyone else around. <b>Builder</b> lays 12 bricks as a staircase.
+                    <b>Basher</b> tunnels sideways, <b>Miner</b> tunnels diagonally down, <b>Digger</b> digs
+                    straight down.</li>
+                <li>Falling further than about six body heights is fatal &mdash; unless the lemming is a floater.
+                    Grey steel cannot be dug through.</li>
+                <li>Reach the exit with enough lemmings before the clock runs out.</li>
+              </ul>
+              <p class="keys"><b>Keys:</b> <kbd>1</kbd>&ndash;<kbd>8</kbd> skill &middot;
+                <kbd>Space</kbd> pause &middot; <kbd>F</kbd> fast forward &middot;
+                <kbd>+</kbd>/<kbd>-</kbd> release rate &middot; <kbd>N</kbd> nuke &middot;
+                <kbd>R</kbd> restart &middot; <kbd>Esc</kbd> menu</p>
+            </details>
+          </div>
+        </div>
+
+        <!-- ============ RESULT ============ -->
+        <div id="result" class="overlay hidden">
+          <div class="panel narrow">
+            <h2 id="result-title">Level complete!</h2>
+            <p id="result-text"></p>
+            <div class="row">
+              <button id="btn-next" class="btn btn-primary">Next level</button>
+              <button id="btn-retry" class="btn">Retry</button>
+              <button id="btn-result-menu" class="btn">Level list</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p id="level-hint" class="hint"></p>
+
+      <!-- ============ SKILLS ============ -->
+      <div id="skill-bar" class="skill-bar"></div>
+
+      <!-- ============ CONTROLS ============ -->
+      <div class="control-bar">
+        <div class="rate">
+          <span>Release rate</span>
+          <button id="btn-rate-down" class="btn btn-sm">&minus;</button>
+          <b id="rate-value">50</b>
+          <button id="btn-rate-up" class="btn btn-sm">+</button>
+        </div>
+        <div class="spacer"></div>
+        <button id="btn-pause" class="btn btn-sm">Pause</button>
+        <button id="btn-speed" class="btn btn-sm">&times;1</button>
+        <button id="btn-nuke" class="btn btn-sm btn-danger">Nuke</button>
+        <button id="btn-sound" class="btn btn-sm">Sound on</button>
+        <button id="btn-menu" class="btn btn-sm">Levels</button>
+      </div>
+
+      <div id="toast" class="toast"></div>
+    </div>
+  </main>
+
+  <footer class="game-footer">
+    <p>Keyboard: <kbd>1</kbd>&ndash;<kbd>8</kbd> pick a skill &middot; <kbd>Space</kbd> pause &middot;
+      <kbd>F</kbd> fast forward &middot; <kbd>N</kbd> nuke &middot; <kbd>R</kbd> restart &middot;
+      <kbd>Esc</kbd> level list. New levels are plain data in <code>js/levels.js</code>.</p>
+  </footer>
+
+  <script src="js/levels.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

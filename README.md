@@ -17,6 +17,7 @@ No server needed — it is a static web page. Student C++ code is compiled by th
 | `js/questions.js` | **Question bank** — edit MCQs, coding tasks, test cases, feedback |
 | `js/app.js` | Application logic (no editing needed) |
 | `google-apps-script/Code.gs` | Script that writes marks into your Google Sheet |
+| `game/` | A separate Lemmings-like puzzle game (see below) |
 
 ## Setup — Google Sheets recording (one time, ~5 minutes)
 
@@ -72,3 +73,34 @@ Open `js/questions.js`:
   (e.g. "you never read input with `cin`"). Students can retry until they submit.
 - **On submission:** a results screen summarises the score and all feedback, and the
   marks are recorded to the spreadsheet.
+
+## Bonus: `game/` — a Lemmings-like puzzle game
+
+`game/index.html` is a stand-alone static page (no build step, no libraries) with a
+small Lemmings-style game: lemmings pour out of a hatch, walk until something stops
+them, and you save them by assigning one skill to one lemming at a time.
+
+| File | Purpose |
+|---|---|
+| `game/index.html` | The game page |
+| `game/css/game.css` | Styling |
+| `game/js/levels.js` | **Level data** — terrain shapes, skill counts, targets |
+| `game/js/engine.js` | Simulation: destructible pixel terrain + lemming state machine |
+| `game/js/game.js` | Rendering, HUD and input |
+
+**Skills:** Climber and Floater are permanent abilities; Bomber blows a lemming (and a
+crater) up after five seconds; Blocker stands still and turns everyone else around;
+Builder lays a twelve-brick staircase; Basher tunnels sideways; Miner tunnels
+diagonally down; Digger digs straight down. Falling more than ~70 pixels is fatal
+unless the lemming is a floater, and grey steel cannot be dug through.
+
+**Controls:** click a skill (or press <kbd>1</kbd>–<kbd>8</kbd>), then click a lemming —
+a green box means the skill can be given, red means it cannot. <kbd>Space</kbd> pauses,
+<kbd>F</kbd> fast-forwards, <kbd>+</kbd>/<kbd>-</kbd> changes the release rate,
+<kbd>N</kbd> nukes (twice to confirm), <kbd>R</kbd> restarts, <kbd>Esc</kbd> opens the
+level list. Completed levels are remembered in the browser's local storage.
+
+**Adding levels:** append an entry to `LEVELS` in `game/js/levels.js`. Terrain is a list
+of `rect`, `circle` or `poly` shapes in a 640×360 space, each with a material of
+`dirt`, `rock` or `steel`; also set the hatch position, the exit position, how many
+lemmings are released, how many must be saved, the time limit and the skill counts.
