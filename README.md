@@ -16,7 +16,7 @@ No server needed — it is a static web page. Student C++ code is compiled by th
 | `js/config.js` | **Lecturer settings** — spreadsheet URL, assessment name |
 | `js/questions.js` | **Question bank** — edit MCQs, coding tasks, test cases, feedback |
 | `js/app.js` | Application logic (no editing needed) |
-| `js/turbo.js` | **Turbo C++ 3.0 emulation** — the DOS IDE, as a stand-alone component |
+| `js/turbo.js` | **Turbo C++ 3.0 emulation** — the DOS IDE used as the code editor |
 | `css/turbo.css` | Text-mode (80x25) styling for the emulation |
 | `turbo.html` | Full-screen Turbo C++ 3.0 practice IDE |
 | `google-apps-script/Code.gs` | Script that writes marks into your Google Sheet |
@@ -78,9 +78,10 @@ Open `js/questions.js`:
 
 ## Turbo C++ 3.0 emulation
 
-Students who were taught on Borland Turbo C++ 3.0 (1992) can work in the same IDE:
-open `turbo.html` for a full-screen version of it. `js/turbo.js` is self-contained
-(no dependencies, no build step) and can be mounted into any page.
+Students who were taught on Borland Turbo C++ 3.0 (1992) get the same IDE in the
+browser: the coding questions use it as their editor, and `turbo.html` is a
+full-screen version for free practice. `js/turbo.js` is self-contained — no
+dependencies, no build step.
 
 What is emulated:
 
@@ -148,3 +149,14 @@ already ISO C++ is passed through untouched.
 `{ compileError, output, runtimeError }` and the emulation does the rest.
 `TurboIDE.wandboxRunner()` is the ready-made one used here; `onRunCheck` replaces
 what `Ctrl+F9` does when the host page wants to grade instead of just run.
+
+### Switching it off
+
+In `js/config.js`:
+
+```js
+TURBO_IDE: true   // false = plain textarea editor
+```
+
+Turbo-dialect source is translated either way, so the change only affects the
+look of the editor.

@@ -182,24 +182,28 @@
         <div class="tests-slot"></div>
       `;
 
+      const ide = mountTurboIde(card, q);
       const editor = card.querySelector(".code-editor");
-      editor.value = q.starter;
-      editor.addEventListener("input", () => { state.coding[q.id].code = editor.value; });
-      // Tab inserts spaces instead of leaving the editor
-      editor.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          e.preventDefault();
-          const s = editor.selectionStart;
-          editor.value = editor.value.slice(0, s) + "    " + editor.value.slice(editor.selectionEnd);
-          editor.selectionStart = editor.selectionEnd = s + 4;
-          state.coding[q.id].code = editor.value;
-        }
-      });
+      if (editor) {
+        editor.value = q.starter;
+        editor.addEventListener("input", () => { state.coding[q.id].code = editor.value; });
+        // Tab inserts spaces instead of leaving the editor
+        editor.addEventListener("keydown", (e) => {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            const s = editor.selectionStart;
+            editor.value = editor.value.slice(0, s) + "    " + editor.value.slice(editor.selectionEnd);
+            editor.selectionStart = editor.selectionEnd = s + 4;
+            state.coding[q.id].code = editor.value;
+          }
+        });
+      }
 
       card.querySelector(".reset-btn").addEventListener("click", () => {
         if (confirm("Reset this question's code to the starter template?")) {
-          editor.value = q.starter;
           state.coding[q.id].code = q.starter;
+          if (ide) ide.setCode(q.starter);
+          else editor.value = q.starter;
         }
       });
 
@@ -207,6 +211,88 @@
 
       container.appendChild(card);
     });
+  }
+
+  /** DOS 8.3 file name for a question, e.g. "c1" -> "C1.CPP". */
+  function qFileName(q) {
+    return String(q.id).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) + ".CPP";
+  }
+
+  /**
+   * Replace the plain textarea with the Turbo C++ 3.0 emulation
+   * (js/turbo.js). Falls back silently to the textarea when the
+   * emulation is switched off in config.js or fails to load.
+   * Returns the IDE instance, or null.
+   */
+  function mountTurboIde(card, q) {
+    if (CONFIG.TURBO_IDE === false || typeof TurboIDE === "undefined") return null;
+    const textarea = card.querySelector(".code-editor");
+    if (!textarea) return null;
+
+    const holder = document.createElement("div");
+    holder.className = "tc-embed";
+    textarea.parentNode.replaceChild(holder, textarea);
+
+    const fileName = qFileName(q);
+    const ide = TurboIDE.mount(holder, {
+      code: q.starter,
+      fileName: fileName,
+      embedded: true,
+      rows: 21,
+      maxFontSize: 18,
+      runner: TurboIDE.wandboxRunner({
+        url: CONFIG.WANDBOX_URL,
+        compiler: CONFIG.WANDBOX_COMPILER,
+        timeout: CONFIG.RUN_TIMEOUT_MS
+      }),
+      onChange: (code) => { state.coding[q.id].code = code; },
+      // Ctrl+F9 inside the IDE runs the marked test cases, not just the program
+      onRunCheck: () => { runCodingQuestion(q, card); }
+    });
+
+    const hint = document.createElement("p");
+    hint.className = "tc-hint";
+    hint.innerHTML =
+      "Turbo C++ 3.0 editor &mdash; click the blue screen first, then " +
+      "<kbd>F10</kbd> menu, <kbd>Alt+F9</kbd> compile, <kbd>Ctrl+F9</kbd> run &amp; check, " +
+      "<kbd>F6</kbd> message window, <kbd>Alt+F5</kbd> user screen. " +
+      "<code>&lt;iostream.h&gt;</code> and <code>void main()</code> are accepted.";
+    holder.parentNode.insertBefore(hint, holder.nextSibling);
+
+    card.__ide = ide;
+    return ide;
+  }
+
+  /** Mirror a run into the IDE's Message window and user screen. */
+  function reportToIde(card, q, compileError, results) {
+    const ide = card.__ide;
+    if (!ide) return;
+    const file = qFileName(q);
+    if (compileError) {
+      ide.showMessages(
+        [{ kind: "info", text: "Compiling " + file + ":" }]
+          .concat(TurboIDE.borlandize(compileError, file)),
+        { focus: true });
+      return;
+    }
+    const lines = [{ kind: "info", text: "Running " + file.replace(/\.CPP$/, ".EXE") + " against the test cases:" }];
+    results.forEach((r, i) => {
+      lines.push({
+        kind: r.pass ? "info" : "error",
+        text: "  Test " + (i + 1) + ": " + (r.pass ? "PASS" : "FAIL") +
+              (r.pass ? "" : "  expected " + JSON.stringify(r.expected) +
+                             ", got " + JSON.stringify(String(r.actual).trim()))
+      });
+    });
+    const passed = results.filter((r) => r.pass).length;
+    lines.push({ kind: passed === results.length ? "info" : "warning",
+                 text: "  " + passed + " of " + results.length + " test cases passed." });
+    ide.showMessages(lines, { focus: false });
+    // keep the program output on the user screen (Alt+F5) without
+    // yanking the student out of the editor
+    if (results.length) {
+      ide.setUserScreen(String(results[0].actual || "").replace(/\r/g, "").split("\n"));
+    }
   }
 
   async function runCodingQuestion(q, card) {
@@ -237,6 +323,8 @@
       }
 
       st.runs += 1;
+
+      reportToIde(card, q, compileError, results);
 
       if (compileError) {
         st.lastResult = { passed: 0, total: q.tests.length, feedback: ["Code does not compile."] };
@@ -323,7 +411,9 @@
         signal: controller.signal,
         body: JSON.stringify({
           compiler: CONFIG.WANDBOX_COMPILER,
-          code: code,
+          // <iostream.h> / void main() / conio.h are rewritten for a modern
+          // compiler without changing any line numbers
+          code: (typeof TurboIDE !== "undefined") ? TurboIDE.modernize(code) : code,
           stdin: stdin
         })
       });
